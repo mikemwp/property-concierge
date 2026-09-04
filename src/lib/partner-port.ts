@@ -138,7 +138,7 @@ export function assertMilestone(caseState: CaseState, role: ActorRole, milestone
   }
 }
 
-function partnerPayload(
+export function buildPartnerEventPayload(
   input: PartnerPortContext,
   adapterId: string,
   ticketId: string,
@@ -157,7 +157,7 @@ function partnerPayload(
 export class ManualPartnerPort implements PartnerPort {
   readonly adapterId = "manual";
 
-  constructor(private readonly store: CaseStore = prismaCaseStore) {}
+  constructor(protected readonly store: CaseStore = prismaCaseStore) {}
 
   async requestWarmIntro(input: WarmIntroRequest): Promise<{ ticketId: string }> {
     const caseState = await this.store.load(input.caseId);
@@ -206,7 +206,7 @@ export class ManualPartnerPort implements PartnerPort {
       stageKey: stage.key,
       role: input.role,
       at,
-      payload: partnerPayload(input, this.adapterId, ticketId, {
+      payload: buildPartnerEventPayload(input, this.adapterId, ticketId, {
         status: "RECEIVED",
         note: input.note,
       }),
@@ -230,7 +230,7 @@ export class ManualPartnerPort implements PartnerPort {
       stageKey: stage.key,
       role: input.role,
       at,
-      payload: partnerPayload(input, this.adapterId, ticketId, { status }),
+      payload: buildPartnerEventPayload(input, this.adapterId, ticketId, { status }),
     });
 
     await this.store.save(caseState);
@@ -277,7 +277,7 @@ export class ManualPartnerPort implements PartnerPort {
       stageKey: stage.key,
       role: input.role,
       at,
-      payload: partnerPayload(input, this.adapterId, ticketId, {
+      payload: buildPartnerEventPayload(input, this.adapterId, ticketId, {
         milestoneKey: input.milestoneKey,
         note: input.note,
       }),
