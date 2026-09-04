@@ -1,7 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { decodePartnerEventPayload } from "../../src/domain/partner-integration";
 import { profileForRole } from "../../src/lib/partner-adapters/profiles";
-import { partnerPortForCase, partnerPortForRole } from "../../src/lib/partner-adapters/registry";
+import {
+  displayTicketAdapterId,
+  partnerPortForCase,
+  partnerPortForRole,
+} from "../../src/lib/partner-adapters/registry";
 import { ManualPartnerPort } from "../../src/lib/partner-port";
 import { atMortgagePath, makeMemoryCaseStore } from "../support/memory-case-store";
 
@@ -33,6 +37,28 @@ describe("stub adapter selection", () => {
 
   it("exposes a role-only lookup for the inbound path", () => {
     expect(partnerPortForRole("CONVEYANCER").adapterId).toBe("stub-conveyancer");
+  });
+
+  it("overlays stub adapter id on manual ledger tickets when speed rails are on", () => {
+    const state = atMortgagePath();
+    expect(
+      displayTicketAdapterId(state, {
+        role: "MORTGAGE_PARTNER",
+        adapterId: "manual",
+      }),
+    ).toBe("stub-mortgage");
+    expect(
+      displayTicketAdapterId(state, {
+        role: "MORTGAGE_PARTNER",
+        adapterId: "stub-mortgage",
+      }),
+    ).toBe("stub-mortgage");
+    expect(
+      displayTicketAdapterId(
+        { ...state, tier: "FREE_DIY" },
+        { role: "MORTGAGE_PARTNER", adapterId: "manual" },
+      ),
+    ).toBe("manual");
   });
 
   it("gives each role its own cadence — removals fastest, conveyancing slowest", () => {

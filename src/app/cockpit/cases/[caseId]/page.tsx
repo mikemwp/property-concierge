@@ -24,6 +24,7 @@ import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { assertPlaybookVisible } from "@/server/cockpit-policy";
 import { listPanel } from "@/server/panel";
 import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
+import { displayTicketAdapterId } from "@/lib/partner-adapters/registry";
 import { canUseSpeedRails } from "@/server/partner-policy";
 import { isPartnerActorRole, PARTNER_ROLES } from "@/domain/types";
 
@@ -91,7 +92,10 @@ export default async function CockpitCasePage({ params }: Props) {
   const isBlocked = focusStage?.status === "BLOCKED";
 
   const pack = casePack(caseState);
-  const tickets = partnerTickets(caseState, now);
+  const tickets = partnerTickets(caseState, now).map((ticket) => ({
+    ...ticket,
+    adapterId: displayTicketAdapterId(caseState, ticket),
+  }));
   const activity = partnerActivity(caseState);
   const railsEnabled = canUseSpeedRails(caseState);
   const syncableRoles =

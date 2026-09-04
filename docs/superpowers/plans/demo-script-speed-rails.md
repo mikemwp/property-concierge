@@ -25,7 +25,7 @@ Founder validation script for the **deep integrations behind a clean port, stubb
 3. **Warm intro** → choose `mortgage partner — Priya Nair (Northstar Mortgages)` → **Request warm intro**.
 4. Scroll to **Partner integration**. One ticket appears:
    - Role: **mortgage adviser**
-   - Adapter: **`stub-mortgage`**
+   - Adapter: **`stub-mortgage`** — shown immediately via the speed-rails display overlay (the frozen warm-intro ledger row has no `adapterId`; the label matches the runtime stub port until the first adapter event writes it)
    - Status badge: **Unacknowledged**
    - Copy the **Ticket** id from the panel — you will need it for section 5.
 

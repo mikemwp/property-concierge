@@ -35,3 +35,14 @@ export function partnerPortForCase(
 ): PartnerPort {
   return railsEnabled(caseState) ? partnerPortForRole(role, store) : new ManualPartnerPort(store);
 }
+
+/** UI overlay: warm-intro tickets omit adapterId in the ledger until the first stub event. */
+export function displayTicketAdapterId(
+  caseState: CaseState,
+  ticket: { role: ActorRole; adapterId: string },
+): string {
+  if (railsEnabled(caseState) && ticket.adapterId === "manual") {
+    return partnerPortForCase(caseState, ticket.role).adapterId;
+  }
+  return ticket.adapterId;
+}

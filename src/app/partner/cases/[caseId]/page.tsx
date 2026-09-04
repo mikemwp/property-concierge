@@ -23,6 +23,7 @@ import { partnerEvidenceInbox } from "@/domain/partner-integration";
 import { getFocusStage } from "@/domain/stage-engine";
 import { auth } from "@/lib/auth";
 import { casePack, stageSlaDays } from "@/lib/case-pack";
+import { displayTicketAdapterId } from "@/lib/partner-adapters/registry";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import {
   canPartnerSubmit,
@@ -95,9 +96,12 @@ export default async function PartnerCasePage({ params }: Props) {
       submitPartnerEvidenceAction(caseId, focus.key, kind),
   }));
 
-  const ticket = openTicketForRole(caseState, role);
-  const activity = partnerActivity(caseState).filter((row) => row.role === role);
+  const openTicket = openTicketForRole(caseState, role);
   const railsEnabled = canUseSpeedRails(caseState);
+  const ticket = openTicket
+    ? { ...openTicket, adapterId: displayTicketAdapterId(caseState, openTicket) }
+    : null;
+  const activity = partnerActivity(caseState).filter((row) => row.role === role);
 
   return (
     <section>
