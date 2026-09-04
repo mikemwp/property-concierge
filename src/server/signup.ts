@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { Prisma } from "@prisma/client";
 import type { LeadAttribution } from "../domain/attribution";
 import type { ParsedIntake } from "../domain/intake";
 import type { Tier } from "../domain/types";
@@ -15,6 +16,20 @@ export class SignupError extends Error {
     super(message);
     this.name = "SignupError";
   }
+}
+
+export function isUniqueEmailConstraint(error: unknown): boolean {
+  if (
+    !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+    error.code !== "P2002"
+  ) {
+    return false;
+  }
+  const target = error.meta?.target;
+  if (Array.isArray(target)) {
+    return target.some((item) => String(item).toLowerCase().includes("email"));
+  }
+  return typeof target === "string" && target.toLowerCase().includes("email");
 }
 
 export async function createSelfServeCase(input: {
@@ -43,23 +58,42 @@ export async function createSelfServeCase(input: {
   }
 
   const passwordHash = await bcrypt.hash(input.intake.password, 10);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      name: input.intake.name,
-      role: "CLIENT",
-      passwordHash,
-    },
-  });
 
-  const caseState = await createCaseRecord({
-    title: input.intake.caseTitle,
-    entryContext: input.intake.entryContext,
-    tier: input.intake.tier,
-    clientUserId: user.id,
-    advisorUserId: advisor.id,
-    attribution: input.attribution,
-  });
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          email,
+          name: input.intake.name,
+          role: "CLIENT",
+          passwordHash,
+        },
+      });
 
-  return { userId: user.id, caseId: caseState.id, tier: input.intake.tier };
+      const caseState = await createCaseRecord(
+        {
+          title: input.intake.caseTitle,
+          entryContext: input.intake.entryContext,
+          tier: input.intake.tier,
+          clientUserId: user.id,
+          advisorUserId: advisor.id,
+          attribution: input.attribution,
+        },
+        tx,
+      );
+
+      return { userId: user.id, caseId: caseState.id, tier: input.intake.tier };
+    });
+  } catch (error) {
+    if (error instanceof SignupError) {
+      throw error;
+    }
+    if (isUniqueEmailConstraint(error)) {
+      throw new SignupError(
+        "EMAIL_TAKEN",
+        "An account already exists for that email — sign in instead.",
+      );
+    }
+    throw error;
+  }
 }

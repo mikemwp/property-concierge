@@ -1,3 +1,4 @@
+import { Prisma, PrismaClient } from "@prisma/client";
 import { DEFAULT_ATTRIBUTION, isLeadSource, type LeadAttribution } from "../domain/attribution";
 import type { FunnelCaseRow } from "../domain/funnel";
 import { createCase, getFocusStage, type CaseState } from "../domain/stage-engine";
@@ -12,6 +13,8 @@ import {
   toCaseState,
   type CaseWithRelations,
 } from "./mappers";
+
+type DbClient = PrismaClient | Prisma.TransactionClient;
 
 export { CaseAccessError, assertCaseAccess } from "./case-access";
 export { attachPartnerParticipant } from "./case-access";
@@ -59,15 +62,18 @@ function toCaseWithRelations(record: {
   return record;
 }
 
-export async function createCaseRecord(input: {
-  title: string;
-  entryContext: EntryContext;
-  tier: Tier;
-  clientUserId: string;
-  advisorUserId: string;
-  marketPackId?: string;
-  attribution?: LeadAttribution;
-}): Promise<CaseState> {
+export async function createCaseRecord(
+  input: {
+    title: string;
+    entryContext: EntryContext;
+    tier: Tier;
+    clientUserId: string;
+    advisorUserId: string;
+    marketPackId?: string;
+    attribution?: LeadAttribution;
+  },
+  db: DbClient = prisma,
+): Promise<CaseState> {
   const marketPackId = input.marketPackId ?? "ew";
   const initialState = createCase({
     id: "pending",
@@ -77,7 +83,7 @@ export async function createCaseRecord(input: {
     attribution: input.attribution,
   });
 
-  const record = await prisma.case.create({
+  const record = await db.case.create({
     data: {
       marketPackId,
       entryContext: input.entryContext,

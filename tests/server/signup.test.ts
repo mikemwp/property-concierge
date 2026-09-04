@@ -2,7 +2,10 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import bcrypt from "bcryptjs";
 import { prisma } from "../../src/lib/db";
 import { loadCase } from "../../src/server/cases";
-import { createSelfServeCase, SignupError } from "../../src/server/signup";
+import {
+  createSelfServeCase,
+  isUniqueEmailConstraint,
+} from "../../src/server/signup";
 import type { ParsedIntake } from "../../src/domain/intake";
 
 const intake: ParsedIntake = {
@@ -79,6 +82,23 @@ describe("createSelfServeCase", () => {
           leadReferrer: null,
         },
       }),
-    ).rejects.toThrow(SignupError);
+    ).rejects.toMatchObject({ code: "EMAIL_TAKEN" });
+  });
+
+  it("treats a unique-email constraint failure as EMAIL_TAKEN", async () => {
+    const passwordHash = await bcrypt.hash("password", 10);
+    const email = "unique-race@example.com";
+    await prisma.user.create({
+      data: { email, role: "CLIENT", passwordHash, name: "Taken" },
+    });
+
+    try {
+      await prisma.user.create({
+        data: { email, role: "CLIENT", passwordHash, name: "Racer" },
+      });
+      throw new Error("expected unique constraint failure");
+    } catch (error) {
+      expect(isUniqueEmailConstraint(error)).toBe(true);
+    }
   });
 });

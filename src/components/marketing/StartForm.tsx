@@ -26,6 +26,9 @@ export function StartForm({ plan, entryContext, attribution }: Props) {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) {
+      return;
+    }
     setErrors({});
     setPending(true);
 
