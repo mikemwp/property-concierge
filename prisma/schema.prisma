@@ -15,6 +15,7 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   cases        CaseParticipant[]
+  panelMember  PartnerPanel?
 }
 
 model Case {
@@ -31,6 +32,7 @@ model Case {
   stages        Stage[]
   participants  CaseParticipant[]
   events        StageEvent[]
+  referrals     Referral[]
 }
 
 model CaseParticipant {
@@ -81,4 +83,32 @@ model StageEvent {
   payload   String?
   createdAt DateTime @default(now())
   case      Case     @relation(fields: [caseId], references: [id])
+}
+
+model PartnerPanel {
+  id        String     @id @default(cuid())
+  roleType  String
+  name      String
+  firm      String?
+  active    Boolean    @default(true)
+  slaDays   Int
+  userId    String?    @unique
+  createdAt DateTime   @default(now())
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  referrals Referral[]
+}
+
+model Referral {
+  id             String       @id @default(cuid())
+  caseId         String
+  partnerId      String
+  partnerRole    String
+  source         String
+  feeStatus      String
+  disclosureText String
+  disclosedAt    DateTime
+  supersededAt   DateTime?
+  createdAt      DateTime     @default(now())
+  case           Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  partner        PartnerPanel @relation(fields: [partnerId], references: [id], onDelete: Cascade)
 }
