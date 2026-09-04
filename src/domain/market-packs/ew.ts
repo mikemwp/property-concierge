@@ -30,7 +30,7 @@ export const ewMarketPack: MarketPack = {
         title: "Purchase profile",
         defaultOwnerRole: "CLIENT",
         slaDays: 3,
-        requiredEvidenceKinds: [],
+        requiredEvidenceKinds: ["profile_complete"],
         freeVisible: true,
         freeCanSelfAdvance: true,
       },

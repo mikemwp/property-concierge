@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { createCase, getCurrentStage } from "../../src/domain/stage-engine";
+import {
+  acceptEvidence,
+  advanceStage,
+  createCase,
+  getCurrentStage,
+  submitEvidence,
+} from "../../src/domain/stage-engine";
 
 describe("createCase", () => {
   it("activates purchase_profile owned by CLIENT and only one ACTIVE stage", () => {
@@ -25,5 +31,50 @@ describe("createCase", () => {
       actorRole: "CLIENT",
       at: "2026-09-04T10:00:00.000Z",
     });
+  });
+});
+
+describe("advanceStage", () => {
+  it("refuses advance when required evidence missing", () => {
+    let c = createCase({
+      id: "case_2",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    c = submitEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+    });
+    c = acceptEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "ADVISOR",
+    });
+    c = advanceStage(c, { actorRole: "ADVISOR" });
+    expect(() => advanceStage(c, { actorRole: "ADVISOR" })).toThrow(
+      /evidence/i,
+    );
+  });
+
+  it("keeps exactly one ACTIVE stage after a successful advance", () => {
+    let c = createCase({
+      id: "case_3",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    c = submitEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+    });
+    c = acceptEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "ADVISOR",
+    });
+    c = advanceStage(c, { actorRole: "ADVISOR" });
+    expect(c.stages.filter((s) => s.status === "ACTIVE")).toHaveLength(1);
+    expect(getCurrentStage(c)?.key).toBe("money_readiness");
   });
 });

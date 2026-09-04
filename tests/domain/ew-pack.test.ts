@@ -30,4 +30,10 @@ describe("ew market pack", () => {
     expect(money?.freeCanSelfAdvance).toBe(false);
     expect(money?.freeVisible).toBe(true);
   });
+
+  it("requires profile_complete evidence on purchase_profile", () => {
+    const stages = getStageTemplate(ewMarketPack, "UK_RESIDENT_SPEED");
+    const profile = stages.find((s) => s.key === "purchase_profile");
+    expect(profile?.requiredEvidenceKinds).toContain("profile_complete");
+  });
 });
