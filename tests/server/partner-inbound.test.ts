@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { PartnerIntegrationError, applyPartnerUpdate, parseInboundUpdate } from "../../src/server/partner-integration";
-import { decodePartnerEventPayload } from "../../src/domain/partner-integration";
+import { openTicketForRole, partnerTickets } from "../../src/domain/partner-activity";
+import { decodePartnerEventPayload, encodePartnerEventPayload } from "../../src/domain/partner-integration";
+import type { CaseStore } from "../../src/lib/case-store";
 import { atMortgagePath, makeMemoryCaseStore } from "../support/memory-case-store";
 
 const NOW = new Date("2026-09-12T09:00:00.000Z");
@@ -17,6 +19,32 @@ async function storeWithOpenTicket() {
     now: new Date("2026-09-11T09:00:00.000Z"),
   });
   return { store, ticketId };
+}
+
+async function seedConveyancerTicket(store: CaseStore): Promise<string> {
+  const state = await store.load("pp1");
+  const ticketId = "ack-pp1-conv";
+  await store.save({
+    ...state,
+    events: [
+      ...state.events,
+      {
+        type: "PARTNER_CASE_ACKNOWLEDGED",
+        stageKey: "legal_path",
+        actorRole: "CONVEYANCER",
+        at: "2026-09-10T09:00:00.000Z",
+        payload: encodePartnerEventPayload({
+          ticketId,
+          adapterId: "stub-conveyancer",
+          role: "CONVEYANCER",
+          panelMemberId: "seed_conveyancer",
+          panelMemberName: "Test Conveyancer",
+          status: "RECEIVED",
+        }),
+      },
+    ],
+  });
+  return ticketId;
 }
 
 describe("parseInboundUpdate", () => {
@@ -68,10 +96,29 @@ describe("applyPartnerUpdate", () => {
     expect(state.events.at(-1)!.type).toBe("PARTNER_STATUS_SYNCED");
   });
 
-  it("audits a wrong-role update instead of dropping it", async () => {
+  it("rejects a foreign-role ticket id before applying anything", async () => {
     const { store, ticketId } = await storeWithOpenTicket();
+    const beforeEvents = (await store.load("pp1")).events.length;
+    const beforeTickets = partnerTickets(await store.load("pp1"), NOW).length;
+
+    await expect(
+      applyPartnerUpdate(
+        { caseId: "pp1", ticketId, role: "CONVEYANCER", status: "EVIDENCE_READY" },
+        { now: NOW, store },
+      ),
+    ).rejects.toThrow(/ticket/i);
+
+    const after = await store.load("pp1");
+    expect(after.events).toHaveLength(beforeEvents);
+    expect(partnerTickets(after, NOW)).toHaveLength(beforeTickets);
+    expect(after.stages.find((s) => s.key === "mortgage_path")!.submittedEvidenceKinds).toEqual([]);
+  });
+
+  it("audits a same-role owner mismatch instead of dropping it", async () => {
+    const { store } = await storeWithOpenTicket();
+    const conveyancerTicketId = await seedConveyancerTicket(store);
     const result = await applyPartnerUpdate(
-      { caseId: "pp1", ticketId, role: "CONVEYANCER", status: "EVIDENCE_READY" },
+      { caseId: "pp1", ticketId: conveyancerTicketId, role: "CONVEYANCER", status: "EVIDENCE_READY" },
       { now: NOW, store },
     );
 
@@ -79,6 +126,31 @@ describe("applyPartnerUpdate", () => {
     const event = (await store.load("pp1")).events.at(-1)!;
     expect(event.type).toBe("PARTNER_UPDATE_REJECTED");
     expect(decodePartnerEventPayload(event.payload)!.reason).toMatch(/owner/i);
+  });
+
+  it("rejects a foreign-role ticket even when the claimed role owns focus", async () => {
+    const { store, ticketId: mortgageTicketId } = await storeWithOpenTicket();
+    const conveyancerTicketId = await seedConveyancerTicket(store);
+    const beforeEvents = (await store.load("pp1")).events.length;
+    const beforeTickets = partnerTickets(await store.load("pp1"), NOW).length;
+
+    await expect(
+      applyPartnerUpdate(
+        {
+          caseId: "pp1",
+          ticketId: conveyancerTicketId,
+          role: "MORTGAGE_PARTNER",
+          status: "EVIDENCE_READY",
+        },
+        { now: NOW, store },
+      ),
+    ).rejects.toThrow(/ticket/i);
+
+    const after = await store.load("pp1");
+    expect(after.events).toHaveLength(beforeEvents);
+    expect(partnerTickets(after, NOW)).toHaveLength(beforeTickets);
+    expect(after.stages.find((s) => s.key === "mortgage_path")!.submittedEvidenceKinds).toEqual([]);
+    expect(openTicketForRole(after, "MORTGAGE_PARTNER")?.ticketId).toBe(mortgageTicketId);
   });
 
   it("refuses an unknown ticket and never invents one", async () => {

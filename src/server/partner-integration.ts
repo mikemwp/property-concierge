@@ -1,7 +1,7 @@
 import type { StageState } from "@/domain/stage-engine";
 import { getFocusStage } from "@/domain/stage-engine";
 import { isMilestoneForRole } from "@/domain/market-packs/types";
-import { openTicketForRole, partnerTickets, type PartnerTicketSummary } from "@/domain/partner-activity";
+import { openTicketForRole, type PartnerTicketSummary } from "@/domain/partner-activity";
 import {
   intentForStatus,
   isPartnerStatus,
@@ -82,20 +82,12 @@ export function parseInboundUpdate(raw: unknown): InboundPartnerUpdate {
 function resolveOpenTicket(
   caseState: Awaited<ReturnType<CaseStore["load"]>>,
   update: InboundPartnerUpdate,
-  now: Date,
 ): PartnerTicketSummary {
-  const roleTicket = openTicketForRole(caseState, update.role);
-  if (roleTicket?.ticketId === update.ticketId) {
-    return roleTicket;
-  }
-
-  const match = partnerTickets(caseState, now).find(
-    (ticket) => ticket.ticketId === update.ticketId && ticket.closedAt === null,
-  );
-  if (!match) {
+  const ticket = openTicketForRole(caseState, update.role);
+  if (!ticket || ticket.ticketId !== update.ticketId) {
     throw new PartnerIntegrationError(`No open ticket ${update.ticketId} for ${update.role}`);
   }
-  return match;
+  return ticket;
 }
 
 async function appendRejection(
@@ -128,7 +120,7 @@ export async function applyPartnerUpdate(
   const caseState = await store.load(update.caseId);
   assertSpeedRails(caseState);
 
-  const ticket = resolveOpenTicket(caseState, update, now);
+  const ticket = resolveOpenTicket(caseState, update);
 
   const focus = getFocusStage(caseState);
   if (!focus) {
