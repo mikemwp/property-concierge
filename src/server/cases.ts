@@ -1,3 +1,4 @@
+import type { LeadAttribution } from "../domain/attribution";
 import { createCase, getFocusStage, type CaseState } from "../domain/stage-engine";
 import type { ActorRole } from "../domain/types";
 import type { EntryContext, Tier } from "../domain/types";
@@ -25,6 +26,9 @@ function toCaseWithRelations(record: {
   entryContext: string;
   tier: string;
   title: string;
+  leadSource: string;
+  leadCampaign: string | null;
+  leadReferrer: string | null;
   createdAt: Date;
   updatedAt: Date;
   stages: Array<{
@@ -61,6 +65,7 @@ export async function createCaseRecord(input: {
   clientUserId: string;
   advisorUserId: string;
   marketPackId?: string;
+  attribution?: LeadAttribution;
 }): Promise<CaseState> {
   const marketPackId = input.marketPackId ?? "ew";
   const initialState = createCase({
@@ -68,6 +73,7 @@ export async function createCaseRecord(input: {
     entryContext: input.entryContext,
     tier: input.tier,
     marketPackId,
+    attribution: input.attribution,
   });
 
   const record = await prisma.case.create({
@@ -76,6 +82,9 @@ export async function createCaseRecord(input: {
       entryContext: input.entryContext,
       tier: input.tier,
       title: input.title,
+      leadSource: initialState.attribution.leadSource,
+      leadCampaign: initialState.attribution.leadCampaign,
+      leadReferrer: initialState.attribution.leadReferrer,
       participants: {
         create: [
           { userId: input.clientUserId, role: "CLIENT" },

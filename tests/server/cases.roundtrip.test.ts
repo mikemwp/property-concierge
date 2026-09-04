@@ -158,4 +158,41 @@ describe("cases persistence", () => {
         ?.submittedEvidenceKinds,
     ).not.toContain("profile_complete");
   });
+
+  it("round-trips lead attribution on a case", async () => {
+    const created = await createCaseRecord({
+      title: "Diaspora signup",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "PAID_DWY",
+      clientUserId: "user_client",
+      advisorUserId: "user_advisor",
+      attribution: {
+        leadSource: "DIASPORA_AU_UK",
+        leadCampaign: "poms-in-oz-sept",
+        leadReferrer: "sarah-w",
+      },
+    });
+
+    expect(created.attribution.leadSource).toBe("DIASPORA_AU_UK");
+
+    const loaded = await loadCase(created.id);
+    expect(loaded.attribution).toEqual({
+      leadSource: "DIASPORA_AU_UK",
+      leadCampaign: "poms-in-oz-sept",
+      leadReferrer: "sarah-w",
+    });
+  });
+
+  it("defaults existing cases without attribution to DIRECT", async () => {
+    const created = await createCaseRecord({
+      title: "No attribution",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "FREE_DIY",
+      clientUserId: "user_client",
+      advisorUserId: "user_advisor",
+    });
+    const loaded = await loadCase(created.id);
+    expect(loaded.attribution.leadSource).toBe("DIRECT");
+    expect(loaded.attribution.leadCampaign).toBeNull();
+  });
 });

@@ -1,4 +1,5 @@
 import type { ActorRole, EntryContext, StageStatus, Tier } from "./types";
+import { DEFAULT_ATTRIBUTION, type LeadAttribution } from "./attribution";
 import { ewMarketPack, getStageTemplate } from "./market-packs/ew";
 import type { MarketPack, StageTemplate } from "./market-packs/types";
 
@@ -24,6 +25,7 @@ export type CaseState = {
   marketPackId: string;
   entryContext: EntryContext;
   tier: Tier;
+  attribution: LeadAttribution;
   stages: StageState[];
   events: Array<{
     type: string;
@@ -52,6 +54,7 @@ export function createCase(input: {
   entryContext: EntryContext;
   tier: Tier;
   marketPackId?: string;
+  attribution?: LeadAttribution;
   now?: Date;
 }): CaseState {
   const marketPackId = input.marketPackId ?? "ew";
@@ -85,6 +88,7 @@ export function createCase(input: {
     marketPackId,
     entryContext: input.entryContext,
     tier: input.tier,
+    attribution: input.attribution ?? DEFAULT_ATTRIBUTION,
     stages,
     events: [
       {

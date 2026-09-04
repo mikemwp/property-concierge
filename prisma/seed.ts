@@ -64,6 +64,11 @@ async function main() {
     tier: "PAID_DWY",
     clientUserId: client.id,
     advisorUserId: advisor.id,
+    attribution: {
+      leadSource: "DIASPORA_AU_UK",
+      leadCampaign: "poms-in-oz-sept",
+      leadReferrer: null,
+    },
   });
 
   await createCaseRecord({
@@ -72,6 +77,24 @@ async function main() {
     tier: "FREE_DIY",
     clientUserId: client.id,
     advisorUserId: advisor.id,
+    attribution: {
+      leadSource: "ORGANIC",
+      leadCampaign: null,
+      leadReferrer: null,
+    },
+  });
+
+  await createCaseRecord({
+    title: "Okafor US return (free)",
+    entryContext: "RETURNER_OVERSEAS",
+    tier: "FREE_DIY",
+    clientUserId: client.id,
+    advisorUserId: advisor.id,
+    attribution: {
+      leadSource: "DIASPORA_US_UK",
+      leadCampaign: "brits-in-america-sept",
+      leadReferrer: null,
+    },
   });
 }
 
