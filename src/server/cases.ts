@@ -1,4 +1,5 @@
-import { createCase, type CaseState } from "../domain/stage-engine";
+import { createCase, getFocusStage, type CaseState } from "../domain/stage-engine";
+import type { ActorRole } from "../domain/types";
 import type { EntryContext, Tier } from "../domain/types";
 import { prisma } from "../lib/db";
 import {
@@ -177,4 +178,31 @@ export async function listCasesForUser(
     title: participant.case.title,
     tier: participant.case.tier,
   }));
+}
+
+export async function listCasesForPartnerRole(
+  partnerRole: ActorRole,
+): Promise<
+  Array<{ id: string; title: string; tier: string; focusStageKey: string }>
+> {
+  const records = await prisma.case.findMany({
+    include: caseInclude,
+    orderBy: { updatedAt: "desc" },
+  });
+
+  return records
+    .map((record) => {
+      const caseState = toCaseState(toCaseWithRelations(record));
+      const focus = getFocusStage(caseState);
+      if (!focus || focus.ownerRole !== partnerRole) {
+        return null;
+      }
+      return {
+        id: record.id,
+        title: record.title,
+        tier: record.tier,
+        focusStageKey: focus.key,
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => row !== null);
 }
