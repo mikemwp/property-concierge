@@ -28,8 +28,9 @@ All demo users use password **`password`**.
 
 Seeded cases:
 
-- **Bloggs return (paid)** — `PAID_DWY`, entry `RETURNER_OVERSEAS`
-- **Smith DIY journey** — `FREE_DIY`, entry `UK_RESIDENT_SPEED`
+- **Bloggs return (paid)** — `PAID_DWY`, entry `RETURNER_OVERSEAS`, lead `DIASPORA_AU_UK`
+- **Smith DIY journey** — `FREE_DIY`, entry `UK_RESIDENT_SPEED`, lead `ORGANIC`
+- **Okafor US return (free)** — `FREE_DIY`, entry `RETURNER_OVERSEAS`, lead `DIASPORA_US_UK`
 
 ## Happy-path demo (free vs paid)
 
@@ -49,6 +50,32 @@ See the step-by-step click script: [`docs/superpowers/plans/demo-script-core-por
 1. Client opens free case → can self-attest early stages only; `money_readiness` shows upgrade callout.
 2. Advisor cockpit: warm intro button **disabled** on free tier.
 3. Partner list stays empty until a case focus stage is owned by that partner role (paid path).
+
+## Acquisition funnel
+
+Public pages (no login): `/`, `/pricing`, `/stories/<slug>`, `/start`.
+
+Campaign links carry attribution into the case: `/?utm_source=poms-in-oz&utm_medium=community`.
+Recognised tags live in `SOURCE_MAP` in `src/domain/attribution.ts` and are
+mirrored in [`docs/playbooks/diaspora-outreach-checklist.md`](docs/playbooks/diaspora-outreach-checklist.md).
+
+`/start` creates a `CLIENT` user plus a `Case` with entry context, tier and lead
+attribution. **Paid is the default tier** — only an explicit `plan=free` creates
+a `FREE_DIY` case.
+
+Advisors can upgrade a case FREE→PAID and edit the entry context from the case
+page; changing entry context rebuilds the required evidence from the market pack.
+
+Validation metrics: `/cockpit/funnel`.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-acquisition-funnel.md`](docs/superpowers/plans/demo-script-acquisition-funnel.md).
+
+## Advisor operating IP
+
+Stage playbooks live in `src/domain/market-packs/ew-playbook.ts` and render only
+inside `/cockpit`. `assertPlaybookVisible` rejects every non-advisor role, and
+`tests/server/cockpit-playbook-policy.test.ts` asserts no playbook string can
+appear in a client stage view.
 
 ## Scripts
 
