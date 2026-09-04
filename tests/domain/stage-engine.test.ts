@@ -4,6 +4,7 @@ import {
   advanceStage,
   createCase,
   getCurrentStage,
+  StageEngineError,
   submitEvidence,
 } from "../../src/domain/stage-engine";
 
@@ -76,5 +77,63 @@ describe("advanceStage", () => {
     c = advanceStage(c, { actorRole: "ADVISOR" });
     expect(c.stages.filter((s) => s.status === "ACTIVE")).toHaveLength(1);
     expect(getCurrentStage(c)?.key).toBe("money_readiness");
+  });
+});
+
+describe("evidence focus stage guard", () => {
+  function advancePastPurchaseProfile() {
+    let c = createCase({
+      id: "case_focus",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    c = submitEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+    });
+    c = acceptEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "ADVISOR",
+    });
+    return advanceStage(c, { actorRole: "ADVISOR" });
+  }
+
+  it("rejects acceptEvidence on a completed stage after advance", () => {
+    const c = advancePastPurchaseProfile();
+    expect(getCurrentStage(c)?.key).toBe("money_readiness");
+    expect(() =>
+      acceptEvidence(c, {
+        stageKey: "purchase_profile",
+        kind: "profile_complete",
+        actorRole: "ADVISOR",
+      }),
+    ).toThrowError(StageEngineError);
+    expect(() =>
+      acceptEvidence(c, {
+        stageKey: "purchase_profile",
+        kind: "profile_complete",
+        actorRole: "ADVISOR",
+      }),
+    ).toThrow(/focus stage: money_readiness/);
+  });
+
+  it("rejects acceptEvidence on a pending future stage", () => {
+    const c = advancePastPurchaseProfile();
+    expect(() =>
+      acceptEvidence(c, {
+        stageKey: "mortgage_path",
+        kind: "dip_aip",
+        actorRole: "ADVISOR",
+      }),
+    ).toThrowError(StageEngineError);
+    expect(() =>
+      acceptEvidence(c, {
+        stageKey: "mortgage_path",
+        kind: "dip_aip",
+        actorRole: "ADVISOR",
+      }),
+    ).toThrow(/focus stage: money_readiness/);
   });
 });

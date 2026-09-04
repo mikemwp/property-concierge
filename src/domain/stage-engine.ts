@@ -99,8 +99,19 @@ export function getCurrentStage(caseState: CaseState): StageState | null {
   return caseState.stages.find((s) => s.status === "ACTIVE") ?? null;
 }
 
+/** ACTIVE stage, or the sole BLOCKED stage when nothing is ACTIVE (e.g. after block). */
+export function getFocusStage(caseState: CaseState): StageState | null {
+  const active = getCurrentStage(caseState);
+  if (active) {
+    return active;
+  }
+  const blocked = caseState.stages.filter((s) => s.status === "BLOCKED");
+  return blocked.length === 1 ? blocked[0] : null;
+}
+
 export type StageEngineErrorCode =
   | "NO_ACTIVE_STAGE"
+  | "WRONG_STAGE"
   | "EVIDENCE_INCOMPLETE"
   | "FORBIDDEN_ROLE"
   | "ALREADY_ACCEPTED"
@@ -189,6 +200,20 @@ function updateStage(
   };
 }
 
+function requireFocusStage(caseState: CaseState, stageKey: string): StageState {
+  const focus = getFocusStage(caseState);
+  if (!focus) {
+    throw new StageEngineError("NO_ACTIVE_STAGE", "No focus stage for evidence operations");
+  }
+  if (stageKey !== focus.key) {
+    throw new StageEngineError(
+      "WRONG_STAGE",
+      `Evidence operations only allowed on focus stage: ${focus.key}`,
+    );
+  }
+  return focus;
+}
+
 export function submitEvidence(
   caseState: CaseState,
   input: {
@@ -198,10 +223,7 @@ export function submitEvidence(
     now?: Date;
   },
 ): CaseState {
-  const stage = findStage(caseState, input.stageKey);
-  if (!stage) {
-    throw new StageEngineError("NO_ACTIVE_STAGE", `Stage not found: ${input.stageKey}`);
-  }
+  const stage = requireFocusStage(caseState, input.stageKey);
   if (!canSubmitEvidence(caseState, input.actorRole)) {
     throw new StageEngineError("FORBIDDEN_ROLE", "Only PAID_DWY clients may submit evidence");
   }
@@ -234,10 +256,7 @@ export function acceptEvidence(
     now?: Date;
   },
 ): CaseState {
-  const stage = findStage(caseState, input.stageKey);
-  if (!stage) {
-    throw new StageEngineError("NO_ACTIVE_STAGE", `Stage not found: ${input.stageKey}`);
-  }
+  const stage = requireFocusStage(caseState, input.stageKey);
   if (!canAcceptEvidence(stage, input.actorRole)) {
     throw new StageEngineError(
       "FORBIDDEN_ROLE",
