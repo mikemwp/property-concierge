@@ -62,6 +62,8 @@ export const auStubPack: MarketPack = {
   },
   buildStages: auStageTemplates,
   buildPlaybooks: () => [],
+  /** AU partner process language is Plan 7. */
+  partnerMilestones: () => [],
   disclosureText: () => {
     throw new MarketPackError("Australia disclosure copy is not written yet");
   },
