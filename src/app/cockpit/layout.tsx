@@ -37,6 +37,14 @@ export default async function CockpitLayout({
         </div>
         <SignOutButton className="rounded border border-slate-400 px-3 py-1 text-sm text-slate-100 hover:bg-slate-800" />
       </header>
+      <nav className="flex gap-4 border-b border-slate-200 bg-white px-4 py-2 text-sm">
+        <a href="/cockpit/cases" className="text-slate-700 hover:text-slate-900">
+          Cases
+        </a>
+        <a href="/cockpit/funnel" className="text-slate-700 hover:text-slate-900">
+          Validation funnel
+        </a>
+      </nav>
       <main style={{ padding: "1.5rem" }}>{children}</main>
     </div>
   );

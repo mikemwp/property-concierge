@@ -1,4 +1,5 @@
 import type { Case, Evidence, Stage, StageEvent } from "@prisma/client";
+import { DEFAULT_ATTRIBUTION, isLeadSource, type LeadAttribution } from "../domain/attribution";
 import type { CaseState, StageState } from "../domain/stage-engine";
 import { ewMarketPack, getStageTemplate } from "../domain/market-packs/ew";
 import type { ActorRole, EntryContext, StageStatus, Tier } from "../domain/types";
@@ -17,6 +18,20 @@ function resolveTemplates(marketPackId: string, entryContext: EntryContext) {
 
 function toIso(date: Date | null): string | null {
   return date ? date.toISOString() : null;
+}
+
+function toAttribution(record: {
+  leadSource: string;
+  leadCampaign: string | null;
+  leadReferrer: string | null;
+}): LeadAttribution {
+  return {
+    leadSource: isLeadSource(record.leadSource)
+      ? record.leadSource
+      : DEFAULT_ATTRIBUTION.leadSource,
+    leadCampaign: record.leadCampaign,
+    leadReferrer: record.leadReferrer,
+  };
 }
 
 export function toStageState(
@@ -66,6 +81,7 @@ export function toCaseState(record: CaseWithRelations): CaseState {
     marketPackId: record.marketPackId,
     entryContext,
     tier: record.tier as Tier,
+    attribution: toAttribution(record),
     stages: [...record.stages]
       .sort((left, right) => left.sortOrder - right.sortOrder)
       .map((stage) => toStageState(stage, templateByKey)),

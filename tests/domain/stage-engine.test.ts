@@ -280,3 +280,33 @@ describe("submitted evidence tracking", () => {
     expect(stage?.submittedEvidenceKinds).toContain("dip_aip");
   });
 });
+
+describe("case attribution", () => {
+  it("defaults to DIRECT attribution", () => {
+    const c = createCase({
+      id: "attr_1",
+      entryContext: "RETURNER_IN_UK",
+      tier: "PAID_DWY",
+    });
+    expect(c.attribution).toEqual({
+      leadSource: "DIRECT",
+      leadCampaign: null,
+      leadReferrer: null,
+    });
+  });
+
+  it("keeps supplied attribution on the case state", () => {
+    const c = createCase({
+      id: "attr_2",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "PAID_DWY",
+      attribution: {
+        leadSource: "DIASPORA_AU_UK",
+        leadCampaign: "spring-return",
+        leadReferrer: null,
+      },
+    });
+    expect(c.attribution.leadSource).toBe("DIASPORA_AU_UK");
+    expect(c.attribution.leadCampaign).toBe("spring-return");
+  });
+});

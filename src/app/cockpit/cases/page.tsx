@@ -32,6 +32,9 @@ export default async function CockpitCasesPage() {
                 <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
                   {c.tier === "FREE_DIY" ? "Free DIY" : "Paid DWY"}
                 </span>
+                <span className="ml-2 rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
+                  {c.leadSource.replace(/_/g, " ").toLowerCase()}
+                </span>
               </Link>
             </li>
           ))}

@@ -1,3 +1,6 @@
+import { Prisma, PrismaClient } from "@prisma/client";
+import { DEFAULT_ATTRIBUTION, isLeadSource, type LeadAttribution } from "../domain/attribution";
+import type { FunnelCaseRow } from "../domain/funnel";
 import { createCase, getFocusStage, type CaseState } from "../domain/stage-engine";
 import type { ActorRole } from "../domain/types";
 import type { EntryContext, Tier } from "../domain/types";
@@ -10,6 +13,8 @@ import {
   toCaseState,
   type CaseWithRelations,
 } from "./mappers";
+
+type DbClient = PrismaClient | Prisma.TransactionClient;
 
 export { CaseAccessError, assertCaseAccess } from "./case-access";
 export { attachPartnerParticipant } from "./case-access";
@@ -25,6 +30,9 @@ function toCaseWithRelations(record: {
   entryContext: string;
   tier: string;
   title: string;
+  leadSource: string;
+  leadCampaign: string | null;
+  leadReferrer: string | null;
   createdAt: Date;
   updatedAt: Date;
   stages: Array<{
@@ -54,28 +62,36 @@ function toCaseWithRelations(record: {
   return record;
 }
 
-export async function createCaseRecord(input: {
-  title: string;
-  entryContext: EntryContext;
-  tier: Tier;
-  clientUserId: string;
-  advisorUserId: string;
-  marketPackId?: string;
-}): Promise<CaseState> {
+export async function createCaseRecord(
+  input: {
+    title: string;
+    entryContext: EntryContext;
+    tier: Tier;
+    clientUserId: string;
+    advisorUserId: string;
+    marketPackId?: string;
+    attribution?: LeadAttribution;
+  },
+  db: DbClient = prisma,
+): Promise<CaseState> {
   const marketPackId = input.marketPackId ?? "ew";
   const initialState = createCase({
     id: "pending",
     entryContext: input.entryContext,
     tier: input.tier,
     marketPackId,
+    attribution: input.attribution,
   });
 
-  const record = await prisma.case.create({
+  const record = await db.case.create({
     data: {
       marketPackId,
       entryContext: input.entryContext,
       tier: input.tier,
       title: input.title,
+      leadSource: initialState.attribution.leadSource,
+      leadCampaign: initialState.attribution.leadCampaign,
+      leadReferrer: initialState.attribution.leadReferrer,
       participants: {
         create: [
           { userId: input.clientUserId, role: "CLIENT" },
@@ -142,6 +158,15 @@ export async function saveCase(caseState: CaseState): Promise<void> {
         include: { evidence: true },
       });
 
+      const staleEvidence = dbStage.evidence.filter(
+        (row) => !stage.requiredEvidenceKinds.includes(row.kind),
+      );
+      if (staleEvidence.length > 0) {
+        await tx.evidence.deleteMany({
+          where: { id: { in: staleEvidence.map((row) => row.id) } },
+        });
+      }
+
       for (const kind of stage.requiredEvidenceKinds) {
         const accepted = stage.acceptedEvidenceKinds.includes(kind);
         const submitted = stage.submittedEvidenceKinds.includes(kind);
@@ -182,9 +207,30 @@ export async function saveCase(caseState: CaseState): Promise<void> {
   });
 }
 
+export async function listFunnelRows(): Promise<FunnelCaseRow[]> {
+  const rows = await prisma.case.findMany({
+    select: {
+      id: true,
+      tier: true,
+      leadSource: true,
+      entryContext: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    tier: row.tier as Tier,
+    leadSource: isLeadSource(row.leadSource)
+      ? row.leadSource
+      : DEFAULT_ATTRIBUTION.leadSource,
+    entryContext: row.entryContext as EntryContext,
+  }));
+}
+
 export async function listCasesForUser(
   userId: string,
-): Promise<Array<{ id: string; title: string; tier: string }>> {
+): Promise<Array<{ id: string; title: string; tier: string; leadSource: string }>> {
   const participants = await prisma.caseParticipant.findMany({
     where: { userId },
     include: { case: true },
@@ -195,6 +241,7 @@ export async function listCasesForUser(
     id: participant.case.id,
     title: participant.case.title,
     tier: participant.case.tier,
+    leadSource: participant.case.leadSource,
   }));
 }
 
