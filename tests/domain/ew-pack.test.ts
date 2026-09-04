@@ -1,7 +1,27 @@
 import { describe, it, expect } from "vitest";
-import { ewMarketPack, getStageTemplate } from "../../src/domain/market-packs/ew";
+import { ewMarketPack } from "../../src/domain/market-packs/ew";
+import { getStageTemplate } from "../../src/domain/market-packs/types";
 
 describe("ew market pack", () => {
+  it("declares its locale, currency and address shape as data", () => {
+    expect(ewMarketPack.locale).toEqual({
+      bcp47: "en-GB",
+      currencyCode: "GBP",
+      addressFieldKeys: ["line1", "line2", "town", "county", "postcode"],
+      regionNoun: "region",
+    });
+    expect(ewMarketPack.jurisdiction).toBe("england_wales");
+    expect(ewMarketPack.enabled).toBe(true);
+  });
+
+  it("carries jurisdiction copy and partner-role labels on the pack", () => {
+    expect(ewMarketPack.copy.region_prompt).toMatch(/England & Wales/);
+    expect(ewMarketPack.copy.directory_intro).toMatch(/England & Wales/);
+    expect(ewMarketPack.copy.mortgage_posture).toMatch(/introducer only/i);
+    expect(ewMarketPack.partnerRoleLabels.CONVEYANCER).toBe("conveyancer");
+    expect(ewMarketPack.partnerRoleLabels.MORTGAGE_PARTNER).toBe("mortgage adviser");
+  });
+
   it("returns nine canonical stage keys in order", () => {
     const stages = getStageTemplate(ewMarketPack, "RETURNER_OVERSEAS");
     expect(stages.map((s) => s.key)).toEqual([

@@ -1,4 +1,4 @@
-import type { EntryContext, Tier } from "./types";
+import { ENTRY_CONTEXTS, type EntryContext, type Tier } from "./types";
 
 export type IntakeFields = {
   name?: string | null;
@@ -25,12 +25,6 @@ export type IntakeResult =
 
 export const MIN_PASSWORD_LENGTH = 10;
 const MAX_TEXT_LENGTH = 80;
-
-const ENTRY_CONTEXTS: EntryContext[] = [
-  "RETURNER_OVERSEAS",
-  "RETURNER_IN_UK",
-  "UK_RESIDENT_SPEED",
-];
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

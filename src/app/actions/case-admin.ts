@@ -2,18 +2,12 @@
 
 import { setEntryContext, upgradeToPaid } from "@/domain/case-admin";
 import { StageEngineError } from "@/domain/stage-engine";
-import type { EntryContext } from "@/domain/types";
+import { ENTRY_CONTEXTS, type EntryContext } from "@/domain/types";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser, saveCase } from "@/server/cases";
 import { revalidatePath } from "next/cache";
 
 export type CaseAdminActionResult = { ok: true } | { ok: false; error: string };
-
-const ENTRY_CONTEXTS: EntryContext[] = [
-  "RETURNER_OVERSEAS",
-  "RETURNER_IN_UK",
-  "UK_RESIDENT_SPEED",
-];
 
 function mapError(err: unknown): string {
   if (err instanceof StageEngineError || err instanceof CaseAccessError) {

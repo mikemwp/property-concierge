@@ -1,5 +1,7 @@
 import type { ActorRole, EntryContext } from "../types";
-import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew";
+import { EW_LOCALE } from "./ew-config";
+import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew-stages";
+import { formatMoney } from "./locale";
 
 export type PlaybookAction = {
   /** Working days from stage activation. */
@@ -26,8 +28,7 @@ function needsCurrencyWork(entry: EntryContext): boolean {
 }
 
 const MONEY_EVIDENCE: Record<string, string> = {
-  source_of_funds:
-    "source_of_funds: statements are full pages with the account holder visible, dated within 30 days, and every deposit over £1,000 explained.",
+  source_of_funds: `source_of_funds: statements are full pages with the account holder visible, dated within 30 days, and every deposit over ${formatMoney(EW_LOCALE, 1000)} explained.`,
   fx_plan:
     "fx_plan: transfer route named, target settlement date set, and the client understands the rate is not fixed by us.",
 };

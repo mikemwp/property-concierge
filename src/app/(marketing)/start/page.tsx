@@ -1,18 +1,12 @@
 import Link from "next/link";
 import { StartForm } from "@/components/marketing/StartForm";
 import { FREE_PLAN, PAID_PLAN } from "@/content/marketing";
-import type { EntryContext } from "@/domain/types";
+import { ENTRY_CONTEXTS, type EntryContext } from "@/domain/types";
 import { attributionParamsFrom, startHref } from "@/lib/marketing-links";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-
-const ENTRY_VALUES: EntryContext[] = [
-  "RETURNER_OVERSEAS",
-  "RETURNER_IN_UK",
-  "UK_RESIDENT_SPEED",
-];
 
 export default async function StartPage({ searchParams }: Props) {
   const resolved = await searchParams;
@@ -22,7 +16,7 @@ export default async function StartPage({ searchParams }: Props) {
   const plan: "free" | "paid" = planParam === "free" ? "free" : "paid";
 
   const entryParam = Array.isArray(resolved.entry) ? resolved.entry[0] : resolved.entry;
-  const entryContext: EntryContext = ENTRY_VALUES.includes(
+  const entryContext: EntryContext = ENTRY_CONTEXTS.includes(
     entryParam as EntryContext,
   )
     ? (entryParam as EntryContext)
