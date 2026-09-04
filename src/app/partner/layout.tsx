@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { roleCanAccess } from "@/lib/auth-roles";
 import { redirect } from "next/navigation";
+import { SignOutButton } from "@/components/SignOutButton";
 
 export default async function PartnerLayout({
   children,
@@ -22,12 +23,18 @@ export default async function PartnerLayout({
           borderBottom: "1px solid #ddd",
           padding: "1rem",
           background: "#ecfdf5",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <strong>Partner View</strong>
-        <span style={{ marginLeft: "1rem", color: "#065f46" }}>
-          {session.user.name ?? session.user.email} ({session.user.role})
-        </span>
+        <div>
+          <strong>Partner View</strong>
+          <span style={{ marginLeft: "1rem", color: "#065f46" }}>
+            {session.user.name ?? session.user.email} ({session.user.role})
+          </span>
+        </div>
+        <SignOutButton />
       </header>
       <main style={{ padding: "1.5rem" }}>{children}</main>
     </div>

@@ -7,11 +7,12 @@ import type { ActorRole } from "@/domain/types";
 export default async function PartnerHomePage() {
   const session = await auth();
   const role = session?.user?.role as ActorRole | undefined;
-  if (!role || !isPartnerRole(role)) {
+  const userId = session?.user?.id;
+  if (!userId || !role || !isPartnerRole(role)) {
     return null;
   }
 
-  const cases = await listCasesForPartnerRole(role);
+  const cases = await listCasesForPartnerRole(userId, role);
 
   return (
     <section>

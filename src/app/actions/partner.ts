@@ -1,12 +1,16 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { isPartnerRole } from "@/server/partner-policy";
-import type { CaseState } from "@/domain/stage-engine";
+import { submitPartnerEvidence, StageEngineError } from "@/domain/stage-engine";
 import type { ActorRole } from "@/domain/types";
-import { loadCase, saveCase } from "@/server/cases";
+import {
+  CaseAccessError,
+  loadCaseForUser,
+  saveCase,
+} from "@/server/cases";
 import {
   assertPartnerSubmit,
+  isPartnerRole,
   PartnerPolicyError,
 } from "@/server/partner-policy";
 import { revalidatePath } from "next/cache";
@@ -14,34 +18,6 @@ import { revalidatePath } from "next/cache";
 export type PartnerActionResult =
   | { ok: true }
   | { ok: false; error: string };
-
-function appendPartnerEvidenceSubmit(
-  caseState: CaseState,
-  input: { stageKey: string; kind: string; actorRole: ActorRole },
-): CaseState {
-  const stage = caseState.stages.find((s) => s.key === input.stageKey);
-  if (!stage) {
-    throw new PartnerPolicyError("Stage not found");
-  }
-  if (!stage.requiredEvidenceKinds.includes(input.kind)) {
-    throw new PartnerPolicyError(`Evidence kind not required: ${input.kind}`);
-  }
-
-  const at = new Date().toISOString();
-  return {
-    ...caseState,
-    events: [
-      ...caseState.events,
-      {
-        type: "EVIDENCE_SUBMITTED",
-        stageKey: input.stageKey,
-        actorRole: input.actorRole,
-        at,
-        payload: input.kind,
-      },
-    ],
-  };
-}
 
 function revalidateCasePaths(caseId: string): void {
   revalidatePath(`/partner/cases/${caseId}`);
@@ -62,9 +38,9 @@ export async function submitPartnerEvidenceAction(
   }
 
   try {
-    let caseState = await loadCase(caseId);
+    let caseState = await loadCaseForUser(session.user.id, role, caseId);
     assertPartnerSubmit(caseState, role, stageKey);
-    caseState = appendPartnerEvidenceSubmit(caseState, {
+    caseState = submitPartnerEvidence(caseState, {
       stageKey,
       kind,
       actorRole: role,
@@ -74,7 +50,9 @@ export async function submitPartnerEvidenceAction(
     return { ok: true };
   } catch (err) {
     const message =
-      err instanceof PartnerPolicyError
+      err instanceof PartnerPolicyError ||
+      err instanceof StageEngineError ||
+      err instanceof CaseAccessError
         ? err.message
         : err instanceof Error
           ? err.message

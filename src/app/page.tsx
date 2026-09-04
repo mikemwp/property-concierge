@@ -3,7 +3,7 @@ export default function HomePage() {
     <main>
       <h1>Property Concierge</h1>
       <p>Your guided path to buying property in England &amp; Wales.</p>
-      <a href="/signup">Get started</a>
+      <a href="/login">Get started</a>
     </main>
   );
 }

@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { warmIntroAction } from "@/app/actions/cockpit";
 import type { ActorRole } from "@/domain/types";
+import { ActionErrorBanner } from "@/components/ActionErrorBanner";
 
 const PARTNER_OPTIONS: Array<{ value: ActorRole; label: string }> = [
   { value: "MORTGAGE_PARTNER", label: "Mortgage partner" },
@@ -15,6 +17,8 @@ type Props = {
 };
 
 export function WarmIntroButton({ caseId, enabled }: Props) {
+  const [error, setError] = useState<string | null>(null);
+
   if (!enabled) {
     return (
       <div className="rounded-lg border border-amber-200 bg-amber-50 p-4">
@@ -32,13 +36,16 @@ export function WarmIntroButton({ caseId, enabled }: Props) {
       <p className="mt-1 text-sm text-slate-600">
         Request a manual partner introduction (logged as a stage event).
       </p>
+      <ActionErrorBanner error={error} />
       <form
         action={async (formData) => {
-          const partnerType = String(
-            formData.get("partnerType"),
-          ) as ActorRole;
+          setError(null);
+          const partnerType = String(formData.get("partnerType")) as ActorRole;
           const note = String(formData.get("note") ?? "");
-          await warmIntroAction(caseId, partnerType, note);
+          const result = await warmIntroAction(caseId, partnerType, note);
+          if (!result.ok) {
+            setError(result.error ?? "Warm intro failed");
+          }
         }}
         className="mt-4 space-y-3"
       >
