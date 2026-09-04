@@ -2,11 +2,11 @@ import type { PartnerPanel, Referral } from "@prisma/client";
 import {
   canTransitionFee,
   defaultFeeStatus,
-  disclosureTextFor,
   type FeeStatus,
   type ReferralRecord,
   type ReferralSource,
 } from "../domain/referral";
+import { resolveMarketPack } from "../domain/market-packs/registry";
 import type { ActorRole } from "../domain/types";
 import { prisma } from "../lib/db";
 import { getPanelMember, PartnerNetworkError } from "./panel";
@@ -37,6 +37,15 @@ export async function createReferral(input: {
   feeStatus?: FeeStatus;
   now?: Date;
 }): Promise<ReferralRecord> {
+  const caseRow = await prisma.case.findUnique({
+    where: { id: input.caseId },
+    select: { marketPackId: true },
+  });
+  if (!caseRow) {
+    throw new PartnerNetworkError("Unknown case");
+  }
+  const pack = resolveMarketPack(caseRow.marketPackId);
+
   const member = await getPanelMember(input.partnerId);
   if (!member) {
     throw new PartnerNetworkError("Unknown panel member");
@@ -53,7 +62,7 @@ export async function createReferral(input: {
       partnerRole: member.roleType,
       source: input.source,
       feeStatus: input.feeStatus ?? defaultFeeStatus(member.roleType),
-      disclosureText: disclosureTextFor({
+      disclosureText: pack.disclosureText({
         role: member.roleType,
         partnerName: member.name,
         partnerFirm: member.firm,

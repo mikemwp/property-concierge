@@ -10,24 +10,19 @@ import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
 import { advisorStageView, canUseWarmIntro } from "@/domain/freemium";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
-import { ewMarketPack, getStageTemplate } from "@/domain/market-packs/ew";
 import { getFocusStage } from "@/domain/stage-engine";
 import { advisorPlaybook } from "@/lib/cockpit-playbook";
+import { stageSlaDays } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { assertPlaybookVisible } from "@/server/cockpit-policy";
 import { listPanel } from "@/server/panel";
 import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
-import { isPartnerActorRole, type EntryContext } from "@/domain/types";
+import { isPartnerActorRole } from "@/domain/types";
 
 type Props = {
   params: Promise<{ caseId: string }>;
 };
-
-function stageSlaDays(entryContext: EntryContext, stageKey: string): number {
-  const templates = getStageTemplate(ewMarketPack, entryContext);
-  return templates.find((t) => t.key === stageKey)?.slaDays ?? 7;
-}
 
 export default async function CockpitCasePage({ params }: Props) {
   const session = await auth();
@@ -47,7 +42,10 @@ export default async function CockpitCasePage({ params }: Props) {
   }
 
   const now = new Date();
-  const panel = await listPanel({ activeOnly: true });
+  const panel = await listPanel({
+    activeOnly: true,
+    marketPackId: caseState.marketPackId,
+  });
   const referrals = await listReferralsForCase(caseId);
   const views = advisorStageView(caseState, now);
   const focus = getFocusStage(caseState);
@@ -114,7 +112,7 @@ export default async function CockpitCasePage({ params }: Props) {
             daysInStage={daysInStage(focus, now)}
             escalation={escalationLevel(
               focus,
-              stageSlaDays(caseState.entryContext, focus.key),
+              stageSlaDays(caseState, focus.key),
               now,
             )}
           />

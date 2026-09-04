@@ -9,6 +9,8 @@ export type PanelMember = {
   active: boolean;
   slaDays: number;
   userId: string | null;
+  /** Spec §10: "partner panels — always local". */
+  marketPackId: string;
 };
 
 /** What a Free DIY client may see: names and categories only. No SLA, no ids, no scores. */

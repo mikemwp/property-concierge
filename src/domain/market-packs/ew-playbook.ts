@@ -1,33 +1,19 @@
 import type { ActorRole, EntryContext } from "../types";
-import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew";
-
-export type PlaybookAction = {
-  /** Working days from stage activation. */
-  day: number;
-  owner: ActorRole;
-  action: string;
-};
-
-export type StagePlaybook = {
-  stageKey: string;
-  objective: string;
-  actions: PlaybookAction[];
-  evidenceStandard: string[];
-  escalation: string[];
-  partnerScript: string | null;
-};
+import type { PlaybookAction, StagePlaybook } from "./types";
+import { EW_LOCALE, EW_FLAGS } from "./ew-config";
+import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew-stages";
+import { formatMoney } from "./locale";
 
 function isOverseas(entry: EntryContext): boolean {
   return entry === "RETURNER_OVERSEAS";
 }
 
 function needsCurrencyWork(entry: EntryContext): boolean {
-  return entry !== "UK_RESIDENT_SPEED";
+  return moneyEvidenceKinds(entry, EW_FLAGS).includes("fx_plan");
 }
 
 const MONEY_EVIDENCE: Record<string, string> = {
-  source_of_funds:
-    "source_of_funds: statements are full pages with the account holder visible, dated within 30 days, and every deposit over £1,000 explained.",
+  source_of_funds: `source_of_funds: statements are full pages with the account holder visible, dated within 30 days, and every deposit over ${formatMoney(EW_LOCALE, 1000)} explained.`,
   fx_plan:
     "fx_plan: transfer route named, target settlement date set, and the client understands the rate is not fixed by us.",
 };
@@ -126,7 +112,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
             "Review the pack against the standard below and reject anything a lender or conveyancer would bounce — once, properly, not twice.",
         },
       ],
-      evidenceStandard: linesFor(moneyEvidenceKinds(entry), MONEY_EVIDENCE),
+      evidenceStandard: linesFor(moneyEvidenceKinds(entry, EW_FLAGS), MONEY_EVIDENCE),
       escalation: [
         "Day 7 (SLA): pack incomplete — advisor calls the client and names the single missing document.",
         "Day 11: still incomplete — block the stage; do not let search readiness start on an unproven deposit.",

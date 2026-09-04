@@ -15,6 +15,7 @@ const members: PanelMember[] = [
     active: true,
     slaDays: 5,
     userId: null,
+    marketPackId: "ew",
   },
   {
     id: "p_mort_inactive",
@@ -24,6 +25,7 @@ const members: PanelMember[] = [
     active: false,
     slaDays: 3,
     userId: null,
+    marketPackId: "ew",
   },
   {
     id: "p_mort_a",
@@ -33,6 +35,7 @@ const members: PanelMember[] = [
     active: true,
     slaDays: 3,
     userId: "seed_mortgage_partner",
+    marketPackId: "ew",
   },
   {
     id: "p_conv_a",
@@ -42,6 +45,7 @@ const members: PanelMember[] = [
     active: true,
     slaDays: 5,
     userId: "seed_conveyancer",
+    marketPackId: "ew",
   },
 ];
 

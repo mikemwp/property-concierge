@@ -1,7 +1,5 @@
-import {
-  ewStagePlaybook,
-  type StagePlaybook,
-} from "@/domain/market-packs/ew-playbook";
+import { stagePlaybook, type StagePlaybook } from "@/domain/market-packs/types";
+import { casePack } from "@/lib/case-pack";
 import type { CaseState } from "@/domain/stage-engine";
 
 /**
@@ -12,7 +10,7 @@ export function advisorPlaybook(
   caseState: CaseState,
   stageKey: string,
 ): StagePlaybook | null {
-  return ewStagePlaybook(stageKey, caseState.entryContext);
+  return stagePlaybook(casePack(caseState), stageKey, caseState.entryContext);
 }
 
 export type { StagePlaybook };

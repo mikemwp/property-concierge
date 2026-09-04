@@ -32,7 +32,7 @@ Seeded cases:
 - **Smith DIY journey** — `FREE_DIY`, entry `UK_RESIDENT_SPEED`, lead `ORGANIC`
 - **Okafor US return (free)** — `FREE_DIY`, entry `RETURNER_OVERSEAS`, lead `DIASPORA_US_UK`
 
-Seeded partner panel (`PartnerPanel`):
+Seeded partner panel (`PartnerPanel`) — all five members are on the `ew` panel (`marketPackId = "ew"`):
 
 | Panel member | Role | SLA | Login |
 |--------------|------|-----|-------|
@@ -104,12 +104,58 @@ superseded, partner participant swapped). Free DIY cases get a names-only
 
 Walkthrough: [`docs/superpowers/plans/demo-script-partner-network.md`](docs/superpowers/plans/demo-script-partner-network.md).
 
+## Market packs (configuration layer)
+
+England & Wales is the **first market pack**, not the product. The stage engine is
+country-agnostic; everything local lives in `src/domain/market-packs/`:
+
+| Layer | File | Responsibility |
+|---|---|---|
+| Interface + pure helpers | `types.ts` | `MarketPack`, `MarketLocale`, `MarketFlags`, `MarketCopy`, `PartnerRoleLabels`, `StagePlaybook`, `MarketPackError` |
+| Money formatting | `locale.ts` | `formatMoney(locale, amount)` — no currency literal anywhere else |
+| E&W config | `ew-config.ts` | locale (`en-GB` / `GBP`), module flags, jurisdiction copy, partner-role labels |
+| E&W legal spine | `ew-stages.ts` | the nine stage templates and their evidence kinds |
+| E&W operating IP | `ew-playbook.ts` | entry-context playbooks (advisor-only) |
+| E&W consumer law | `ew-disclosure.ts` | referral disclosure wording |
+| Assembly | `ew.ts`, `au-stub.ts` | pack objects only |
+| Resolution | `registry.ts` | `DEFAULT_MARKET_PACK_ID`, `listMarketPacks`, `resolveMarketPack` |
+| Cockpit view model | `inspector.ts` | read-only `marketPackSummary` |
+
+**Resolution is fail-closed.** Every surface resolves the pack from `case.marketPackId`
+(`src/lib/case-pack.ts` → `casePack`, `stageSlaDays`). An unknown id or a registered-but-
+disabled pack throws `MarketPackError` — it never falls back to `ew`.
+
+**Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
+`isModuleEnabled`. The `ew` pack runs `fx_deposit` only; `chain_free_inventory`,
+`hard_client_sla`, `corridor_inbound`, `corridor_outbound`, `document_vault` and
+`partner_speed_rails` are off in every pack, enforced by
+`tests/domain/market-pack-flags.test.ts` (the spec's dependency rule).
+
+**`au` is a stub, not a product.** It is registered and `enabled: false`, with a different
+currency, address shape and stage keys (`finance_path`, `settlement_complete`), no
+playbooks, no evidence kinds and no partners. It exists to prove the registry resolves more
+than one pack. Corridor journeys (AU↔UK, US↔UK) are a later plan.
+
+**What stays engine-global:** the stage engine, pressure/escalation model, freemium
+discipline, partner scorecards and advisor cockpit. `tests/domain/engine-country-agnostic.test.ts`
+scans those modules and fails if any of them gains a jurisdiction literal or imports the
+`ew` pack directly.
+
+**Known limitation:** `EntryContext` values (`RETURNER_IN_UK`, `UK_RESIDENT_SPEED`) are
+persisted enum labels from earlier plans and were deliberately not renamed. Entry context
+is metadata; packs localise it through `MarketCopy` and `buildPlaybooks(entry)`. Marketing
+copy in `src/content/marketing.ts` is brand copy and is intentionally not pack data.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-market-packs.md`](docs/superpowers/plans/demo-script-market-packs.md).
+
 ## Advisor operating IP
 
-Stage playbooks live in `src/domain/market-packs/ew-playbook.ts` and render only
-inside `/cockpit`. `assertPlaybookVisible` rejects every non-advisor role, and
-`tests/server/cockpit-playbook-policy.test.ts` asserts no playbook string can
-appear in a client stage view.
+Stage playbooks live in `src/domain/market-packs/ew-playbook.ts`, resolve through
+`pack.buildPlaybooks(entry)` and render only inside `/cockpit`. `assertPlaybookVisible`
+rejects every non-advisor role, and `tests/server/cockpit-playbook-policy.test.ts` asserts
+no playbook string can appear in a client stage view. The read-only pack inspector at
+`/cockpit/market-packs` is guarded by `assertPackInspectorVisible` and deliberately carries
+no playbook prose.
 
 ## Scripts
 

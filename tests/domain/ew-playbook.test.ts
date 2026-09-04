@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { ewMarketPack, getStageTemplate } from "../../src/domain/market-packs/ew";
+import { ewMarketPack } from "../../src/domain/market-packs/ew";
+import { getStageTemplate } from "../../src/domain/market-packs/types";
 import {
   ewPlaybooks,
   ewStagePlaybook,

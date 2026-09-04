@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { signUpAction } from "@/app/actions/signup";
 import type { RawAttributionParams } from "@/domain/attribution";
 import type { EntryContext } from "@/domain/types";
+import { DEFAULT_MARKET_PACK_ID, resolveMarketPack } from "@/domain/market-packs/registry";
 
 type Props = {
   plan: "free" | "paid";
@@ -18,6 +19,8 @@ const ENTRY_OPTIONS: Array<{ value: EntryContext; label: string }> = [
   { value: "RETURNER_IN_UK", label: "Back in the UK, temporary set-up" },
   { value: "UK_RESIDENT_SPEED", label: "Living here, want a faster purchase" },
 ];
+
+const REGION_PROMPT = resolveMarketPack(DEFAULT_MARKET_PACK_ID).copy.region_prompt;
 
 export function StartForm({ plan, entryContext, attribution }: Props) {
   const router = useRouter();
@@ -117,7 +120,7 @@ export function StartForm({ plan, entryContext, attribution }: Props) {
 
       <label className="block">
         <span className="text-sm font-medium text-slate-700">
-          Where in England &amp; Wales are you buying?
+          {REGION_PROMPT}
         </span>
         <input
           name="targetRegion"

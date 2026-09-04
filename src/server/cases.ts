@@ -1,6 +1,7 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { DEFAULT_ATTRIBUTION, isLeadSource, type LeadAttribution } from "../domain/attribution";
 import type { FunnelCaseRow } from "../domain/funnel";
+import { DEFAULT_MARKET_PACK_ID } from "../domain/market-packs/registry";
 import { createCase, getFocusStage, type CaseState } from "../domain/stage-engine";
 import type { ActorRole } from "../domain/types";
 import type { EntryContext, Tier } from "../domain/types";
@@ -74,7 +75,7 @@ export async function createCaseRecord(
   },
   db: DbClient = prisma,
 ): Promise<CaseState> {
-  const marketPackId = input.marketPackId ?? "ew";
+  const marketPackId = input.marketPackId ?? DEFAULT_MARKET_PACK_ID;
   const initialState = createCase({
     id: "pending",
     entryContext: input.entryContext,
