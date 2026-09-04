@@ -47,6 +47,12 @@ export default async function CockpitLayout({
         <a href="/cockpit/panel" className="text-slate-700 hover:text-slate-900">
           Partner panel
         </a>
+        <a
+          href="/cockpit/market-packs"
+          className="text-slate-700 hover:text-slate-900"
+        >
+          Market packs
+        </a>
       </nav>
       <main style={{ padding: "1.5rem" }}>{children}</main>
     </div>

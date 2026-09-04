@@ -28,3 +28,11 @@ export function assertPlaybookVisible(viewerRole: ActorRole): void {
     );
   }
 }
+
+export function assertPackInspectorVisible(viewerRole: ActorRole): void {
+  if (viewerRole !== "ADVISOR") {
+    throw new CockpitPolicyError(
+      "The market pack inspector is advisor-only operating IP",
+    );
+  }
+}

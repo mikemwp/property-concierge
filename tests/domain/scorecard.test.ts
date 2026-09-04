@@ -21,6 +21,7 @@ const priya: PanelMember = {
   active: true,
   slaDays: 3,
   userId: null,
+  marketPackId: "ew",
 };
 
 function fixtureCase(
