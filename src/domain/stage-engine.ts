@@ -1,7 +1,7 @@
 import type { ActorRole, EntryContext, StageStatus, Tier } from "./types";
 import { DEFAULT_ATTRIBUTION, type LeadAttribution } from "./attribution";
-import { ewMarketPack, getStageTemplate } from "./market-packs/ew";
-import type { MarketPack, StageTemplate } from "./market-packs/types";
+import { DEFAULT_MARKET_PACK_ID, resolveMarketPack } from "./market-packs/registry";
+import { getStageTemplate, type StageTemplate } from "./market-packs/types";
 
 export type StageState = {
   key: string;
@@ -42,13 +42,6 @@ function addDays(iso: string, days: number): string {
   return date.toISOString();
 }
 
-function resolveMarketPack(marketPackId: string): MarketPack {
-  if (marketPackId === "ew") {
-    return ewMarketPack;
-  }
-  throw new Error(`Unknown market pack: ${marketPackId}`);
-}
-
 export function createCase(input: {
   id: string;
   entryContext: EntryContext;
@@ -57,7 +50,7 @@ export function createCase(input: {
   attribution?: LeadAttribution;
   now?: Date;
 }): CaseState {
-  const marketPackId = input.marketPackId ?? "ew";
+  const marketPackId = input.marketPackId ?? DEFAULT_MARKET_PACK_ID;
   const now = input.now ?? new Date();
   const nowIso = now.toISOString();
   const pack = resolveMarketPack(marketPackId);

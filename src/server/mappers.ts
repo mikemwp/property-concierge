@@ -1,7 +1,8 @@
 import type { Case, Evidence, Stage, StageEvent } from "@prisma/client";
 import { DEFAULT_ATTRIBUTION, isLeadSource, type LeadAttribution } from "../domain/attribution";
 import type { CaseState, StageState } from "../domain/stage-engine";
-import { ewMarketPack, getStageTemplate } from "../domain/market-packs/ew";
+import { resolveMarketPack } from "../domain/market-packs/registry";
+import { getStageTemplate } from "../domain/market-packs/types";
 import type { ActorRole, EntryContext, StageStatus, Tier } from "../domain/types";
 
 export type CaseWithRelations = Case & {
@@ -10,10 +11,7 @@ export type CaseWithRelations = Case & {
 };
 
 function resolveTemplates(marketPackId: string, entryContext: EntryContext) {
-  if (marketPackId !== "ew") {
-    throw new Error(`Unknown market pack: ${marketPackId}`);
-  }
-  return getStageTemplate(ewMarketPack, entryContext);
+  return getStageTemplate(resolveMarketPack(marketPackId), entryContext);
 }
 
 function toIso(date: Date | null): string | null {

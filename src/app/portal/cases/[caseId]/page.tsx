@@ -10,24 +10,17 @@ import { UpgradeCallout } from "@/components/UpgradeCallout";
 import { canViewSlaPressure, clientStageView } from "@/domain/freemium";
 import { canViewDirectory, directoryEntries } from "@/domain/panel";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
-import { ewMarketPack, getStageTemplate } from "@/domain/market-packs/ew";
 import { getFocusStage } from "@/domain/stage-engine";
+import { stageSlaDays } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { listPanel } from "@/server/panel";
 import { canPortalSubmit } from "@/server/portal-policy";
 import { listReferralsForCase } from "@/server/referrals";
 
-import type { EntryContext } from "@/domain/types";
-
 type Props = {
   params: Promise<{ caseId: string }>;
 };
-
-function stageSlaDays(entryContext: EntryContext, stageKey: string): number {
-  const templates = getStageTemplate(ewMarketPack, entryContext);
-  return templates.find((t) => t.key === stageKey)?.slaDays ?? 7;
-}
 
 export default async function PortalCasePage({ params }: Props) {
   const session = await auth();
@@ -120,7 +113,7 @@ export default async function PortalCasePage({ params }: Props) {
               canViewSlaPressure(caseState)
                 ? escalationLevel(
                     focus,
-                    stageSlaDays(caseState.entryContext, focus.key),
+                    stageSlaDays(caseState, focus.key),
                     now,
                   )
                 : undefined

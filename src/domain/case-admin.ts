@@ -1,4 +1,5 @@
-import { ewMarketPack, getStageTemplate } from "./market-packs/ew";
+import { resolveMarketPack } from "./market-packs/registry";
+import { getStageTemplate } from "./market-packs/types";
 import {
   getFocusStage,
   StageEngineError,
@@ -64,7 +65,8 @@ export function setEntryContext(
     );
   }
 
-  const templates = getStageTemplate(ewMarketPack, input.entryContext);
+  const pack = resolveMarketPack(caseState.marketPackId);
+  const templates = getStageTemplate(pack, input.entryContext);
 
   const stages = caseState.stages.map((stage) => {
     const template = templates.find((t) => t.key === stage.key);
