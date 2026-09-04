@@ -32,6 +32,16 @@ Seeded cases:
 - **Smith DIY journey** — `FREE_DIY`, entry `UK_RESIDENT_SPEED`, lead `ORGANIC`
 - **Okafor US return (free)** — `FREE_DIY`, entry `RETURNER_OVERSEAS`, lead `DIASPORA_US_UK`
 
+Seeded partner panel (`PartnerPanel`):
+
+| Panel member | Role | SLA | Login |
+|--------------|------|-----|-------|
+| Priya Nair — Northstar Mortgages | `MORTGAGE_PARTNER` | 3d | `mortgage@example.com` |
+| Ravi Patel — Ledger Mortgages | `MORTGAGE_PARTNER` | 3d | none (seeded **inactive**) |
+| Tom Ashby — Harbour Law LLP | `CONVEYANCER` | 5d | `conveyancer@example.com` |
+| Lena Okoro — Greenway Conveyancing | `CONVEYANCER` | 5d | none |
+| Dan Whitfield — Compass Removals | `MOVE_PARTNER` | 4d | `move@example.com` |
+
 ## Happy-path demo (free vs paid)
 
 See the step-by-step click script: [`docs/superpowers/plans/demo-script-core-portal.md`](docs/superpowers/plans/demo-script-core-portal.md).
@@ -40,7 +50,7 @@ See the step-by-step click script: [`docs/superpowers/plans/demo-script-core-por
 
 1. Client logs in → open paid case → submit profile evidence on the focus stage.
 2. Advisor logs in → accept evidence → advance to `money_readiness`.
-3. Advisor requests warm intro to `MORTGAGE_PARTNER` (event logged on case).
+3. Advisor requests warm intro to a **named panel member** (event + disclosed referral logged on case).
 4. Advance case through money readiness to `mortgage_path` (advisor accepts + advances).
 5. Mortgage partner logs in → assigned case appears → submit `dip_aip` evidence.
 6. Advisor accepts partner evidence and advances — client portal shows new owner.
@@ -69,6 +79,30 @@ page; changing entry context rebuilds the required evidence from the market pack
 Validation metrics: `/cockpit/funnel`.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-acquisition-funnel.md`](docs/superpowers/plans/demo-script-acquisition-funnel.md).
+
+## Partner panel, scorecards and referrals
+
+The partner network is a **curated panel**, not a marketplace. Advisors manage it at
+`/cockpit/panel`, where each member is scored from the stage ledger alone
+(`src/domain/scorecard.ts`): stages attributed, completions, average days in stage,
+miss rate and breaches against the member's own SLA (reusing
+`src/domain/escalation.ts`), portal participation, nudges, and a 0–100 quality
+score with a `STRONG / WATCH / UNDERPERFORMING / NO_DATA` rating. Demoted members
+keep their history but cannot receive intros.
+
+Every warm intro (paid) or advisor-marked referral (any tier) creates a
+`Referral` with a fee status (`NONE → EXPECTED → RECEIVED | WAIVED`, recorded only —
+nothing is paid from this system) and an England & Wales disclosure text
+(`src/domain/referral.ts`). Mortgage disclosures state introducer-only / no advice.
+Clients see live disclosures on their case page; they never see SLA days, scores or
+fee status.
+
+Partner non-response follows the spec: **nudge** (`PARTNER_NUDGED` event, counts
+against the scorecard) → **re-route** (`PARTNER_REROUTED` event, previous referral
+superseded, partner participant swapped). Free DIY cases get a names-only
+**partner directory** with a paid CTA instead of a warm intro.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-partner-network.md`](docs/superpowers/plans/demo-script-partner-network.md).
 
 ## Advisor operating IP
 
