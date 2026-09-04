@@ -12,6 +12,7 @@ import {
 import {
   attachPartnerParticipant,
   CaseAccessError,
+  detachPartnerParticipant,
   loadCaseForUser,
   saveCase,
 } from "@/server/cases";
@@ -20,7 +21,7 @@ import {
   CockpitPolicyError,
 } from "@/server/cockpit-policy";
 import { getPanelMember, PartnerNetworkError } from "@/server/panel";
-import { createReferral } from "@/server/referrals";
+import { createReferral, supersedeActiveReferrals } from "@/server/referrals";
 import { revalidatePath } from "next/cache";
 
 const partnerPort = new ManualPartnerPort();
@@ -188,6 +189,8 @@ export async function warmIntroAction(
       return { ok: false, error: "Panel member is not available for warm intros" };
     }
 
+    const previous = await supersedeActiveReferrals(caseId, member.roleType);
+
     await partnerPort.requestWarmIntro({
       caseId,
       partnerType: member.roleType,
@@ -196,7 +199,16 @@ export async function warmIntroAction(
       panelMemberName: member.name,
     });
     await createReferral({ caseId, partnerId: member.id, source: "WARM_INTRO" });
-    await attachPartnerParticipant(caseId, member.roleType, member.userId);
+
+    if (previous) {
+      const previousMember = await getPanelMember(previous.partnerId);
+      if (previousMember?.userId && previousMember.userId !== member.userId) {
+        await detachPartnerParticipant(caseId, previousMember.userId);
+      }
+    }
+    if (member.userId) {
+      await attachPartnerParticipant(caseId, member.roleType, member.userId);
+    }
     revalidateCasePaths(caseId);
     return { ok: true };
   } catch (err) {

@@ -91,6 +91,12 @@ export async function markReferralAction(
 
   try {
     await loadCaseForUser(authResult.userId, "ADVISOR", caseId);
+
+    const member = await getPanelMember(panelMemberId);
+    if (member) {
+      await supersedeActiveReferrals(caseId, member.roleType);
+    }
+
     await createReferral({
       caseId,
       partnerId: panelMemberId,
