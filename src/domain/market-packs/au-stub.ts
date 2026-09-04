@@ -1,5 +1,5 @@
 import type { EntryContext } from "../types";
-import type { MarketPack, StageTemplate } from "./types";
+import { MarketPackError, type MarketPack, type StageTemplate } from "./types";
 
 /**
  * Spec §3: "Second-country market packs (architecture ready only)". This pack exists
@@ -62,4 +62,7 @@ export const auStubPack: MarketPack = {
   },
   buildStages: auStageTemplates,
   buildPlaybooks: () => [],
+  disclosureText: () => {
+    throw new MarketPackError("Australia disclosure copy is not written yet");
+  },
 };

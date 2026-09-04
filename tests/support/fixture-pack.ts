@@ -61,6 +61,7 @@ export function makeFixturePack(overrides: Partial<MarketPack> = {}): MarketPack
         partnerScript: null,
       },
     ],
+    disclosureText: ({ partnerName }) => `Testland disclosure for ${partnerName}.`,
     ...overrides,
   };
 }

@@ -1,5 +1,4 @@
 import { ENTRY_CONTEXTS, type ActorRole, type EntryContext } from "../types";
-
 export type StageTemplate = {
   key: string;
   title: string;
@@ -86,6 +85,12 @@ export type StagePlaybook = {
   partnerScript: string | null;
 };
 
+export type DisclosureInput = {
+  role: ActorRole;
+  partnerName: string;
+  partnerFirm: string | null;
+};
+
 export type MarketPack = {
   id: string;
   name: string;
@@ -99,6 +104,8 @@ export type MarketPack = {
   partnerRoleLabels: PartnerRoleLabels;
   buildStages: (entry: EntryContext) => StageTemplate[];
   buildPlaybooks: (entry: EntryContext) => StagePlaybook[];
+  /** Spec §10: consumer law and referral disclosure are always local. */
+  disclosureText: (input: DisclosureInput) => string;
 };
 
 export function getStageTemplate(

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import bcrypt from "bcryptjs";
+import { ewMarketPack } from "../../src/domain/market-packs/ew";
 import { prisma } from "../../src/lib/db";
 import { createCaseRecord } from "../../src/server/cases";
 import { PartnerNetworkError } from "../../src/server/panel";
@@ -131,5 +132,29 @@ describe("referrals persistence", () => {
     expect((await activeReferralForRole(caseId, "CONVEYANCER"))?.partnerId).toBe("ref_conv_b");
     expect(await activeReferralForRole(caseId, "MORTGAGE_PARTNER")).toBeNull();
     expect(await supersedeActiveReferrals(caseId, "MOVE_PARTNER")).toBeNull();
+  });
+
+  it("takes the disclosure wording from the case's own market pack", async () => {
+    const referral = await createReferral({
+      caseId,
+      partnerId: "ref_conv_b",
+      source: "ADVISOR_MARK",
+    });
+    expect(referral.disclosureText).toBe(
+      ewMarketPack.disclosureText({
+        role: "CONVEYANCER",
+        partnerName: "Lena Okoro",
+        partnerFirm: null,
+      }),
+    );
+    await supersedeActiveReferrals(caseId, "CONVEYANCER");
+  });
+
+  it("fails closed when the case points at a pack that cannot be resolved", async () => {
+    await prisma.case.update({ where: { id: caseId }, data: { marketPackId: "au" } });
+    await expect(
+      createReferral({ caseId, partnerId: "ref_conv_a", source: "ADVISOR_MARK" }),
+    ).rejects.toThrow(/not enabled/i);
+    await prisma.case.update({ where: { id: caseId }, data: { marketPackId: "ew" } });
   });
 });

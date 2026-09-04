@@ -1,4 +1,5 @@
 import { ENTRY_CONTEXTS, type EntryContext, type Tier } from "./types";
+import { DEFAULT_MARKET_PACK_ID, resolveMarketPack } from "./market-packs/registry";
 
 export type IntakeFields = {
   name?: string | null;
@@ -27,6 +28,9 @@ export const MIN_PASSWORD_LENGTH = 10;
 const MAX_TEXT_LENGTH = 80;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Intake happens before a case exists, so it uses the default market's copy. */
+const DEFAULT_PACK = resolveMarketPack(DEFAULT_MARKET_PACK_ID);
 
 export function caseTitleFor(name: string, targetRegion: string): string {
   return `${name.trim()} — ${targetRegion.trim()}`;
@@ -65,7 +69,7 @@ export function parseIntake(fields: IntakeFields): IntakeResult {
 
   const targetRegion = (fields.targetRegion ?? "").trim();
   if (targetRegion.length === 0) {
-    errors.targetRegion = "Where in England & Wales are you buying?";
+    errors.targetRegion = DEFAULT_PACK.copy.region_prompt;
   } else if (targetRegion.length > MAX_TEXT_LENGTH) {
     errors.targetRegion = `Keep this under ${MAX_TEXT_LENGTH} characters.`;
   }

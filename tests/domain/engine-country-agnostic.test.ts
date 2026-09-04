@@ -16,8 +16,11 @@ const ENGINE_GLOBAL_FILES = [
   "src/domain/panel.ts",
   "src/domain/scorecard.ts",
   "src/domain/partner-ops.ts",
+  "src/domain/referral.ts",
+  "src/domain/intake.ts",
   "src/server/mappers.ts",
   "src/lib/case-pack.ts",
+  "src/server/referrals.ts",
 ];
 
 const JURISDICTION_LITERAL = /£|\bGBP\b|en-GB|england|wales/i;
