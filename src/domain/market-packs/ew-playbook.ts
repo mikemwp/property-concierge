@@ -1,4 +1,5 @@
 import type { ActorRole, EntryContext } from "../types";
+import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew";
 
 export type PlaybookAction = {
   /** Working days from stage activation. */
@@ -22,6 +23,30 @@ function isOverseas(entry: EntryContext): boolean {
 
 function needsCurrencyWork(entry: EntryContext): boolean {
   return entry !== "UK_RESIDENT_SPEED";
+}
+
+const MONEY_EVIDENCE: Record<string, string> = {
+  source_of_funds:
+    "source_of_funds: statements are full pages with the account holder visible, dated within 30 days, and every deposit over £1,000 explained.",
+  fx_plan:
+    "fx_plan: transfer route named, target settlement date set, and the client understands the rate is not fixed by us.",
+};
+
+const MOVE_EVIDENCE: Record<string, string> = {
+  move_quote:
+    "move_quote: written quote with a validity date, storage rate per week, and cancellation terms stated.",
+  vehicle_path:
+    "vehicle_path: decision recorded for each vehicle — ship, sell, or leave — with the registration steps listed.",
+};
+
+function linesFor(kinds: string[], copy: Record<string, string>): string[] {
+  return kinds.map((kind) => {
+    const line = copy[kind];
+    if (!line) {
+      throw new Error(`Missing playbook evidence copy for ${kind}`);
+    }
+    return line;
+  });
 }
 
 export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
@@ -101,10 +126,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
             "Review the pack against the standard below and reject anything a lender or conveyancer would bounce — once, properly, not twice.",
         },
       ],
-      evidenceStandard: [
-        "source_of_funds: statements are full pages with the account holder visible, dated within 30 days, and every deposit over £1,000 explained.",
-        "fx_plan: transfer route named, target settlement date set, and the client understands the rate is not fixed by us.",
-      ],
+      evidenceStandard: linesFor(moneyEvidenceKinds(entry), MONEY_EVIDENCE),
       escalation: [
         "Day 7 (SLA): pack incomplete — advisor calls the client and names the single missing document.",
         "Day 11: still incomplete — block the stage; do not let search readiness start on an unproven deposit.",
@@ -179,10 +201,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
             "Confirm storage is booked as the fallback so the move never becomes the reason a completion date slips.",
         },
       ],
-      evidenceStandard: [
-        "move_quote: written quote with a validity date, storage rate per week, and cancellation terms stated.",
-        "vehicle_path: decision recorded for each vehicle — ship, sell, or leave — with the registration steps listed.",
-      ],
+      evidenceStandard: linesFor(moveEvidenceKinds(entry), MOVE_EVIDENCE),
       escalation: [
         "Day 10 (SLA): no quote — advisor chases the partner directly and offers the second panel member.",
         "Day 14: no quote from either — block the stage and tell the client which decision is now at risk.",

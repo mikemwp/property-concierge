@@ -3,7 +3,7 @@ import type { MarketPack, StageTemplate } from "./types";
 
 export { getStageTemplate } from "./types";
 
-function moneyEvidenceKinds(entry: EntryContext): string[] {
+export function moneyEvidenceKinds(entry: EntryContext): string[] {
   const kinds = ["source_of_funds"];
   if (entry !== "UK_RESIDENT_SPEED") {
     kinds.push("fx_plan");
@@ -11,7 +11,7 @@ function moneyEvidenceKinds(entry: EntryContext): string[] {
   return kinds;
 }
 
-function moveEvidenceKinds(entry: EntryContext): string[] {
+export function moveEvidenceKinds(entry: EntryContext): string[] {
   const kinds = ["move_quote"];
   if (entry === "RETURNER_OVERSEAS") {
     kinds.push("vehicle_path");

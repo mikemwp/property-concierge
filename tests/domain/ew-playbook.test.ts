@@ -47,4 +47,25 @@ describe("ew stage playbooks", () => {
   it("returns null for unknown stage keys", () => {
     expect(ewStagePlaybook("chain_free_matching", "RETURNER_IN_UK")).toBeNull();
   });
+
+  it("keeps money and move evidenceStandard aligned with pack kinds", () => {
+    const entries = [
+      "RETURNER_OVERSEAS",
+      "RETURNER_IN_UK",
+      "UK_RESIDENT_SPEED",
+    ] as const;
+
+    for (const entry of entries) {
+      const templates = getStageTemplate(ewMarketPack, entry);
+      for (const key of ["money_readiness", "move_logistics"] as const) {
+        const kinds =
+          templates.find((stage) => stage.key === key)?.requiredEvidenceKinds ??
+          [];
+        const playbook = ewStagePlaybook(key, entry);
+        const prefixes =
+          playbook?.evidenceStandard.map((line) => line.split(":")[0]) ?? [];
+        expect({ entry, key, prefixes }).toEqual({ entry, key, prefixes: kinds });
+      }
+    }
+  });
 });
