@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  role      String
+  createdAt DateTime @default(now())
+  cases     CaseParticipant[]
+}
+
+model Case {
+  id            String   @id @default(cuid())
+  marketPackId  String
+  entryContext  String
+  tier          String
+  title         String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  stages        Stage[]
+  participants  CaseParticipant[]
+  events        StageEvent[]
+}
+
+model CaseParticipant {
+  id     String @id @default(cuid())
+  caseId String
+  userId String
+  role   String
+  case   Case   @relation(fields: [caseId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([caseId, userId])
+}
+
+model Stage {
+  id              String    @id @default(cuid())
+  caseId          String
+  key             String
+  title           String
+  sortOrder       Int
+  status          String
+  ownerRole       String
+  dueAt           DateTime?
+  activatedAt     DateTime?
+  completedAt     DateTime?
+  blockedReason   String?
+  case            Case      @relation(fields: [caseId], references: [id])
+  evidence        Evidence[]
+
+  @@unique([caseId, key])
+}
+
+model Evidence {
+  id        String   @id @default(cuid())
+  stageId   String
+  kind      String
+  note      String?
+  accepted  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  stage     Stage    @relation(fields: [stageId], references: [id])
+}
+
+model StageEvent {
+  id        String   @id @default(cuid())
+  caseId    String
+  stageKey  String
+  type      String
+  actorRole String
+  payload   String?
+  createdAt DateTime @default(now())
+  case      Case     @relation(fields: [caseId], references: [id])
+}
