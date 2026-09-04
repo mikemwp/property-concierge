@@ -16,20 +16,14 @@ export default async function PortalLayout({
   }
 
   return (
-    <div style={{ minHeight: "100vh" }}>
-      <header
-        style={{
-          borderBottom: "1px solid #ddd",
-          padding: "1rem",
-          background: "#f8fafc",
-        }}
-      >
-        <strong>Client Portal</strong>
-        <span style={{ marginLeft: "1rem", color: "#475569" }}>
+    <div className="min-h-screen">
+      <header className="border-b border-slate-200 bg-white px-4 py-3">
+        <strong className="text-slate-900">Client Portal</strong>
+        <span className="ml-4 text-sm text-slate-600">
           {session.user.name ?? session.user.email} ({session.user.role})
         </span>
       </header>
-      <main style={{ padding: "1.5rem" }}>{children}</main>
+      <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
     </div>
   );
 }

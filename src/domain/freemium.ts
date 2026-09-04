@@ -1,3 +1,4 @@
+import { daysInStage as utcDaysInStage } from "./escalation";
 import type { CaseState } from "./stage-engine";
 import { getFocusStage } from "./stage-engine";
 import type { ActorRole, StageStatus } from "./types";
@@ -18,14 +19,6 @@ function findStage(caseState: CaseState, stageKey: string) {
 
 function isFreeTier(caseState: CaseState): boolean {
   return caseState.tier === "FREE_DIY";
-}
-
-function daysInStage(activatedAt: string | null, now: Date): number | null {
-  if (!activatedAt) {
-    return null;
-  }
-  const ms = now.getTime() - new Date(activatedAt).getTime();
-  return Math.max(0, Math.floor(ms / (1000 * 60 * 60 * 24)));
 }
 
 function isSimpleFreeAdvanceableCurrent(
@@ -100,7 +93,7 @@ export function clientStageView(
       title: stage.title,
       status,
       ownerRole: showFullFreeDetail ? stage.ownerRole : null,
-      daysInStage: showFullFreeDetail ? daysInStage(stage.activatedAt, now) : null,
+      daysInStage: showFullFreeDetail ? utcDaysInStage(stage, now) : null,
       isCurrent,
       limited,
     };

@@ -24,9 +24,22 @@ describe("freemium", () => {
       id: "f2",
       entryContext: "RETURNER_OVERSEAS",
       tier: "FREE_DIY",
+      now: new Date("2026-09-01T10:00:00.000Z"),
     });
     const views = clientStageView(c, new Date("2026-09-04T10:00:00.000Z"));
     const money = views.find((v) => v.key === "money_readiness");
     expect(money?.limited).toBe(true);
+  });
+
+  it("uses UTC day floors for daysInStage on visible stages", () => {
+    const c = createCase({
+      id: "f3",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "PAID_DWY",
+      now: new Date("2026-09-01T10:00:00.000Z"),
+    });
+    const views = clientStageView(c, new Date("2026-09-04T10:00:00.000Z"));
+    const profile = views.find((v) => v.key === "purchase_profile");
+    expect(profile?.daysInStage).toBe(3);
   });
 });
