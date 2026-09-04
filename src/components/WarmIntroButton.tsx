@@ -2,21 +2,20 @@
 
 import { useState } from "react";
 import { warmIntroAction } from "@/app/actions/cockpit";
-import type { ActorRole } from "@/domain/types";
 import { ActionErrorBanner } from "@/components/ActionErrorBanner";
-
-const PARTNER_OPTIONS: Array<{ value: ActorRole; label: string }> = [
-  { value: "MORTGAGE_PARTNER", label: "Mortgage partner" },
-  { value: "CONVEYANCER", label: "Conveyancer" },
-  { value: "MOVE_PARTNER", label: "Move partner" },
-];
+import type { PanelMember } from "@/domain/panel";
 
 type Props = {
   caseId: string;
   enabled: boolean;
+  panel: PanelMember[];
 };
 
-export function WarmIntroButton({ caseId, enabled }: Props) {
+function label(role: string): string {
+  return role.replace(/_/g, " ").toLowerCase();
+}
+
+export function WarmIntroButton({ caseId, enabled, panel }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   if (!enabled) {
@@ -30,55 +29,65 @@ export function WarmIntroButton({ caseId, enabled }: Props) {
     );
   }
 
+  const active = panel.filter((member) => member.active);
+
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-4">
       <h2 className="text-lg font-medium text-slate-900">Warm intro</h2>
       <p className="mt-1 text-sm text-slate-600">
-        Request a manual partner introduction (logged as a stage event).
+        Introduce a named panel partner. Logged as a stage event and a disclosed
+        referral the client can see.
       </p>
       <ActionErrorBanner error={error} />
-      <form
-        action={async (formData) => {
-          setError(null);
-          const partnerType = String(formData.get("partnerType")) as ActorRole;
-          const note = String(formData.get("note") ?? "");
-          const result = await warmIntroAction(caseId, partnerType, note);
-          if (!result.ok) {
-            setError(result.error ?? "Warm intro failed");
-          }
-        }}
-        className="mt-4 space-y-3"
-      >
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Partner</span>
-          <select
-            name="partnerType"
-            defaultValue="MORTGAGE_PARTNER"
-            className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
-          >
-            {PARTNER_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block">
-          <span className="text-sm font-medium text-slate-700">Note</span>
-          <textarea
-            name="note"
-            rows={2}
-            placeholder="Context for the partner…"
-            className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
-          />
-        </label>
-        <button
-          type="submit"
-          className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+      {active.length === 0 ? (
+        <p className="mt-3 text-sm text-slate-500">
+          No active panel members. Reinstate one from the Partner panel.
+        </p>
+      ) : (
+        <form
+          action={async (formData) => {
+            setError(null);
+            const panelMemberId = String(formData.get("panelMemberId") ?? "");
+            const note = String(formData.get("note") ?? "");
+            const result = await warmIntroAction(caseId, panelMemberId, note);
+            if (!result.ok) {
+              setError(result.error ?? "Warm intro failed");
+            }
+          }}
+          className="mt-4 space-y-3"
         >
-          Request warm intro
-        </button>
-      </form>
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">Panel partner</span>
+            <select
+              name="panelMemberId"
+              defaultValue={active[0].id}
+              className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            >
+              {active.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {label(member.roleType)} — {member.name}
+                  {member.firm ? ` (${member.firm})` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-sm font-medium text-slate-700">Note</span>
+            <textarea
+              name="note"
+              rows={2}
+              placeholder="Context for the partner…"
+              className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+            />
+          </label>
+          <button
+            type="submit"
+            className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Request warm intro
+          </button>
+        </form>
+      )}
     </div>
   );
 }

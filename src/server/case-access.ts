@@ -34,10 +34,13 @@ export async function assertCaseAccess(
 export async function attachPartnerParticipant(
   caseId: string,
   partnerRole: ActorRole,
+  preferredUserId?: string | null,
 ): Promise<void> {
-  const user = await prisma.user.findFirst({
-    where: { role: partnerRole },
-  });
+  const user = preferredUserId
+    ? await prisma.user.findFirst({
+        where: { id: preferredUserId, role: partnerRole },
+      })
+    : await prisma.user.findFirst({ where: { role: partnerRole } });
   if (!user) {
     return;
   }
@@ -56,4 +59,11 @@ export async function attachPartnerParticipant(
     },
     update: {},
   });
+}
+
+export async function detachPartnerParticipant(
+  caseId: string,
+  userId: string,
+): Promise<void> {
+  await prisma.caseParticipant.deleteMany({ where: { caseId, userId } });
 }

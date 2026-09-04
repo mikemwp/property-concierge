@@ -14,6 +14,7 @@ import { advisorPlaybook } from "@/lib/cockpit-playbook";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { assertPlaybookVisible } from "@/server/cockpit-policy";
+import { listPanel } from "@/server/panel";
 import type { EntryContext } from "@/domain/types";
 
 type Props = {
@@ -43,6 +44,7 @@ export default async function CockpitCasePage({ params }: Props) {
   }
 
   const now = new Date();
+  const panel = await listPanel({ activeOnly: true });
   const views = advisorStageView(caseState, now);
   const focus = getFocusStage(caseState);
   const focusStage = focus
@@ -132,6 +134,7 @@ export default async function CockpitCasePage({ params }: Props) {
         <WarmIntroButton
           caseId={caseId}
           enabled={canUseWarmIntro(caseState)}
+          panel={panel}
         />
       </div>
 
