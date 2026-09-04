@@ -121,7 +121,9 @@ export type StageEngineErrorCode =
   | "EVIDENCE_INCOMPLETE"
   | "FORBIDDEN_ROLE"
   | "ALREADY_ACCEPTED"
-  | "MULTIPLE_ACTIVE";
+  | "MULTIPLE_ACTIVE"
+  | "ALREADY_PAID"
+  | "ENTRY_LOCKED";
 
 export class StageEngineError extends Error {
   constructor(

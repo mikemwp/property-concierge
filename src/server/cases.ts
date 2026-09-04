@@ -151,6 +151,15 @@ export async function saveCase(caseState: CaseState): Promise<void> {
         include: { evidence: true },
       });
 
+      const staleEvidence = dbStage.evidence.filter(
+        (row) => !stage.requiredEvidenceKinds.includes(row.kind),
+      );
+      if (staleEvidence.length > 0) {
+        await tx.evidence.deleteMany({
+          where: { id: { in: staleEvidence.map((row) => row.id) } },
+        });
+      }
+
       for (const kind of stage.requiredEvidenceKinds) {
         const accepted = stage.acceptedEvidenceKinds.includes(kind);
         const submitted = stage.submittedEvidenceKinds.includes(kind);

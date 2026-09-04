@@ -4,6 +4,7 @@ import { AdvisorStageControls } from "@/components/AdvisorStageControls";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { PlaybookPanel } from "@/components/PlaybookPanel";
 import { StageTimeline } from "@/components/StageTimeline";
+import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
 import { advisorStageView, canUseWarmIntro } from "@/domain/freemium";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
@@ -133,6 +134,17 @@ export default async function CockpitCasePage({ params }: Props) {
           enabled={canUseWarmIntro(caseState)}
         />
       </div>
+
+      <CaseAdminControls
+        caseId={caseId}
+        tier={caseState.tier}
+        entryContext={caseState.entryContext}
+        entryLocked={
+          caseState.stages.find((s) => s.key === "offer_instruct")?.status !==
+          "PENDING"
+        }
+        leadSource={caseState.attribution.leadSource}
+      />
 
       {warmIntroEvents.length > 0 && (
         <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">

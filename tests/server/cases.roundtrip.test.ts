@@ -8,6 +8,7 @@ import {
   loadCase,
   saveCase,
 } from "../../src/server/cases";
+import { setEntryContext, upgradeToPaid } from "../../src/domain/case-admin";
 import {
   acceptEvidence,
   advanceStage,
@@ -194,5 +195,54 @@ describe("cases persistence", () => {
     const loaded = await loadCase(created.id);
     expect(loaded.attribution.leadSource).toBe("DIRECT");
     expect(loaded.attribution.leadCampaign).toBeNull();
+  });
+
+  it("persists an upgrade and clears evidence dropped by an entry-context change", async () => {
+    const created = await createCaseRecord({
+      title: "Upgrade and re-context",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "FREE_DIY",
+      clientUserId: "user_client",
+      advisorUserId: "user_advisor",
+    });
+
+    let caseState = await loadCase(created.id);
+    caseState = upgradeToPaid(caseState, { actorRole: "ADVISOR" });
+    await saveCase(caseState);
+
+    caseState = await loadCase(created.id);
+    expect(caseState.tier).toBe("PAID_DWY");
+
+    caseState = submitEvidence(caseState, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+    });
+    caseState = acceptEvidence(caseState, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "ADVISOR",
+    });
+    caseState = advanceStage(caseState, { actorRole: "ADVISOR" });
+    caseState = submitEvidence(caseState, {
+      stageKey: "money_readiness",
+      kind: "fx_plan",
+      actorRole: "CLIENT",
+    });
+    await saveCase(caseState);
+
+    caseState = await loadCase(created.id);
+    caseState = setEntryContext(caseState, {
+      entryContext: "UK_RESIDENT_SPEED",
+      actorRole: "ADVISOR",
+    });
+    await saveCase(caseState);
+
+    const reloaded = await loadCase(created.id);
+    const money = reloaded.stages.find((s) => s.key === "money_readiness");
+    expect(reloaded.entryContext).toBe("UK_RESIDENT_SPEED");
+    expect(money?.requiredEvidenceKinds).toEqual(["source_of_funds"]);
+    expect(money?.submittedEvidenceKinds).not.toContain("fx_plan");
+    expect(reloaded.events.some((e) => e.type === "CASE_UPGRADED")).toBe(true);
   });
 });
