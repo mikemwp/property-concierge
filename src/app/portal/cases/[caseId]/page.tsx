@@ -5,7 +5,7 @@ import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
 import { StageTimeline } from "@/components/StageTimeline";
 import { UpgradeCallout } from "@/components/UpgradeCallout";
-import { clientStageView } from "@/domain/freemium";
+import { canViewSlaPressure, clientStageView } from "@/domain/freemium";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
 import { ewMarketPack, getStageTemplate } from "@/domain/market-packs/ew";
 import { getFocusStage } from "@/domain/stage-engine";
@@ -81,31 +81,27 @@ export default async function PortalCasePage({ params }: Props) {
 
       {showUpgrade && <UpgradeCallout limitedCount={limitedCount} />}
 
-      {focus && caseState.tier === "PAID_DWY" && (
-        <CurrentOwnerBanner
-          ownerRole={focus.ownerRole}
-          daysInStage={daysInStage(focus, now)}
-          escalation={escalationLevel(
-            focus,
-            stageSlaDays(caseState.entryContext, focus.key),
-            now,
-          )}
-          stageTitle={focus.title}
-        />
-      )}
-
       {focus &&
-        caseState.tier === "FREE_DIY" &&
-        !views.find((v) => v.key === focus.key)?.limited && (
+        (caseState.tier === "PAID_DWY" ||
+          !views.find((v) => v.key === focus.key)?.limited) && (
           <CurrentOwnerBanner
             ownerRole={focus.ownerRole}
-            daysInStage={daysInStage(focus, now)}
-            escalation={escalationLevel(
-              focus,
-              stageSlaDays(caseState.entryContext, focus.key),
-              now,
-            )}
             stageTitle={focus.title}
+            showSlaPressure={canViewSlaPressure(caseState)}
+            daysInStage={
+              canViewSlaPressure(caseState)
+                ? daysInStage(focus, now)
+                : undefined
+            }
+            escalation={
+              canViewSlaPressure(caseState)
+                ? escalationLevel(
+                    focus,
+                    stageSlaDays(caseState.entryContext, focus.key),
+                    now,
+                  )
+                : undefined
+            }
           />
         )}
 

@@ -4,10 +4,26 @@ import {
   canSelfAdvance,
   canUseWarmIntro,
   canViewPlaybook,
+  canViewSlaPressure,
   clientStageView,
 } from "../../src/domain/freemium";
 
 describe("freemium", () => {
+  it("hides SLA pressure on FREE_DIY portal banner", () => {
+    const free = createCase({
+      id: "f0",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "FREE_DIY",
+    });
+    const paid = createCase({
+      id: "p0",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "PAID_DWY",
+    });
+    expect(canViewSlaPressure(free)).toBe(false);
+    expect(canViewSlaPressure(paid)).toBe(true);
+  });
+
   it("blocks warm intro and playbooks on FREE_DIY", () => {
     const c = createCase({
       id: "f1",

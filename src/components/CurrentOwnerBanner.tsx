@@ -19,31 +19,37 @@ function formatRole(role: ActorRole): string {
 
 type Props = {
   ownerRole: ActorRole;
-  daysInStage: number;
-  escalation: EscalationLevel;
   stageTitle: string;
+  showSlaPressure?: boolean;
+  daysInStage?: number;
+  escalation?: EscalationLevel;
 };
 
 export function CurrentOwnerBanner({
   ownerRole,
+  stageTitle,
+  showSlaPressure = true,
   daysInStage,
   escalation,
-  stageTitle,
 }: Props) {
+  const containerClass = showSlaPressure
+    ? escalationStyles[escalation ?? "OK"]
+    : "bg-slate-50 border-slate-200 text-slate-900";
+
   return (
-    <div
-      className={`mb-6 rounded-lg border px-4 py-3 ${escalationStyles[escalation]}`}
-    >
+    <div className={`mb-6 rounded-lg border px-4 py-3 ${containerClass}`}>
       <p className="text-sm font-medium uppercase tracking-wide opacity-70">
         Current stage owner
       </p>
       <p className="mt-1 text-lg font-semibold capitalize">
         {formatRole(ownerRole)} · {stageTitle}
       </p>
-      <p className="mt-1 text-sm">
-        {daysInStage} day{daysInStage === 1 ? "" : "s"} in stage ·{" "}
-        {escalationLabels[escalation]}
-      </p>
+      {showSlaPressure && daysInStage !== undefined && escalation !== undefined && (
+        <p className="mt-1 text-sm">
+          {daysInStage} day{daysInStage === 1 ? "" : "s"} in stage ·{" "}
+          {escalationLabels[escalation]}
+        </p>
+      )}
     </div>
   );
 }

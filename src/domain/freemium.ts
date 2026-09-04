@@ -62,6 +62,10 @@ export function canUseWarmIntro(caseState: CaseState): boolean {
   return caseState.tier === "PAID_DWY";
 }
 
+export function canViewSlaPressure(caseState: CaseState): boolean {
+  return caseState.tier === "PAID_DWY";
+}
+
 export function canViewPlaybook(caseState: CaseState, stageKey: string): boolean {
   if (isFreeTier(caseState)) {
     return false;
