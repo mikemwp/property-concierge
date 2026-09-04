@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { prisma } from "../src/lib/db";
 import { createCaseRecord } from "../src/server/cases";
 
@@ -9,12 +10,15 @@ async function main() {
   await prisma.case.deleteMany();
   await prisma.user.deleteMany();
 
+  const passwordHash = await bcrypt.hash("password", 10);
+
   const advisor = await prisma.user.create({
     data: {
       id: "seed_advisor",
       email: "advisor@example.com",
       name: "Demo Advisor",
       role: "ADVISOR",
+      passwordHash,
     },
   });
 
@@ -24,6 +28,7 @@ async function main() {
       email: "client@example.com",
       name: "Demo Client",
       role: "CLIENT",
+      passwordHash,
     },
   });
 
@@ -34,18 +39,21 @@ async function main() {
         email: "mortgage@example.com",
         name: "Demo Mortgage Partner",
         role: "MORTGAGE_PARTNER",
+        passwordHash,
       },
       {
         id: "seed_conveyancer",
         email: "conveyancer@example.com",
         name: "Demo Conveyancer",
         role: "CONVEYANCER",
+        passwordHash,
       },
       {
         id: "seed_move_partner",
         email: "move@example.com",
         name: "Demo Move Partner",
         role: "MOVE_PARTNER",
+        passwordHash,
       },
     ],
   });

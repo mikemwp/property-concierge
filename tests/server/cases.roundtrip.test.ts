@@ -1,10 +1,12 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import bcrypt from "bcryptjs";
 import { prisma } from "../../src/lib/db";
 import { createCaseRecord, loadCase } from "../../src/server/cases";
 import { advanceStage, acceptEvidence, submitEvidence } from "../../src/domain/stage-engine";
 
 describe("cases persistence", () => {
   beforeAll(async () => {
+    const passwordHash = await bcrypt.hash("password", 10);
     await prisma.stageEvent.deleteMany();
     await prisma.evidence.deleteMany();
     await prisma.stage.deleteMany();
@@ -12,10 +14,20 @@ describe("cases persistence", () => {
     await prisma.case.deleteMany();
     await prisma.user.deleteMany();
     await prisma.user.create({
-      data: { id: "user_client", email: "client@example.com", role: "CLIENT" },
+      data: {
+        id: "user_client",
+        email: "client@example.com",
+        role: "CLIENT",
+        passwordHash,
+      },
     });
     await prisma.user.create({
-      data: { id: "user_advisor", email: "advisor@example.com", role: "ADVISOR" },
+      data: {
+        id: "user_advisor",
+        email: "advisor@example.com",
+        role: "ADVISOR",
+        passwordHash,
+      },
     });
   });
 
