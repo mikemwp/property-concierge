@@ -1,23 +1,8 @@
 import type { ActorRole, EntryContext } from "../types";
+import type { PlaybookAction, StagePlaybook } from "./types";
 import { EW_LOCALE } from "./ew-config";
 import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew-stages";
 import { formatMoney } from "./locale";
-
-export type PlaybookAction = {
-  /** Working days from stage activation. */
-  day: number;
-  owner: ActorRole;
-  action: string;
-};
-
-export type StagePlaybook = {
-  stageKey: string;
-  objective: string;
-  actions: PlaybookAction[];
-  evidenceStandard: string[];
-  escalation: string[];
-  partnerScript: string | null;
-};
 
 function isOverseas(entry: EntryContext): boolean {
   return entry === "RETURNER_OVERSEAS";

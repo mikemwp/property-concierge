@@ -70,6 +70,22 @@ export type MarketCopy = Record<MarketCopyKey, string>;
 
 export type PartnerRoleLabels = Record<ActorRole, string>;
 
+export type PlaybookAction = {
+  /** Working days from stage activation. */
+  day: number;
+  owner: ActorRole;
+  action: string;
+};
+
+export type StagePlaybook = {
+  stageKey: string;
+  objective: string;
+  actions: PlaybookAction[];
+  evidenceStandard: string[];
+  escalation: string[];
+  partnerScript: string | null;
+};
+
 export type MarketPack = {
   id: string;
   name: string;
@@ -82,6 +98,7 @@ export type MarketPack = {
   copy: MarketCopy;
   partnerRoleLabels: PartnerRoleLabels;
   buildStages: (entry: EntryContext) => StageTemplate[];
+  buildPlaybooks: (entry: EntryContext) => StagePlaybook[];
 };
 
 export function getStageTemplate(
@@ -118,4 +135,12 @@ export function isModuleEnabled(flags: MarketFlags, key: MarketModuleKey): boole
 
 export function partnerRoleLabel(pack: MarketPack, role: ActorRole): string {
   return pack.partnerRoleLabels[role];
+}
+
+export function stagePlaybook(
+  pack: MarketPack,
+  stageKey: string,
+  entry: EntryContext,
+): StagePlaybook | null {
+  return pack.buildPlaybooks(entry).find((p) => p.stageKey === stageKey) ?? null;
 }

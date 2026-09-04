@@ -51,6 +51,16 @@ export function makeFixturePack(overrides: Partial<MarketPack> = {}): MarketPack
         freeCanSelfAdvance: false,
       },
     ],
+    buildPlaybooks: (entry: EntryContext) => [
+      {
+        stageKey: "local_profile",
+        objective: "Fixture objective for local_profile.",
+        actions: [{ day: 0, owner: "ADVISOR" as const, action: "Fixture action." }],
+        evidenceStandard: ["profile_complete: fixture standard."],
+        escalation: [`Day 2: fixture escalation (${entry}).`],
+        partnerScript: null,
+      },
+    ],
     ...overrides,
   };
 }

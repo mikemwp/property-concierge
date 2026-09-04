@@ -4,6 +4,7 @@ import {
   EW_LOCALE,
   EW_PARTNER_ROLE_LABELS,
 } from "./ew-config";
+import { ewPlaybooks } from "./ew-playbook";
 import { ewStageTemplates } from "./ew-stages";
 import type { MarketPack } from "./types";
 
@@ -20,4 +21,5 @@ export const ewMarketPack: MarketPack = {
   copy: EW_COPY,
   partnerRoleLabels: EW_PARTNER_ROLE_LABELS,
   buildStages: ewStageTemplates,
+  buildPlaybooks: ewPlaybooks,
 };

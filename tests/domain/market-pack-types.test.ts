@@ -7,6 +7,7 @@ import {
   MARKET_MODULE_KEYS,
   packEvidenceKinds,
   partnerRoleLabel,
+  stagePlaybook,
   stageTemplateFor,
 } from "../../src/domain/market-packs/types";
 import { EW_LOCALE } from "../../src/domain/market-packs/ew-config";
@@ -41,6 +42,13 @@ describe("pack-parametric helpers", () => {
   it("labels partner roles from the pack, not from a hardcoded map", () => {
     expect(partnerRoleLabel(pack, "CONVEYANCER")).toBe("settlement agent");
     expect(partnerRoleLabel(pack, "MOVE_PARTNER")).toBe("removalist");
+  });
+
+  it("resolves playbooks through whichever pack it is given", () => {
+    expect(stagePlaybook(pack, "local_profile", "RETURNER_OVERSEAS")?.objective).toBe(
+      "Fixture objective for local_profile.",
+    );
+    expect(stagePlaybook(pack, "money_readiness", "RETURNER_OVERSEAS")).toBeNull();
   });
 
   it("keeps the module and copy key sets closed", () => {

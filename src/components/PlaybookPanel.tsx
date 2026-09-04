@@ -1,4 +1,4 @@
-import type { StagePlaybook } from "@/domain/market-packs/ew-playbook";
+import type { StagePlaybook } from "@/domain/market-packs/types";
 
 type Props = {
   playbook: StagePlaybook;

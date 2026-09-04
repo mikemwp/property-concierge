@@ -1,7 +1,5 @@
-import {
-  ewStagePlaybook,
-  type StagePlaybook,
-} from "@/domain/market-packs/ew-playbook";
+import { ewStagePlaybook } from "@/domain/market-packs/ew-playbook";
+import type { StagePlaybook } from "@/domain/market-packs/types";
 import type { CaseState } from "@/domain/stage-engine";
 
 /**
