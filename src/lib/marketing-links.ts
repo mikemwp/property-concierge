@@ -8,6 +8,28 @@ const ATTRIBUTION_KEYS = [
   "ref",
 ] as const;
 
+export function withAttribution(
+  href: string,
+  params?: RawAttributionParams,
+): string {
+  const question = href.indexOf("?");
+  const path = question === -1 ? href : href.slice(0, question);
+  const query = new URLSearchParams(
+    question === -1 ? "" : href.slice(question + 1),
+  );
+
+  const source = params ?? {};
+  for (const key of ATTRIBUTION_KEYS) {
+    const value = source[key];
+    if (typeof value === "string" && value.trim() !== "") {
+      query.set(key, value.trim());
+    }
+  }
+
+  const qs = query.toString();
+  return qs ? `${path}?${qs}` : path;
+}
+
 export function startHref(input: {
   plan: "free" | "paid";
   entryContext?: EntryContext;
@@ -19,15 +41,7 @@ export function startHref(input: {
     query.set("entry", input.entryContext);
   }
 
-  const params = input.params ?? {};
-  for (const key of ATTRIBUTION_KEYS) {
-    const value = params[key];
-    if (typeof value === "string" && value.trim() !== "") {
-      query.set(key, value.trim());
-    }
-  }
-
-  return `/start?${query.toString()}`;
+  return withAttribution(`/start?${query.toString()}`, input.params);
 }
 
 function first(value: string | string[] | undefined): string | null {

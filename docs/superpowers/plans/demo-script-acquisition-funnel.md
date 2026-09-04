@@ -6,8 +6,10 @@ Assumes `npm run db:push && npm run db:seed && npm run dev`.
 
 1. Open `http://localhost:3000/?utm_source=poms-in-oz&utm_medium=community`.
 2. Point out: paid CTA is primary and appears first; the free CTA is secondary.
-3. Open an entry story from the nav (`AU → UK`). The paid CTA carries both the
-   entry context and the campaign tag into `/start`.
+3. Open an entry story from the nav (`AU → UK`) or a homepage story card — the
+   URL keeps `utm_source` and `utm_medium`. Pricing in the nav does the same.
+   The paid CTA then carries both the entry context and the campaign tag into
+   `/start`.
 
 ## 2. Self-serve signup (3 min)
 

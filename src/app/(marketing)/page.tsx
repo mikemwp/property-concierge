@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PlanCards } from "@/components/marketing/PlanCards";
 import { ENTRY_STORIES, HERO } from "@/content/marketing";
-import { attributionParamsFrom, startHref } from "@/lib/marketing-links";
+import { attributionParamsFrom, startHref, withAttribution } from "@/lib/marketing-links";
 
 type Props = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -40,7 +40,7 @@ export default async function MarketingHomePage({ searchParams }: Props) {
           {ENTRY_STORIES.map((story) => (
             <Link
               key={story.slug}
-              href={`/stories/${story.slug}`}
+              href={withAttribution(`/stories/${story.slug}`, params)}
               className="rounded-lg border border-slate-200 p-5 hover:border-indigo-300 hover:bg-indigo-50"
             >
               <span className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
