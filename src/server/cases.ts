@@ -1,4 +1,5 @@
-import type { LeadAttribution } from "../domain/attribution";
+import { DEFAULT_ATTRIBUTION, isLeadSource, type LeadAttribution } from "../domain/attribution";
+import type { FunnelCaseRow } from "../domain/funnel";
 import { createCase, getFocusStage, type CaseState } from "../domain/stage-engine";
 import type { ActorRole } from "../domain/types";
 import type { EntryContext, Tier } from "../domain/types";
@@ -200,9 +201,30 @@ export async function saveCase(caseState: CaseState): Promise<void> {
   });
 }
 
+export async function listFunnelRows(): Promise<FunnelCaseRow[]> {
+  const rows = await prisma.case.findMany({
+    select: {
+      id: true,
+      tier: true,
+      leadSource: true,
+      entryContext: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return rows.map((row) => ({
+    id: row.id,
+    tier: row.tier as Tier,
+    leadSource: isLeadSource(row.leadSource)
+      ? row.leadSource
+      : DEFAULT_ATTRIBUTION.leadSource,
+    entryContext: row.entryContext as EntryContext,
+  }));
+}
+
 export async function listCasesForUser(
   userId: string,
-): Promise<Array<{ id: string; title: string; tier: string }>> {
+): Promise<Array<{ id: string; title: string; tier: string; leadSource: string }>> {
   const participants = await prisma.caseParticipant.findMany({
     where: { userId },
     include: { case: true },
@@ -213,6 +235,7 @@ export async function listCasesForUser(
     id: participant.case.id,
     title: participant.case.title,
     tier: participant.case.tier,
+    leadSource: participant.case.leadSource,
   }));
 }
 
