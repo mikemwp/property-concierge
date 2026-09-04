@@ -103,3 +103,21 @@ export function clientStageView(
     };
   });
 }
+
+/** Full stage ledger for advisors and partners — never strips free-tier detail. */
+export function advisorStageView(
+  caseState: CaseState,
+  now: Date = new Date(),
+): PublicStageView[] {
+  const focus = getFocusStage(caseState);
+
+  return caseState.stages.map((stage) => ({
+    key: stage.key,
+    title: stage.title,
+    status: stage.status,
+    ownerRole: stage.ownerRole,
+    daysInStage: utcDaysInStage(stage, now),
+    isCurrent: focus?.key === stage.key,
+    limited: false,
+  }));
+}

@@ -16,6 +16,7 @@ export type StageState = {
   freeVisible: boolean;
   freeCanSelfAdvance: boolean;
   acceptedEvidenceKinds: string[];
+  submittedEvidenceKinds: string[];
 };
 
 export type CaseState = {
@@ -75,6 +76,7 @@ export function createCase(input: {
       freeVisible: template.freeVisible,
       freeCanSelfAdvance: template.freeCanSelfAdvance,
       acceptedEvidenceKinds: [],
+      submittedEvidenceKinds: [],
     };
   });
 
@@ -164,14 +166,8 @@ function canAcceptEvidence(stage: StageState, actorRole: ActorRole): boolean {
   return actorRole === stage.ownerRole && actorRole !== "CLIENT";
 }
 
-function canAdvanceStage(stage: StageState, actorRole: ActorRole): boolean {
-  if (actorRole === "ADVISOR") {
-    return true;
-  }
-  if (stage.freeCanSelfAdvance && actorRole === "CLIENT") {
-    return true;
-  }
-  return actorRole === stage.ownerRole && actorRole !== "CLIENT";
+function canAdvanceStage(_stage: StageState, actorRole: ActorRole): boolean {
+  return actorRole === "ADVISOR";
 }
 
 function evidenceComplete(stage: StageState): boolean {
@@ -234,11 +230,137 @@ export function submitEvidence(
     );
   }
 
+  if (stage.submittedEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already submitted: ${input.kind}`);
+  }
+  if (stage.acceptedEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already accepted: ${input.kind}`);
+  }
+
   const at = nowIso(input.now);
+  const updated = updateStage(caseState, input.stageKey, (s) => ({
+    ...s,
+    submittedEvidenceKinds: [...s.submittedEvidenceKinds, input.kind],
+  }));
+
   return {
-    ...caseState,
-    events: appendEvent(caseState, {
+    ...updated,
+    events: appendEvent(updated, {
       type: "EVIDENCE_SUBMITTED",
+      stageKey: input.stageKey,
+      actorRole: input.actorRole,
+      at,
+      payload: input.kind,
+    }),
+  };
+}
+
+function canSubmitPartnerEvidence(actorRole: ActorRole): boolean {
+  return (
+    actorRole === "MORTGAGE_PARTNER" ||
+    actorRole === "CONVEYANCER" ||
+    actorRole === "MOVE_PARTNER"
+  );
+}
+
+export function submitPartnerEvidence(
+  caseState: CaseState,
+  input: {
+    stageKey: string;
+    kind: string;
+    actorRole: ActorRole;
+    now?: Date;
+  },
+): CaseState {
+  const stage = requireFocusStage(caseState, input.stageKey);
+  if (!canSubmitPartnerEvidence(input.actorRole)) {
+    throw new StageEngineError("FORBIDDEN_ROLE", "Only partner roles may submit partner evidence");
+  }
+  if (stage.ownerRole !== input.actorRole) {
+    throw new StageEngineError(
+      "FORBIDDEN_ROLE",
+      `Stage owner is ${stage.ownerRole}, not ${input.actorRole}`,
+    );
+  }
+  if (stage.status !== "ACTIVE" && stage.status !== "BLOCKED") {
+    throw new StageEngineError(
+      "FORBIDDEN_ROLE",
+      "Partner may submit only on ACTIVE or BLOCKED focus stages",
+    );
+  }
+  if (!stage.requiredEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError(
+      "EVIDENCE_INCOMPLETE",
+      `Evidence kind not required for stage: ${input.kind}`,
+    );
+  }
+  if (stage.submittedEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already submitted: ${input.kind}`);
+  }
+  if (stage.acceptedEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already accepted: ${input.kind}`);
+  }
+
+  const at = nowIso(input.now);
+  const updated = updateStage(caseState, input.stageKey, (s) => ({
+    ...s,
+    submittedEvidenceKinds: [...s.submittedEvidenceKinds, input.kind],
+  }));
+
+  return {
+    ...updated,
+    events: appendEvent(updated, {
+      type: "EVIDENCE_SUBMITTED",
+      stageKey: input.stageKey,
+      actorRole: input.actorRole,
+      at,
+      payload: input.kind,
+    }),
+  };
+}
+
+export function attestEvidence(
+  caseState: CaseState,
+  input: {
+    stageKey: string;
+    kind: string;
+    actorRole: ActorRole;
+    now?: Date;
+  },
+): CaseState {
+  const stage = requireFocusStage(caseState, input.stageKey);
+  if (input.actorRole !== "CLIENT") {
+    throw new StageEngineError("FORBIDDEN_ROLE", "Only clients may attest evidence on free tier");
+  }
+  if (caseState.tier !== "FREE_DIY") {
+    throw new StageEngineError("FORBIDDEN_ROLE", "Attestation is only for free DIY cases");
+  }
+  if (!stage.freeCanSelfAdvance) {
+    throw new StageEngineError(
+      "FORBIDDEN_ROLE",
+      "Free attestation not allowed on this stage",
+    );
+  }
+  if (!stage.requiredEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError(
+      "EVIDENCE_INCOMPLETE",
+      `Evidence kind not required for stage: ${input.kind}`,
+    );
+  }
+  if (stage.acceptedEvidenceKinds.includes(input.kind)) {
+    throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already accepted: ${input.kind}`);
+  }
+
+  const at = nowIso(input.now);
+  const updated = updateStage(caseState, input.stageKey, (s) => ({
+    ...s,
+    acceptedEvidenceKinds: [...s.acceptedEvidenceKinds, input.kind],
+  }));
+
+  return {
+    ...updated,
+    events: appendEvent(updated, {
+      type: "EVIDENCE_ATTESTED",
       stageKey: input.stageKey,
       actorRole: input.actorRole,
       at,
@@ -272,11 +394,21 @@ export function acceptEvidence(
   if (stage.acceptedEvidenceKinds.includes(input.kind)) {
     throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already accepted: ${input.kind}`);
   }
+  if (
+    caseState.tier === "PAID_DWY" &&
+    !stage.submittedEvidenceKinds.includes(input.kind)
+  ) {
+    throw new StageEngineError(
+      "EVIDENCE_INCOMPLETE",
+      `Evidence must be submitted before acceptance: ${input.kind}`,
+    );
+  }
 
   const at = nowIso(input.now);
   const updated = updateStage(caseState, input.stageKey, (s) => ({
     ...s,
     acceptedEvidenceKinds: [...s.acceptedEvidenceKinds, input.kind],
+    submittedEvidenceKinds: s.submittedEvidenceKinds.filter((k) => k !== input.kind),
   }));
 
   return {
@@ -365,6 +497,10 @@ export function blockStage(
   caseState: CaseState,
   input: { reason: string; actorRole: ActorRole; now?: Date },
 ): CaseState {
+  if (input.actorRole !== "ADVISOR") {
+    throw new StageEngineError("FORBIDDEN_ROLE", "Only advisors may block stages");
+  }
+
   const current = getCurrentStage(caseState);
   if (!current) {
     throw new StageEngineError("NO_ACTIVE_STAGE", "No active stage to block");
@@ -397,4 +533,42 @@ export function pauseStage(
     ...input,
     reason: input.reason.startsWith("PAUSED:") ? input.reason : `PAUSED:${input.reason}`,
   });
+}
+
+export function resumeStage(
+  caseState: CaseState,
+  input: { actorRole: ActorRole; now?: Date },
+): CaseState {
+  if (input.actorRole !== "ADVISOR") {
+    throw new StageEngineError("FORBIDDEN_ROLE", "Only advisors may resume stages");
+  }
+
+  const blocked = caseState.stages.filter((s) => s.status === "BLOCKED");
+  if (blocked.length !== 1) {
+    throw new StageEngineError(
+      "NO_ACTIVE_STAGE",
+      `Expected exactly one BLOCKED stage to resume, found ${blocked.length}`,
+    );
+  }
+
+  const blockedStage = blocked[0];
+  const at = nowIso(input.now);
+  const updated = updateStage(caseState, blockedStage.key, (stage) => ({
+    ...stage,
+    status: "ACTIVE",
+    blockedReason: null,
+  }));
+
+  const nextState: CaseState = {
+    ...updated,
+    events: appendEvent(updated, {
+      type: "STAGE_RESUMED",
+      stageKey: blockedStage.key,
+      actorRole: input.actorRole,
+      at,
+    }),
+  };
+
+  assertSingleActive(nextState);
+  return nextState;
 }

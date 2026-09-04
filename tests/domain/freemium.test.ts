@@ -6,6 +6,7 @@ import {
   canViewPlaybook,
   canViewSlaPressure,
   clientStageView,
+  advisorStageView,
 } from "../../src/domain/freemium";
 
 describe("freemium", () => {
@@ -57,5 +58,18 @@ describe("freemium", () => {
     const views = clientStageView(c, new Date("2026-09-04T10:00:00.000Z"));
     const profile = views.find((v) => v.key === "purchase_profile");
     expect(profile?.daysInStage).toBe(3);
+  });
+
+  it("advisorStageView shows full ledger on FREE_DIY", () => {
+    const c = createCase({
+      id: "f4",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "FREE_DIY",
+    });
+    const views = advisorStageView(c, new Date("2026-09-04T10:00:00.000Z"));
+    const money = views.find((v) => v.key === "money_readiness");
+    expect(money?.limited).toBe(false);
+    expect(money?.ownerRole).not.toBeNull();
+    expect(money?.status).toBe("PENDING");
   });
 });

@@ -2,6 +2,7 @@ import { createCase, getFocusStage, type CaseState } from "../domain/stage-engin
 import type { ActorRole } from "../domain/types";
 import type { EntryContext, Tier } from "../domain/types";
 import { prisma } from "../lib/db";
+import { assertCaseAccess, CaseAccessError } from "./case-access";
 import {
   eventCreateInput,
   stageCreateInput,
@@ -9,6 +10,9 @@ import {
   toCaseState,
   type CaseWithRelations,
 } from "./mappers";
+
+export { CaseAccessError, assertCaseAccess } from "./case-access";
+export { attachPartnerParticipant } from "./case-access";
 
 const caseInclude = {
   stages: { include: { evidence: true }, orderBy: { sortOrder: "asc" as const } },
@@ -106,6 +110,15 @@ export async function loadCase(caseId: string): Promise<CaseState> {
   return toCaseState(toCaseWithRelations(record));
 }
 
+export async function loadCaseForUser(
+  userId: string,
+  role: ActorRole,
+  caseId: string,
+): Promise<CaseState> {
+  await assertCaseAccess(userId, role, caseId);
+  return loadCase(caseId);
+}
+
 export async function saveCase(caseState: CaseState): Promise<void> {
   await prisma.$transaction(async (tx) => {
     await tx.case.update({
@@ -131,6 +144,7 @@ export async function saveCase(caseState: CaseState): Promise<void> {
 
       for (const kind of stage.requiredEvidenceKinds) {
         const accepted = stage.acceptedEvidenceKinds.includes(kind);
+        const submitted = stage.submittedEvidenceKinds.includes(kind);
         const existing = dbStage.evidence.find((row) => row.kind === kind);
 
         if (existing) {
@@ -143,22 +157,26 @@ export async function saveCase(caseState: CaseState): Promise<void> {
           continue;
         }
 
-        if (accepted) {
+        if (accepted || submitted) {
           await tx.evidence.create({
             data: {
               stageId: dbStage.id,
               kind,
-              accepted: true,
+              accepted,
             },
           });
         }
       }
     }
 
-    await tx.stageEvent.deleteMany({ where: { caseId: caseState.id } });
-    if (caseState.events.length > 0) {
+    const existingEvents = await tx.stageEvent.findMany({
+      where: { caseId: caseState.id },
+      orderBy: { createdAt: "asc" },
+    });
+    const newEvents = caseState.events.slice(existingEvents.length);
+    if (newEvents.length > 0) {
       await tx.stageEvent.createMany({
-        data: caseState.events.map((event) => eventCreateInput(caseState.id, event)),
+        data: newEvents.map((event) => eventCreateInput(caseState.id, event)),
       });
     }
   });
@@ -181,26 +199,32 @@ export async function listCasesForUser(
 }
 
 export async function listCasesForPartnerRole(
+  userId: string,
   partnerRole: ActorRole,
 ): Promise<
   Array<{ id: string; title: string; tier: string; focusStageKey: string }>
 > {
-  const records = await prisma.case.findMany({
-    include: caseInclude,
-    orderBy: { updatedAt: "desc" },
+  const participants = await prisma.caseParticipant.findMany({
+    where: { userId },
+    include: {
+      case: {
+        include: caseInclude,
+      },
+    },
+    orderBy: { case: { updatedAt: "desc" } },
   });
 
-  return records
-    .map((record) => {
-      const caseState = toCaseState(toCaseWithRelations(record));
+  return participants
+    .map((participant) => {
+      const caseState = toCaseState(toCaseWithRelations(participant.case));
       const focus = getFocusStage(caseState);
       if (!focus || focus.ownerRole !== partnerRole) {
         return null;
       }
       return {
-        id: record.id,
-        title: record.title,
-        tier: record.tier,
+        id: participant.case.id,
+        title: participant.case.title,
+        tier: participant.case.tier,
         focusStageKey: focus.key,
       };
     })

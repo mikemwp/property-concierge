@@ -25,6 +25,9 @@ export function toStageState(
 ): StageState {
   const template = templateByKey.get(stage.key);
   const acceptedEvidenceKinds = stage.evidence.filter((row) => row.accepted).map((row) => row.kind);
+  const submittedEvidenceKinds = stage.evidence
+    .filter((row) => !row.accepted)
+    .map((row) => row.kind);
 
   return {
     key: stage.key,
@@ -40,6 +43,7 @@ export function toStageState(
     freeVisible: template?.freeVisible ?? false,
     freeCanSelfAdvance: template?.freeCanSelfAdvance ?? false,
     acceptedEvidenceKinds,
+    submittedEvidenceKinds,
   };
 }
 
