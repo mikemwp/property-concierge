@@ -2,7 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdvisorStageControls } from "@/components/AdvisorStageControls";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
+import { PartnerOpsControls } from "@/components/PartnerOpsControls";
 import { PlaybookPanel } from "@/components/PlaybookPanel";
+import { ReferralPanel } from "@/components/ReferralPanel";
 import { StageTimeline } from "@/components/StageTimeline";
 import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
@@ -15,7 +17,8 @@ import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { assertPlaybookVisible } from "@/server/cockpit-policy";
 import { listPanel } from "@/server/panel";
-import type { EntryContext } from "@/domain/types";
+import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
+import { isPartnerActorRole, type EntryContext } from "@/domain/types";
 
 type Props = {
   params: Promise<{ caseId: string }>;
@@ -45,8 +48,17 @@ export default async function CockpitCasePage({ params }: Props) {
 
   const now = new Date();
   const panel = await listPanel({ activeOnly: true });
+  const referrals = await listReferralsForCase(caseId);
   const views = advisorStageView(caseState, now);
   const focus = getFocusStage(caseState);
+  const focusOwnerRole =
+    focus && isPartnerActorRole(focus.ownerRole) ? focus.ownerRole : null;
+  const currentReferral = focusOwnerRole
+    ? await activeReferralForRole(caseId, focusOwnerRole)
+    : null;
+  const rerouteOptions = focusOwnerRole
+    ? panel.filter((member) => member.roleType === focusOwnerRole)
+    : [];
   const focusStage = focus
     ? caseState.stages.find((s) => s.key === focus.key)
     : null;
@@ -73,8 +85,8 @@ export default async function CockpitCasePage({ params }: Props) {
 
   const isBlocked = focusStage?.status === "BLOCKED";
 
-  const warmIntroEvents = caseState.events.filter(
-    (e) => e.type === "WARM_INTRO_REQUESTED",
+  const partnerEvents = caseState.events.filter((e) =>
+    ["WARM_INTRO_REQUESTED", "PARTNER_NUDGED", "PARTNER_REROUTED"].includes(e.type),
   );
 
   return (
@@ -138,6 +150,20 @@ export default async function CockpitCasePage({ params }: Props) {
         />
       </div>
 
+      <PartnerOpsControls
+        caseId={caseId}
+        paid={caseState.tier === "PAID_DWY"}
+        focusOwnerRole={focusOwnerRole}
+        currentPartner={
+          currentReferral
+            ? { id: currentReferral.partnerId, name: currentReferral.partnerName }
+            : null
+        }
+        rerouteOptions={rerouteOptions}
+      />
+
+      <ReferralPanel caseId={caseId} referrals={referrals} panel={panel} />
+
       <CaseAdminControls
         caseId={caseId}
         tier={caseState.tier}
@@ -149,18 +175,20 @@ export default async function CockpitCasePage({ params }: Props) {
         leadSource={caseState.attribution.leadSource}
       />
 
-      {warmIntroEvents.length > 0 && (
+      {partnerEvents.length > 0 && (
         <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="text-lg font-medium text-slate-900">
-            Warm intro history
+            Partner history
           </h2>
           <ul className="mt-3 space-y-2">
-            {warmIntroEvents.map((event, index) => (
+            {partnerEvents.map((event, index) => (
               <li
                 key={`${event.at}-${index}`}
                 className="rounded border border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-700"
               >
-                <span className="font-medium">{event.stageKey}</span>
+                <span className="font-medium">{event.type.replace(/_/g, " ").toLowerCase()}</span>
+                {" · "}
+                {event.stageKey}
                 {" · "}
                 {new Date(event.at).toLocaleString()}
                 {event.payload && (
