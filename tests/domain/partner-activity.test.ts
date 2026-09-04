@@ -157,6 +157,17 @@ describe("partnerTickets", () => {
     expect(ticket.nudges).toBe(1);
   });
 
+  it("flags a ticket the partner has not acknowledged after a day", () => {
+    const [ticket] = partnerTickets(caseWithEvents([WARM]), NOW);
+    expect(ticket.acknowledgedAt).toBeNull();
+    expect(ticket.openDays).toBeGreaterThanOrEqual(1);
+  });
+
+  it("orders tickets by open time so the cockpit reads chronologically", () => {
+    const tickets = partnerTickets(caseWithEvents([WARM, CONVEYANCER_ACK]), NOW);
+    expect(tickets.map((t) => t.role)).toEqual(["MORTGAGE_PARTNER", "CONVEYANCER"]);
+  });
+
   it("closes the role's ticket on re-route and opens no new one until the next intro", () => {
     const tickets = partnerTickets(
       caseWithEvents([

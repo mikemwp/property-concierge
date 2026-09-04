@@ -15,6 +15,7 @@ type Props = {
   focusOwnerRole: ActorRole | null;
   currentPartner: { id: string; name: string } | null;
   rerouteOptions: PanelMember[];
+  unacknowledgedPartner?: boolean;
 };
 
 function label(value: string): string {
@@ -27,6 +28,7 @@ export function PartnerOpsControls({
   focusOwnerRole,
   currentPartner,
   rerouteOptions,
+  unacknowledgedPartner = false,
 }: Props) {
   const [error, setError] = useState<string | null>(null);
 
@@ -57,18 +59,25 @@ export function PartnerOpsControls({
       <ActionErrorBanner error={error} />
 
       <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-        <form
-          action={async () => {
-            await run(() => nudgePartnerAction(caseId));
-          }}
-        >
-          <button
-            type="submit"
-            className="rounded border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100"
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          {unacknowledgedPartner && (
+            <span className="rounded bg-amber-200 px-2 py-1 text-xs font-medium text-amber-900">
+              Partner has not acknowledged this case
+            </span>
+          )}
+          <form
+            action={async () => {
+              await run(() => nudgePartnerAction(caseId));
+            }}
           >
-            Nudge partner
-          </button>
-        </form>
+            <button
+              type="submit"
+              className="rounded border border-amber-300 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-900 hover:bg-amber-100"
+            >
+              Nudge partner
+            </button>
+          </form>
+        </div>
 
         {paid ? (
           options.length > 0 ? (
