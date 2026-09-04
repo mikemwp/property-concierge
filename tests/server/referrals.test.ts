@@ -87,6 +87,24 @@ describe("referrals persistence", () => {
     );
   });
 
+  it("rejects fee updates when the referral belongs to a different case", async () => {
+    const other = await createCaseRecord({
+      title: "Other referral case",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+      clientUserId: "ref_client",
+      advisorUserId: "ref_advisor",
+    });
+    const [referral] = await listReferralsForCase(caseId);
+
+    await expect(setReferralFeeStatus(referral.id, "WAIVED", other.id)).rejects.toThrow(
+      PartnerNetworkError,
+    );
+    await expect(setReferralFeeStatus(referral.id, "WAIVED", other.id)).rejects.toThrow(
+      /does not belong to this case/i,
+    );
+  });
+
   it("supersedes the active referral for a role and records the replacement", async () => {
     const before = await activeReferralForRole(caseId, "CONVEYANCER");
     expect(before?.partnerId).toBe("ref_conv_a");

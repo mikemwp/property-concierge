@@ -119,7 +119,7 @@ export async function setFeeStatusAction(
 
   try {
     await loadCaseForUser(authResult.userId, "ADVISOR", caseId);
-    await setReferralFeeStatus(referralId, feeStatus);
+    await setReferralFeeStatus(referralId, feeStatus, caseId);
     revalidateCasePaths(caseId);
     return { ok: true };
   } catch (err) {
@@ -180,7 +180,9 @@ export async function reroutePartnerAction(
         await detachPartnerParticipant(caseId, previousMember.userId);
       }
     }
-    await attachPartnerParticipant(caseId, next.roleType, next.userId);
+    if (next.userId) {
+      await attachPartnerParticipant(caseId, next.roleType, next.userId);
+    }
 
     revalidateCasePaths(caseId);
     return { ok: true };

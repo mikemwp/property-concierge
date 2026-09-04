@@ -107,6 +107,7 @@ export async function supersedeActiveReferrals(
 export async function setReferralFeeStatus(
   referralId: string,
   next: FeeStatus,
+  caseId?: string,
 ): Promise<ReferralRecord> {
   const existing = await prisma.referral.findUnique({
     where: { id: referralId },
@@ -114,6 +115,9 @@ export async function setReferralFeeStatus(
   });
   if (!existing) {
     throw new PartnerNetworkError("Unknown referral");
+  }
+  if (caseId !== undefined && existing.caseId !== caseId) {
+    throw new PartnerNetworkError("Referral does not belong to this case");
   }
   const from = existing.feeStatus as FeeStatus;
   if (!canTransitionFee(from, next)) {
