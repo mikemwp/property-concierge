@@ -11,6 +11,7 @@ import {
 import { CaseAccessError, loadCaseForUser, saveCase } from "@/server/cases";
 import { assertReroute, CockpitPolicyError } from "@/server/cockpit-policy";
 import {
+  assertPanelMemberInMarket,
   getPanelMember,
   PartnerNetworkError,
   setPanelMemberActive,
@@ -169,6 +170,7 @@ export async function reroutePartnerAction(
     if (!next || !next.active) {
       return { ok: false, error: "Panel member is not available for re-route" };
     }
+    assertPanelMemberInMarket(next, caseState.marketPackId);
 
     const previous = await supersedeActiveReferrals(caseId, next.roleType);
     caseState = reroutePartner(caseState, {

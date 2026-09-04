@@ -91,11 +91,14 @@ model PartnerPanel {
   name      String
   firm      String?
   active    Boolean    @default(true)
-  slaDays   Int
-  userId    String?    @unique
+  slaDays      Int
+  marketPackId String     @default("ew")
+  userId       String?    @unique
   createdAt DateTime   @default(now())
   user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   referrals Referral[]
+
+  @@index([marketPackId, roleType])
 }
 
 model Referral {

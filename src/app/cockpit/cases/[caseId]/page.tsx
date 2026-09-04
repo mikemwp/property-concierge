@@ -42,7 +42,10 @@ export default async function CockpitCasePage({ params }: Props) {
   }
 
   const now = new Date();
-  const panel = await listPanel({ activeOnly: true });
+  const panel = await listPanel({
+    activeOnly: true,
+    marketPackId: caseState.marketPackId,
+  });
   const referrals = await listReferralsForCase(caseId);
   const views = advisorStageView(caseState, now);
   const focus = getFocusStage(caseState);

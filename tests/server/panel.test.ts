@@ -2,9 +2,11 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import bcrypt from "bcryptjs";
 import { prisma } from "../../src/lib/db";
 import {
+  assertPanelMemberInMarket,
   findActivePanelMemberForRole,
   getPanelMember,
   listPanel,
+  PartnerNetworkError,
   setPanelMemberActive,
 } from "../../src/server/panel";
 
@@ -36,6 +38,7 @@ describe("panel persistence", () => {
           firm: "Northstar Mortgages",
           slaDays: 3,
           userId: "panel_mortgage_user",
+          marketPackId: "ew",
         },
         {
           id: "panel_mort_unlinked",
@@ -43,6 +46,7 @@ describe("panel persistence", () => {
           name: "Aaron Blake",
           firm: null,
           slaDays: 3,
+          marketPackId: "ew",
         },
         {
           id: "panel_conv_inactive",
@@ -51,6 +55,15 @@ describe("panel persistence", () => {
           firm: "Zed Legal LLP",
           slaDays: 5,
           active: false,
+          marketPackId: "ew",
+        },
+        {
+          id: "panel_mort_other_market",
+          roleType: "MORTGAGE_PARTNER",
+          name: "Ada Ng",
+          firm: "Southern Cross Broking",
+          slaDays: 3,
+          marketPackId: "au",
         },
       ],
     });
@@ -65,10 +78,15 @@ describe("panel persistence", () => {
     expect(all.map((m) => m.id)).toEqual([
       "panel_conv_inactive",
       "panel_mort_unlinked",
+      "panel_mort_other_market",
       "panel_mort_linked",
     ]);
     const active = await listPanel({ activeOnly: true });
-    expect(active.map((m) => m.id)).toEqual(["panel_mort_unlinked", "panel_mort_linked"]);
+    expect(active.map((m) => m.id)).toEqual([
+      "panel_mort_unlinked",
+      "panel_mort_other_market",
+      "panel_mort_linked",
+    ]);
   });
 
   it("maps rows to PanelMember with a typed role and nullable link", async () => {
@@ -81,6 +99,7 @@ describe("panel persistence", () => {
       active: true,
       slaDays: 3,
       userId: "panel_mortgage_user",
+      marketPackId: "ew",
     });
     expect(await getPanelMember("missing")).toBeNull();
   });
@@ -99,5 +118,28 @@ describe("panel persistence", () => {
     );
     const reinstated = await setPanelMemberActive("panel_mort_linked", true);
     expect(reinstated.active).toBe(true);
+  });
+
+  it("scopes the panel to one market", async () => {
+    const ew = await listPanel({ marketPackId: "ew" });
+    expect(ew.map((m) => m.id)).not.toContain("panel_mort_other_market");
+    const au = await listPanel({ marketPackId: "au" });
+    expect(au.map((m) => m.id)).toEqual(["panel_mort_other_market"]);
+  });
+
+  it("never picks a member from another market for a role", async () => {
+    expect((await findActivePanelMemberForRole("MORTGAGE_PARTNER", "ew"))?.id).toBe(
+      "panel_mort_linked",
+    );
+    expect((await findActivePanelMemberForRole("MORTGAGE_PARTNER", "au"))?.id).toBe(
+      "panel_mort_other_market",
+    );
+  });
+
+  it("rejects a panel member that is not on the case's market panel", async () => {
+    const member = await getPanelMember("panel_mort_other_market");
+    expect(() => assertPanelMemberInMarket(member!, "ew")).toThrow(PartnerNetworkError);
+    expect(() => assertPanelMemberInMarket(member!, "ew")).toThrow(/ew panel/);
+    expect(() => assertPanelMemberInMarket(member!, "au")).not.toThrow();
   });
 });

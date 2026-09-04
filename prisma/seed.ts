@@ -69,6 +69,7 @@ async function main() {
         firm: "Northstar Mortgages",
         slaDays: 3,
         userId: "seed_mortgage_partner",
+        marketPackId: "ew",
       },
       {
         id: "seed_panel_ravi",
@@ -77,6 +78,7 @@ async function main() {
         firm: "Ledger Mortgages",
         slaDays: 3,
         active: false,
+        marketPackId: "ew",
       },
       {
         id: "seed_panel_tom",
@@ -85,6 +87,7 @@ async function main() {
         firm: "Harbour Law LLP",
         slaDays: 5,
         userId: "seed_conveyancer",
+        marketPackId: "ew",
       },
       {
         id: "seed_panel_lena",
@@ -92,6 +95,7 @@ async function main() {
         name: "Lena Okoro",
         firm: "Greenway Conveyancing",
         slaDays: 5,
+        marketPackId: "ew",
       },
       {
         id: "seed_panel_dan",
@@ -100,6 +104,7 @@ async function main() {
         firm: "Compass Removals",
         slaDays: 4,
         userId: "seed_move_partner",
+        marketPackId: "ew",
       },
     ],
   });

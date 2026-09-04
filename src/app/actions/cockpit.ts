@@ -20,7 +20,7 @@ import {
   assertWarmIntro,
   CockpitPolicyError,
 } from "@/server/cockpit-policy";
-import { getPanelMember, PartnerNetworkError } from "@/server/panel";
+import { assertPanelMemberInMarket, getPanelMember, PartnerNetworkError } from "@/server/panel";
 import { createReferral, supersedeActiveReferrals } from "@/server/referrals";
 import { revalidatePath } from "next/cache";
 
@@ -188,6 +188,7 @@ export async function warmIntroAction(
     if (!member || !member.active) {
       return { ok: false, error: "Panel member is not available for warm intros" };
     }
+    assertPanelMemberInMarket(member, caseState.marketPackId);
 
     const previous = await supersedeActiveReferrals(caseId, member.roleType);
 

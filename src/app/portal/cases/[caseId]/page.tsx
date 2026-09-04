@@ -11,7 +11,7 @@ import { canViewSlaPressure, clientStageView } from "@/domain/freemium";
 import { canViewDirectory, directoryEntries } from "@/domain/panel";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
 import { getFocusStage } from "@/domain/stage-engine";
-import { stageSlaDays } from "@/lib/case-pack";
+import { stageSlaDays, casePack } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { listPanel } from "@/server/panel";
@@ -41,8 +41,11 @@ export default async function PortalCasePage({ params }: Props) {
 
   const now = new Date();
   const referrals = await listReferralsForCase(caseId);
+  const pack = casePack(caseState);
   const directory = canViewDirectory(caseState)
-    ? directoryEntries(await listPanel({ activeOnly: true }))
+    ? directoryEntries(
+        await listPanel({ activeOnly: true, marketPackId: caseState.marketPackId }),
+      )
     : null;
   const views = clientStageView(caseState, now);
   const focus = getFocusStage(caseState);
@@ -137,7 +140,13 @@ export default async function PortalCasePage({ params }: Props) {
 
       <ReferralDisclosure referrals={referrals} />
 
-      {directory && <PartnerDirectory entries={directory} />}
+      {directory && (
+        <PartnerDirectory
+          entries={directory}
+          intro={pack.copy.directory_intro}
+          roleLabels={pack.partnerRoleLabels}
+        />
+      )}
     </section>
   );
 }
