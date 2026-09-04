@@ -1,6 +1,6 @@
 import type { ActorRole, EntryContext } from "../types";
 import type { PlaybookAction, StagePlaybook } from "./types";
-import { EW_LOCALE } from "./ew-config";
+import { EW_LOCALE, EW_FLAGS } from "./ew-config";
 import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew-stages";
 import { formatMoney } from "./locale";
 
@@ -9,7 +9,7 @@ function isOverseas(entry: EntryContext): boolean {
 }
 
 function needsCurrencyWork(entry: EntryContext): boolean {
-  return entry !== "UK_RESIDENT_SPEED";
+  return moneyEvidenceKinds(entry, EW_FLAGS).includes("fx_plan");
 }
 
 const MONEY_EVIDENCE: Record<string, string> = {
@@ -112,7 +112,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
             "Review the pack against the standard below and reject anything a lender or conveyancer would bounce — once, properly, not twice.",
         },
       ],
-      evidenceStandard: linesFor(moneyEvidenceKinds(entry), MONEY_EVIDENCE),
+      evidenceStandard: linesFor(moneyEvidenceKinds(entry, EW_FLAGS), MONEY_EVIDENCE),
       escalation: [
         "Day 7 (SLA): pack incomplete — advisor calls the client and names the single missing document.",
         "Day 11: still incomplete — block the stage; do not let search readiness start on an unproven deposit.",

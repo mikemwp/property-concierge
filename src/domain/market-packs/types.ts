@@ -133,6 +133,16 @@ export function isModuleEnabled(flags: MarketFlags, key: MarketModuleKey): boole
   return flags[key] === true;
 }
 
+export type MarketModuleRow = { key: MarketModuleKey; enabled: boolean };
+
+/** Every module key with its resolved state — for the advisor pack inspector. */
+export function packModules(pack: MarketPack): MarketModuleRow[] {
+  return MARKET_MODULE_KEYS.map((key) => ({
+    key,
+    enabled: isModuleEnabled(pack.flags, key),
+  }));
+}
+
 export function partnerRoleLabel(pack: MarketPack, role: ActorRole): string {
   return pack.partnerRoleLabels[role];
 }

@@ -1,9 +1,14 @@
 import type { EntryContext } from "../types";
-import type { StageTemplate } from "./types";
+import { EW_FLAGS } from "./ew-config";
+import { isModuleEnabled, type MarketFlags, type StageTemplate } from "./types";
 
-export function moneyEvidenceKinds(entry: EntryContext): string[] {
+/** FX evidence exists only where the pack runs the fx_deposit module and the household holds foreign currency. */
+export function moneyEvidenceKinds(
+  entry: EntryContext,
+  flags: MarketFlags,
+): string[] {
   const kinds = ["source_of_funds"];
-  if (entry !== "UK_RESIDENT_SPEED") {
+  if (isModuleEnabled(flags, "fx_deposit") && entry !== "UK_RESIDENT_SPEED") {
     kinds.push("fx_plan");
   }
   return kinds;
@@ -34,7 +39,7 @@ export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
       title: "Money readiness",
       defaultOwnerRole: "CLIENT",
       slaDays: 7,
-      requiredEvidenceKinds: moneyEvidenceKinds(entry),
+      requiredEvidenceKinds: moneyEvidenceKinds(entry, EW_FLAGS),
       freeVisible: true,
       freeCanSelfAdvance: false,
     },
