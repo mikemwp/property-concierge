@@ -44,6 +44,9 @@ export default async function CockpitLayout({
         <a href="/cockpit/funnel" className="text-slate-700 hover:text-slate-900">
           Validation funnel
         </a>
+        <a href="/cockpit/panel" className="text-slate-700 hover:text-slate-900">
+          Partner panel
+        </a>
       </nav>
       <main style={{ padding: "1.5rem" }}>{children}</main>
     </div>

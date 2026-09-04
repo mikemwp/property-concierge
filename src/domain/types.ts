@@ -13,3 +13,13 @@ export type ActorRole =
   | "MOVE_PARTNER";
 
 export type StageStatus = "PENDING" | "ACTIVE" | "BLOCKED" | "DONE" | "SKIPPED";
+
+export const PARTNER_ROLES: readonly ActorRole[] = [
+  "MORTGAGE_PARTNER",
+  "CONVEYANCER",
+  "MOVE_PARTNER",
+];
+
+export function isPartnerActorRole(role: ActorRole): boolean {
+  return PARTNER_ROLES.includes(role);
+}

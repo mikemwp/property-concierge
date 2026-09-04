@@ -17,7 +17,7 @@ import {
 type DbClient = PrismaClient | Prisma.TransactionClient;
 
 export { CaseAccessError, assertCaseAccess } from "./case-access";
-export { attachPartnerParticipant } from "./case-access";
+export { attachPartnerParticipant, detachPartnerParticipant } from "./case-access";
 
 const caseInclude = {
   stages: { include: { evidence: true }, orderBy: { sortOrder: "asc" as const } },

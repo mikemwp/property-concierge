@@ -15,6 +15,12 @@ export function assertWarmIntro(caseState: CaseState): void {
   }
 }
 
+export function assertReroute(caseState: CaseState): void {
+  if (!canUseWarmIntro(caseState)) {
+    throw new CockpitPolicyError("Re-routing a partner requires a paid tier");
+  }
+}
+
 export function assertPlaybookVisible(viewerRole: ActorRole): void {
   if (viewerRole !== "ADVISOR") {
     throw new CockpitPolicyError(

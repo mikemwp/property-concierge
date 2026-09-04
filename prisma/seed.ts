@@ -3,6 +3,8 @@ import { prisma } from "../src/lib/db";
 import { createCaseRecord } from "../src/server/cases";
 
 async function main() {
+  await prisma.referral.deleteMany();
+  await prisma.partnerPanel.deleteMany();
   await prisma.stageEvent.deleteMany();
   await prisma.evidence.deleteMany();
   await prisma.stage.deleteMany();
@@ -54,6 +56,50 @@ async function main() {
         name: "Demo Move Partner",
         role: "MOVE_PARTNER",
         passwordHash,
+      },
+    ],
+  });
+
+  await prisma.partnerPanel.createMany({
+    data: [
+      {
+        id: "seed_panel_priya",
+        roleType: "MORTGAGE_PARTNER",
+        name: "Priya Nair",
+        firm: "Northstar Mortgages",
+        slaDays: 3,
+        userId: "seed_mortgage_partner",
+      },
+      {
+        id: "seed_panel_ravi",
+        roleType: "MORTGAGE_PARTNER",
+        name: "Ravi Patel",
+        firm: "Ledger Mortgages",
+        slaDays: 3,
+        active: false,
+      },
+      {
+        id: "seed_panel_tom",
+        roleType: "CONVEYANCER",
+        name: "Tom Ashby",
+        firm: "Harbour Law LLP",
+        slaDays: 5,
+        userId: "seed_conveyancer",
+      },
+      {
+        id: "seed_panel_lena",
+        roleType: "CONVEYANCER",
+        name: "Lena Okoro",
+        firm: "Greenway Conveyancing",
+        slaDays: 5,
+      },
+      {
+        id: "seed_panel_dan",
+        roleType: "MOVE_PARTNER",
+        name: "Dan Whitfield",
+        firm: "Compass Removals",
+        slaDays: 4,
+        userId: "seed_move_partner",
       },
     ],
   });
