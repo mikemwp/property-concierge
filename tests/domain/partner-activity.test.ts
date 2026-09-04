@@ -60,6 +60,20 @@ const ACK = integrationEvent("PARTNER_CASE_ACKNOWLEDGED", "2026-09-02T09:00:00.0
   status: "RECEIVED",
 });
 
+const CONVEYANCER_ACK = {
+  type: "WARM_INTRO_REQUESTED",
+  stageKey: "conveyancing",
+  actorRole: "ADVISOR" as const,
+  at: "2026-09-03T09:00:00.000Z",
+  payload: JSON.stringify({
+    partnerType: "CONVEYANCER",
+    note: "Needs instructing this week",
+    ticketId: "warm-c1-99",
+    panelMemberId: "seed_panel_tom",
+    panelMemberName: "Tom Ashby",
+  }),
+};
+
 describe("partnerActivity", () => {
   it("decodes both the new envelope and the frozen warm-intro shape", () => {
     const rows = partnerActivity(caseWithEvents([WARM, ACK]));
@@ -84,6 +98,12 @@ describe("partnerActivity", () => {
     );
     expect(rows).toHaveLength(2);
     expect(rows[1]).toMatchObject({ type: "EVIDENCE_SUBMITTED", detail: "dip_aip", ticketId: "warm-c1-1" });
+  });
+
+  it("scopes activity to one role so a partner cannot see another partner's ticket", () => {
+    const rows = partnerActivity(caseWithEvents([WARM, ACK, CONVEYANCER_ACK]));
+    expect(rows.filter((r) => r.role === "MORTGAGE_PARTNER")).toHaveLength(2);
+    expect(rows.filter((r) => r.role === "CONVEYANCER")).toHaveLength(1);
   });
 });
 

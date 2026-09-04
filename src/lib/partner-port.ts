@@ -155,7 +155,7 @@ export function buildPartnerEventPayload(
 }
 
 export class ManualPartnerPort implements PartnerPort {
-  readonly adapterId = "manual";
+  readonly adapterId: string = "manual";
 
   constructor(protected readonly store: CaseStore = prismaCaseStore) {}
 

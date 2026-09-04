@@ -60,7 +60,7 @@ describe("webhook secret", () => {
   });
 
   it("accepts the configured secret and rejects everything else", async () => {
-    const { verifyWebhookSecret } = await import("../../src/app/api/partner-updates/route");
+    const { verifyWebhookSecret } = await import("../../src/lib/partner-webhook-secret");
     expect(verifyWebhookSecret("dev-partner-secret")).toBe(true);
     expect(verifyWebhookSecret("dev-partner-secre")).toBe(false);
     expect(verifyWebhookSecret("")).toBe(false);
@@ -69,7 +69,7 @@ describe("webhook secret", () => {
 
   it("fails closed when no secret is configured", async () => {
     delete process.env.PARTNER_WEBHOOK_SECRET;
-    const { verifyWebhookSecret } = await import("../../src/app/api/partner-updates/route");
+    const { verifyWebhookSecret } = await import("../../src/lib/partner-webhook-secret");
     expect(verifyWebhookSecret("anything")).toBe(false);
   });
 });
