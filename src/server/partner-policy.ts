@@ -1,6 +1,9 @@
 import type { CaseState } from "../domain/stage-engine";
 import { getFocusStage } from "../domain/stage-engine";
 import type { ActorRole } from "../domain/types";
+import { canUseWarmIntro } from "../domain/freemium";
+import { isModuleEnabled } from "../domain/market-packs/types";
+import { casePack } from "../lib/case-pack";
 
 export class PartnerPolicyError extends Error {
   constructor(message: string) {
@@ -58,5 +61,31 @@ export function canPartnerSubmit(
     return true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * Spec §9 Phase 2. Rails need the market to have them (pack flag) and the household
+ * to be paying for orchestration (tier). Nothing here produces a client guarantee.
+ */
+export function canUseSpeedRails(caseState: CaseState): boolean {
+  if (!canUseWarmIntro(caseState)) {
+    return false;
+  }
+  try {
+    return isModuleEnabled(casePack(caseState).flags, "partner_speed_rails");
+  } catch {
+    return false;
+  }
+}
+
+export function assertSpeedRails(caseState: CaseState): void {
+  if (!canUseWarmIntro(caseState)) {
+    throw new PartnerPolicyError("Partner speed rails require a paid Done-With-You case");
+  }
+  if (!isModuleEnabled(casePack(caseState).flags, "partner_speed_rails")) {
+    throw new PartnerPolicyError(
+      `Partner speed rails are not enabled for market pack ${caseState.marketPackId}`,
+    );
   }
 }
