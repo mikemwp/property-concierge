@@ -1,7 +1,8 @@
-import type { ActorRole, EntryContext } from "../types";
+import { PARTNER_ROLES, type ActorRole, type EntryContext } from "../types";
 import {
   getStageTemplate,
   MARKET_COPY_KEYS,
+  milestonesForRole,
   packEvidenceKinds,
   packModules,
   type MarketCopyKey,
@@ -37,6 +38,7 @@ export type MarketPackSummary = {
   stages: MarketPackStageRow[];
   evidenceKinds: string[];
   playbookStageKeys: string[];
+  partnerMilestoneKeys: Array<{ role: ActorRole; keys: string[] }>;
 };
 
 export function marketPackSummary(
@@ -67,5 +69,9 @@ export function marketPackSummary(
     })),
     evidenceKinds: packEvidenceKinds(pack),
     playbookStageKeys: pack.buildPlaybooks(entry).map((p) => p.stageKey),
+    partnerMilestoneKeys: PARTNER_ROLES.map((role) => ({
+      role,
+      keys: milestonesForRole(pack, role).map((m) => m.key),
+    })),
   };
 }

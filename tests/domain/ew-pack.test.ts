@@ -3,8 +3,11 @@ import { ewMarketPack } from "../../src/domain/market-packs/ew";
 import { getStageTemplate, stagePlaybook } from "../../src/domain/market-packs/types";
 
 describe("ew market pack", () => {
-  it("switches only the FX module on", () => {
-    expect(ewMarketPack.flags).toEqual({ fx_deposit: true });
+  it("switches FX and partner speed rails on as adapter plumbing", () => {
+    expect(ewMarketPack.flags).toEqual({
+      fx_deposit: true,
+      partner_speed_rails: true,
+    });
   });
 
   it("declares its locale, currency and address shape as data", () => {

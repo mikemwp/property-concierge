@@ -57,6 +57,13 @@ describe("market pack summary", () => {
     }
   });
 
+  it("lists partner milestone keys per role without leaking process prose", () => {
+    const summary = marketPackSummary(ewMarketPack, "RETURNER_OVERSEAS");
+    const conveyancer = summary.partnerMilestoneKeys.find((r) => r.role === "CONVEYANCER");
+    expect(conveyancer?.keys).toContain("searches_ordered");
+    expect(JSON.stringify(summary)).not.toContain("Searches ordered");
+  });
+
   it("summarises a disabled pack without enabling it", () => {
     const stub = marketPackSummary(auStubPack, "UK_RESIDENT_SPEED");
     expect(stub.enabled).toBe(false);

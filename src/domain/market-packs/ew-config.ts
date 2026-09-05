@@ -13,11 +13,13 @@ export const EW_LOCALE: MarketLocale = {
 };
 
 /**
- * Spec §3: FX for the deposit is in v1 scope. Spec §9 dependency rule: chain-free
- * inventory and hard SLAs stay off until the ledger proves speed. Corridors are Plan 7.
+ * Spec §3: FX for the deposit is in v1 scope. Spec §9 Phase 2: speed rails are deep
+ * partner integrations — on here as adapter plumbing only. Chain-free inventory and
+ * hard client SLAs stay off until the ledger proves speed.
  */
 export const EW_FLAGS: MarketFlags = {
   fx_deposit: true,
+  partner_speed_rails: true,
 };
 
 export const EW_COPY: MarketCopy = {

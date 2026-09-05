@@ -15,7 +15,6 @@ const GATED_MODULES = [
   "corridor_inbound",
   "corridor_outbound",
   "document_vault",
-  "partner_speed_rails",
 ] as const;
 
 describe("module flags are pack data", () => {
@@ -30,6 +29,13 @@ describe("module flags are pack data", () => {
   it("enables FX for the deposit in England & Wales only", () => {
     const enabled = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "fx_deposit"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual(["ew"]);
+  });
+
+  it("runs partner speed rails in England & Wales only", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "partner_speed_rails"))
       .map((pack) => pack.id);
     expect(enabled).toEqual(["ew"]);
   });

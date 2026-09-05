@@ -7,6 +7,11 @@ UK property purchase orchestration portal — England & Wales (market pack `ew`)
 ```bash
 npm install
 cp .env.example .env
+```
+
+Set `PARTNER_WEBHOOK_SECRET` in `.env` (seeded as `dev-partner-secret` in `.env.example`). Replace it outside development — the inbound webhook accepts only this shared secret.
+
+```bash
 npm run db:push
 npm run db:seed
 npm run dev
@@ -104,6 +109,44 @@ superseded, partner participant swapped). Free DIY cases get a names-only
 
 Walkthrough: [`docs/superpowers/plans/demo-script-partner-network.md`](docs/superpowers/plans/demo-script-partner-network.md).
 
+## Partner speed rails (deep integrations, stubbed)
+
+Paid England & Wales cases with the `partner_speed_rails` module on get a **clean integration port** behind which manual ops, stub adapters and future vendor clients are interchangeable implementations.
+
+The port lives in `src/lib/partner-port.ts`:
+
+| Method | Purpose |
+|--------|---------|
+| `requestWarmIntro` | Opens an integration ticket when the advisor requests a warm intro |
+| `acknowledgeCase` | Partner confirms receipt; records acknowledgement latency |
+| `syncStatus` | Advisor pulls the latest vendor-neutral status from the adapter |
+| `submitPartnerEvidence` | Partner or inbound path submits required evidence kinds |
+| `reportMilestone` | Partner reports pack-defined process milestones |
+
+| Implementation | `adapterId` | When selected |
+|----------------|-------------|---------------|
+| `ManualPartnerPort` | `manual` | Free tier, or pack with `partner_speed_rails` off |
+| `StubPartnerAdapter` (mortgage profile) | `stub-mortgage` | Paid E&W, focus owned by mortgage partner |
+| `StubPartnerAdapter` (conveyancer profile) | `stub-conveyancer` | Paid E&W, focus owned by conveyancer |
+| `StubPartnerAdapter` (move profile) | `stub-move` | Paid E&W, focus owned by move partner |
+| A future vendor client | *(vendor-specific)* | Drops in with no engine rewrite |
+
+**Deliberately absent from the port:** accept, advance, block, resume, re-route and create-referral. Those are advisor powers and stay in the cockpit. Enforced by `tests/server/adapter-authority.test.ts`.
+
+**Four additive ledger event types** (Plan 1–3 event shapes are frozen): `PARTNER_CASE_ACKNOWLEDGED`, `PARTNER_STATUS_SYNCED`, `PARTNER_MILESTONE_REPORTED`, `PARTNER_UPDATE_REJECTED`.
+
+**Simulated turnaround** is deterministic: days-in-stage divided by the role profile's cadence walks a fixed status ladder — never random, never networked. See `tests/lib/partner-adapters.test.ts`.
+
+**Inbound loopback:** `POST /api/partner-updates` with header `x-partner-signature` matching `PARTNER_WEBHOOK_SECRET`. Replace the secret outside development.
+
+**Gate:** `partner_speed_rails` (pack module) **and** `PAID_DWY` (tier), checked by `canUseSpeedRails` / `assertSpeedRails` in `src/server/partner-policy.ts`.
+
+**Milestone vocabulary** is pack data (`src/domain/market-packs/ew-milestones.ts`); a second market brings its own process language.
+
+**No live third-party conveyancing, FX, mortgage or removals integration exists, and no client-facing guaranteed date is produced anywhere in this system.**
+
+Walkthrough: [`docs/superpowers/plans/demo-script-speed-rails.md`](docs/superpowers/plans/demo-script-speed-rails.md).
+
 ## Market packs (configuration layer)
 
 England & Wales is the **first market pack**, not the product. The stage engine is
@@ -126,10 +169,11 @@ country-agnostic; everything local lives in `src/domain/market-packs/`:
 disabled pack throws `MarketPackError` — it never falls back to `ew`.
 
 **Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
-`isModuleEnabled`. The `ew` pack runs `fx_deposit` only; `chain_free_inventory`,
-`hard_client_sla`, `corridor_inbound`, `corridor_outbound`, `document_vault` and
-`partner_speed_rails` are off in every pack, enforced by
-`tests/domain/market-pack-flags.test.ts` (the spec's dependency rule).
+`isModuleEnabled`. The `ew` pack runs `fx_deposit` and `partner_speed_rails`;
+`chain_free_inventory`, `hard_client_sla`, `corridor_inbound`, `corridor_outbound` and
+`document_vault` are **off** in every pack — the spec §9 dependency rule as data, not a
+promise in a doc. Speed rails being on means adapter plumbing exists, not that any date is
+guaranteed. Enforced by `tests/domain/market-pack-flags.test.ts`.
 
 **`au` is a stub, not a product.** It is registered and `enabled: false`, with a different
 currency, address shape and stage keys (`finance_path`, `settlement_complete`), no

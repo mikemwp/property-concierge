@@ -62,6 +62,10 @@ export function makeFixturePack(overrides: Partial<MarketPack> = {}): MarketPack
       },
     ],
     disclosureText: ({ partnerName }) => `Testland disclosure for ${partnerName}.`,
+    partnerMilestones: (role) =>
+      role === "CONVEYANCER"
+        ? [{ key: "settlement_lodged", label: "Settlement lodged", role }]
+        : [],
     ...overrides,
   };
 }

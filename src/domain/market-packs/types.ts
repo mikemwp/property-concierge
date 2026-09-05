@@ -91,6 +91,14 @@ export type DisclosureInput = {
   partnerFirm: string | null;
 };
 
+export type PartnerMilestone = {
+  /** Stable key stored in the ledger payload. */
+  key: string;
+  /** Rendered in the partner mini-view and the cockpit, in the pack's own words. */
+  label: string;
+  role: ActorRole;
+};
+
 export type MarketPack = {
   id: string;
   name: string;
@@ -104,6 +112,8 @@ export type MarketPack = {
   partnerRoleLabels: PartnerRoleLabels;
   buildStages: (entry: EntryContext) => StageTemplate[];
   buildPlaybooks: (entry: EntryContext) => StagePlaybook[];
+  /** Spec §10: conveyancing and mortgage process language is always local. */
+  partnerMilestones: (role: ActorRole) => PartnerMilestone[];
   /** Spec §10: consumer law and referral disclosure are always local. */
   disclosureText: (input: DisclosureInput) => string;
 };
@@ -152,6 +162,14 @@ export function packModules(pack: MarketPack): MarketModuleRow[] {
 
 export function partnerRoleLabel(pack: MarketPack, role: ActorRole): string {
   return pack.partnerRoleLabels[role];
+}
+
+export function milestonesForRole(pack: MarketPack, role: ActorRole): PartnerMilestone[] {
+  return pack.partnerMilestones(role);
+}
+
+export function isMilestoneForRole(pack: MarketPack, role: ActorRole, key: string): boolean {
+  return milestonesForRole(pack, role).some((milestone) => milestone.key === key);
 }
 
 export function stagePlaybook(

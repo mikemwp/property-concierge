@@ -1,12 +1,14 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { submitPartnerEvidence, StageEngineError } from "@/domain/stage-engine";
+import { StageEngineError } from "@/domain/stage-engine";
+import { openTicketForRole } from "@/domain/partner-activity";
 import type { ActorRole } from "@/domain/types";
+import { partnerPortForCase } from "@/lib/partner-adapters/registry";
+import { PartnerPortError } from "@/lib/partner-port";
 import {
   CaseAccessError,
   loadCaseForUser,
-  saveCase,
 } from "@/server/cases";
 import {
   assertPartnerSubmit,
@@ -38,20 +40,25 @@ export async function submitPartnerEvidenceAction(
   }
 
   try {
-    let caseState = await loadCaseForUser(session.user.id, role, caseId);
+    const caseState = await loadCaseForUser(session.user.id, role, caseId);
     assertPartnerSubmit(caseState, role, stageKey);
-    caseState = submitPartnerEvidence(caseState, {
+    const ticket = openTicketForRole(caseState, role);
+    const port = partnerPortForCase(caseState, role);
+    await port.submitPartnerEvidence({
+      caseId,
+      role,
+      panelMemberId: ticket?.panelMemberId ?? null,
+      panelMemberName: ticket?.panelMemberName ?? null,
       stageKey,
       kind,
-      actorRole: role,
     });
-    await saveCase(caseState);
     revalidateCasePaths(caseId);
     return { ok: true };
   } catch (err) {
     const message =
       err instanceof PartnerPolicyError ||
       err instanceof StageEngineError ||
+      err instanceof PartnerPortError ||
       err instanceof CaseAccessError
         ? err.message
         : err instanceof Error

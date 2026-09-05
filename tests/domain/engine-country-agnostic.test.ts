@@ -16,6 +16,8 @@ const ENGINE_GLOBAL_FILES = [
   "src/domain/panel.ts",
   "src/domain/scorecard.ts",
   "src/domain/partner-ops.ts",
+  "src/domain/partner-integration.ts",
+  "src/domain/partner-activity.ts",
   "src/domain/referral.ts",
   "src/domain/intake.ts",
   "src/server/mappers.ts",
