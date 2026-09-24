@@ -1,12 +1,16 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { signUpAction } from "@/app/actions/signup";
 import type { RawAttributionParams } from "@/domain/attribution";
 import type { EntryContext } from "@/domain/types";
-import { DEFAULT_MARKET_PACK_ID, resolveMarketPack } from "@/domain/market-packs/registry";
+import {
+  DEFAULT_MARKET_PACK_ID,
+  SELF_SERVE_MARKET_PACK_IDS,
+  resolveMarketPack,
+} from "@/domain/market-packs/registry";
 
 type Props = {
   plan: "free" | "paid";
@@ -20,12 +24,20 @@ const ENTRY_OPTIONS: Array<{ value: EntryContext; label: string }> = [
   { value: "UK_RESIDENT_SPEED", label: "Living here, want a faster purchase" },
 ];
 
-const REGION_PROMPT = resolveMarketPack(DEFAULT_MARKET_PACK_ID).copy.region_prompt;
+const PACK_OPTIONS = SELF_SERVE_MARKET_PACK_IDS.map((id) => {
+  const pack = resolveMarketPack(id);
+  return { id: pack.id, name: pack.name, regionPrompt: pack.copy.region_prompt };
+});
 
 export function StartForm({ plan, entryContext, attribution }: Props) {
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pending, setPending] = useState(false);
+  const [marketPackId, setMarketPackId] = useState(DEFAULT_MARKET_PACK_ID);
+  const selectedPack = useMemo(
+    () => PACK_OPTIONS.find((pack) => pack.id === marketPackId) ?? PACK_OPTIONS[0]!,
+    [marketPackId],
+  );
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,6 +93,25 @@ export function StartForm({ plan, entryContext, attribution }: Props) {
       )}
 
       <label className="block">
+        <span className="text-sm font-medium text-slate-700">Which corridor are you buying on?</span>
+        <select
+          name="marketPackId"
+          value={marketPackId}
+          onChange={(event) => setMarketPackId(event.target.value)}
+          className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-sm"
+        >
+          {PACK_OPTIONS.map((pack) => (
+            <option key={pack.id} value={pack.id}>
+              {pack.name}
+            </option>
+          ))}
+        </select>
+        {errors.marketPackId && (
+          <span className="text-xs text-red-700">{errors.marketPackId}</span>
+        )}
+      </label>
+
+      <label className="block">
         <span className="text-sm font-medium text-slate-700">Household name</span>
         <input
           name="name"
@@ -120,7 +151,7 @@ export function StartForm({ plan, entryContext, attribution }: Props) {
 
       <label className="block">
         <span className="text-sm font-medium text-slate-700">
-          {REGION_PROMPT}
+          {selectedPack.regionPrompt}
         </span>
         <input
           name="targetRegion"

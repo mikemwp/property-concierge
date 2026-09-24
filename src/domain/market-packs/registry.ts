@@ -12,6 +12,12 @@ export const DEFAULT_MARKET_PACK_ID = "ew";
 /** Sorted ids of the enabled bidirectional corridor packs. The au stub is not in this list. */
 export const CORRIDOR_PACK_IDS = ["au_uk", "uk_au", "uk_us", "us_uk"] as const;
 
+export const SELF_SERVE_MARKET_PACK_IDS = ["ew", "au_uk", "us_uk"] as const;
+
+export function isSelfServeMarketPack(id: string): boolean {
+  return (SELF_SERVE_MARKET_PACK_IDS as readonly string[]).includes(id);
+}
+
 const PACKS: readonly MarketPack[] = [
   ewMarketPack,
   auStubPack,

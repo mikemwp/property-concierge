@@ -1,5 +1,10 @@
 import { ENTRY_CONTEXTS, type EntryContext, type Tier } from "./types";
-import { DEFAULT_MARKET_PACK_ID, resolveMarketPack } from "./market-packs/registry";
+import {
+  DEFAULT_MARKET_PACK_ID,
+  isSelfServeMarketPack,
+  resolveMarketPack,
+} from "./market-packs/registry";
+import { MarketPackError } from "./market-packs/types";
 
 export type IntakeFields = {
   name?: string | null;
@@ -8,6 +13,7 @@ export type IntakeFields = {
   entryContext?: string | null;
   plan?: string | null;
   targetRegion?: string | null;
+  marketPackId?: string | null;
 };
 
 export type ParsedIntake = {
@@ -18,6 +24,7 @@ export type ParsedIntake = {
   tier: Tier;
   targetRegion: string;
   caseTitle: string;
+  marketPackId: string;
 };
 
 export type IntakeResult =
@@ -28,9 +35,6 @@ export const MIN_PASSWORD_LENGTH = 10;
 const MAX_TEXT_LENGTH = 80;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** Intake happens before a case exists, so it uses the default market's copy. */
-const DEFAULT_PACK = resolveMarketPack(DEFAULT_MARKET_PACK_ID);
 
 export function caseTitleFor(name: string, targetRegion: string): string {
   return `${name.trim()} — ${targetRegion.trim()}`;
@@ -67,9 +71,32 @@ export function parseIntake(fields: IntakeFields): IntakeResult {
     errors.password = `Use at least ${MIN_PASSWORD_LENGTH} characters.`;
   }
 
+  const requestedPack = (fields.marketPackId ?? "").trim() || DEFAULT_MARKET_PACK_ID;
+  let marketPackId = DEFAULT_MARKET_PACK_ID;
+  try {
+    const pack = resolveMarketPack(requestedPack);
+    if (!isSelfServeMarketPack(pack.id)) {
+      errors.marketPackId = "This corridor is opened by your advisor.";
+    } else {
+      marketPackId = pack.id;
+    }
+  } catch (err) {
+    if (err instanceof MarketPackError) {
+      errors.marketPackId = err.message.includes("not enabled")
+        ? "That market is not enabled."
+        : "Unknown market pack.";
+    } else {
+      errors.marketPackId = "That market is not available.";
+    }
+  }
+
+  const packForCopy = isSelfServeMarketPack(requestedPack)
+    ? resolveMarketPack(requestedPack)
+    : resolveMarketPack(DEFAULT_MARKET_PACK_ID);
+
   const targetRegion = (fields.targetRegion ?? "").trim();
   if (targetRegion.length === 0) {
-    errors.targetRegion = DEFAULT_PACK.copy.region_prompt;
+    errors.targetRegion = packForCopy.copy.region_prompt;
   } else if (targetRegion.length > MAX_TEXT_LENGTH) {
     errors.targetRegion = `Keep this under ${MAX_TEXT_LENGTH} characters.`;
   }
@@ -93,6 +120,7 @@ export function parseIntake(fields: IntakeFields): IntakeResult {
       tier: tierFromPlan(fields.plan),
       targetRegion,
       caseTitle: caseTitleFor(name, targetRegion),
+      marketPackId,
     },
   };
 }

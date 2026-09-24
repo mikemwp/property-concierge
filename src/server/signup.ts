@@ -77,6 +77,7 @@ export async function createSelfServeCase(input: {
           tier: input.intake.tier,
           clientUserId: user.id,
           advisorUserId: advisor.id,
+          marketPackId: input.intake.marketPackId,
           attribution: input.attribution,
         },
         tx,

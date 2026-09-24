@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { DEFAULT_MARKET_PACK_ID } from "../../src/domain/market-packs/registry";
 import { caseTitleFor, parseIntake } from "../../src/domain/intake";
 
 const valid = {
@@ -34,6 +35,48 @@ describe("parseIntake", () => {
 
     const junk = parseIntake({ ...valid, plan: "premium-plus" });
     expect(junk.ok && junk.value.tier).toBe("PAID_DWY");
+  });
+
+  it("defaults marketPackId to the beachhead pack", () => {
+    const result = parseIntake(valid);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.marketPackId).toBe(DEFAULT_MARKET_PACK_ID);
+  });
+
+  it("accepts diaspora self-serve corridor packs and copies their region prompt on empty region", () => {
+    const auUk = parseIntake({ ...valid, marketPackId: "au_uk", targetRegion: "Bristol" });
+    expect(auUk.ok && auUk.value.marketPackId).toBe("au_uk");
+
+    const usUk = parseIntake({ ...valid, marketPackId: "us_uk" });
+    expect(usUk.ok && usUk.value.marketPackId).toBe("us_uk");
+
+    const missingRegion = parseIntake({
+      ...valid,
+      marketPackId: "au_uk",
+      targetRegion: "",
+    });
+    expect(missingRegion.ok).toBe(false);
+    if (missingRegion.ok) return;
+    expect(missingRegion.errors.targetRegion).toMatch(/England & Wales/);
+    expect(missingRegion.errors.targetRegion).toMatch(/Australia/);
+  });
+
+  it("refuses advisor-only and disabled packs on the public funnel", () => {
+    const outbound = parseIntake({ ...valid, marketPackId: "uk_au" });
+    expect(outbound.ok).toBe(false);
+    if (outbound.ok) return;
+    expect(outbound.errors.marketPackId).toMatch(/advisor/i);
+
+    const stub = parseIntake({ ...valid, marketPackId: "au" });
+    expect(stub.ok).toBe(false);
+    if (stub.ok) return;
+    expect(stub.errors.marketPackId).toMatch(/not enabled|not available/i);
+
+    const unknown = parseIntake({ ...valid, marketPackId: "zz" });
+    expect(unknown.ok).toBe(false);
+    if (unknown.ok) return;
+    expect(unknown.errors.marketPackId).toMatch(/unknown|not available/i);
   });
 
   it("collects field errors instead of throwing", () => {

@@ -23,6 +23,7 @@ export async function signUpAction(
     entryContext: field(formData, "entryContext"),
     plan: field(formData, "plan"),
     targetRegion: field(formData, "targetRegion"),
+    marketPackId: field(formData, "marketPackId"),
   });
 
   if (!parsed.ok) {

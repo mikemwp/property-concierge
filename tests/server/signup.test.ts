@@ -16,6 +16,7 @@ const intake: ParsedIntake = {
   tier: "PAID_DWY",
   targetRegion: "Bristol",
   caseTitle: "Bloggs household — Bristol",
+  marketPackId: "ew",
 };
 
 describe("createSelfServeCase", () => {
@@ -69,6 +70,29 @@ describe("createSelfServeCase", () => {
     expect(participants.map((p) => p.role).sort()).toEqual([
       "ADVISOR",
       "CLIENT",
+    ]);
+  });
+
+  it("persists a self-serve corridor pack id onto the case", async () => {
+    const created = await createSelfServeCase({
+      intake: {
+        ...intake,
+        email: "signup-auuk@example.com",
+        marketPackId: "au_uk",
+        caseTitle: "Bloggs household — Bristol",
+      },
+      attribution: {
+        leadSource: "DIASPORA_AU_UK",
+        leadCampaign: "poms-in-oz-sept",
+        leadReferrer: null,
+      },
+    });
+    const caseState = await loadCase(created.caseId);
+    expect(caseState.marketPackId).toBe("au_uk");
+    expect(caseState.stages.some((s) => s.key === "chain_free_matching")).toBe(false);
+    expect(caseState.stages.find((s) => s.key === "money_readiness")?.requiredEvidenceKinds).toEqual([
+      "source_of_funds",
+      "fx_plan",
     ]);
   });
 
