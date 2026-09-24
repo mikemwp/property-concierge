@@ -23,6 +23,7 @@ const ENGINE_GLOBAL_FILES = [
   "src/domain/client-sla.ts",
   "src/domain/vault.ts",
   "src/domain/threads.ts",
+  "src/domain/seller-milestones.ts",
   "src/domain/market-packs/corridor.ts",
   "src/domain/intake.ts",
   "src/server/mappers.ts",
