@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  CASE_THREAD_HOOK,
   CHAIN_FREE_HOOK,
   CLIENT_SLA_HOOK,
   ENTRY_STORIES,
@@ -130,5 +131,31 @@ describe("client SLA hook is a target, not a promise", () => {
   it("keeps the footer disclosure on planning targets", () => {
     expect(REGULATORY_DISCLOSURES.some((line) => /planning targets/i.test(line))).toBe(true);
     expect(REGULATORY_DISCLOSURES.some((line) => /carve-out/i.test(line))).toBe(true);
+  });
+});
+
+describe("case thread hook is an audit trail, not live chat", () => {
+  it("names the append-only thread and forbids realtime or guarantee language", () => {
+    const blob = `${CASE_THREAD_HOOK.eyebrow} ${CASE_THREAD_HOOK.headline} ${CASE_THREAD_HOOK.body}`;
+    expect(blob).toMatch(/thread/i);
+    expect(blob).toMatch(/append-only/i);
+    expect(blob).toMatch(/refresh/i);
+    expect(blob.replace(/not a live chat/gi, "")).not.toMatch(/live chat/i);
+    expect(blob).toMatch(/not a live chat/i);
+    expect(blob).not.toMatch(/websocket|real-?time|pusher|ably/i);
+    expect(blob).not.toMatch(/guarante/i);
+    for (const pattern of FORBIDDEN_CLAIM_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
+    }
+    for (const pattern of FORBIDDEN_INVENTORY_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
+    }
+  });
+
+  it("keeps the case thread out of free features and states the withhold", () => {
+    expect(FREE_PLAN.limits.some((line) => /case thread/i.test(line))).toBe(true);
+    for (const feature of FREE_PLAN.features) {
+      expect(/case thread/i.test(feature), feature).toBe(false);
+    }
   });
 });

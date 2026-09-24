@@ -65,6 +65,7 @@ export const FREE_PLAN: PlanCopy = {
     "No named owner or day counters once you reach a money or legal stage",
     "No introductions — you source, vet and brief every partner yourself",
     "Nobody chases when a stage stalls; the map waits for you",
+    "No case thread — conversations with partners stay in your own inbox",
   ],
   ctaLabel: "Take the free orientation",
 };
@@ -173,6 +174,7 @@ export const PAID_ONLY_CAPABILITY_PATTERNS: RegExp[] = [
   /\bsla\b/i,
   /we chase/i,
   /day counter/i,
+  /case thread/i,
 ];
 
 /** Claims we must never make in v1 sales copy. */
@@ -203,6 +205,12 @@ export const CLIENT_SLA_HOOK = {
   eyebrow: "Targets, not promises",
   headline: "Published target timelines, subject to carve-outs.",
   body: "When the ledger supports it, your advisor can publish a target completion date we are working toward. Dates stay subject to carve-outs. This is not a marketing promise of a completion date.",
+};
+
+export const CASE_THREAD_HOOK = {
+  eyebrow: "One thread, not six inboxes",
+  headline: "The case thread is the audit trail.",
+  body: "On Done-With-You your advisor stays in one append-only thread with you and the partners on the case. Every post is dated and attributed. Refresh the portal to see new messages — this is not a live chat.",
 };
 
 export const OUT_OF_SCOPE_GEO_PATTERNS: RegExp[] = [
@@ -242,5 +250,8 @@ export function marketingClaimStrings(): string[] {
     CLIENT_SLA_HOOK.eyebrow,
     CLIENT_SLA_HOOK.headline,
     CLIENT_SLA_HOOK.body,
+    CASE_THREAD_HOOK.eyebrow,
+    CASE_THREAD_HOOK.headline,
+    CASE_THREAD_HOOK.body,
   ];
 }
