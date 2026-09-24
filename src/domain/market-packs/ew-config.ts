@@ -19,7 +19,9 @@ export const EW_LOCALE: MarketLocale = {
  * document_vault is on for ew only. Spec §5/§9: hard_client_sla is on for ew
  * only as published target timelines with legal carve-outs — not a marketing
  * guarantee. Spec §8: case_threads is on for ew only as the append-only
- * multi-party case thread.
+ * multi-party case thread. Spec §9 Phase 4: seller_milestone_views is on for
+ * ew only as a read-only buyer-ledger projection — not a seller login or
+ * inventory product.
  */
 export const EW_FLAGS: MarketFlags = {
   fx_deposit: true,
@@ -28,6 +30,7 @@ export const EW_FLAGS: MarketFlags = {
   document_vault: true,
   hard_client_sla: true,
   case_threads: true,
+  seller_milestone_views: true,
 };
 
 export const EW_COPY: MarketCopy = {

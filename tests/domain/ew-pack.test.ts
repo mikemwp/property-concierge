@@ -11,6 +11,7 @@ describe("ew market pack", () => {
       document_vault: true,
       hard_client_sla: true,
       case_threads: true,
+      seller_milestone_views: true,
     });
   });
 

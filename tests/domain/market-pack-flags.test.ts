@@ -71,6 +71,20 @@ describe("module flags are pack data", () => {
     expect(isModuleEnabled(EW_FLAGS, "case_threads")).toBe(true);
   });
 
+  it("runs seller milestone views in England & Wales only", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "seller_milestone_views"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual(["ew"]);
+    expect(
+      isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "seller_milestone_views"),
+    ).toBe(false);
+    expect(
+      isModuleEnabled(listMarketPacks().find((p) => p.id === "au_uk")!.flags, "seller_milestone_views"),
+    ).toBe(false);
+    expect(isModuleEnabled(EW_FLAGS, "seller_milestone_views")).toBe(true);
+  });
+
   it("turns corridor modules on only for the four corridor packs", () => {
     const inbound = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "corridor_inbound"))

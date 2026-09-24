@@ -25,6 +25,7 @@ describe("market pack summary", () => {
     expect(summary.modules.find((m) => m.key === "hard_client_sla")?.enabled).toBe(true);
     expect(summary.modules.find((m) => m.key === "document_vault")?.enabled).toBe(true);
     expect(summary.modules.find((m) => m.key === "case_threads")?.enabled).toBe(true);
+    expect(summary.modules.find((m) => m.key === "seller_milestone_views")?.enabled).toBe(true);
     expect(summary.stages.map((s) => s.key)).toEqual(
       ewMarketPack.buildStages("RETURNER_OVERSEAS").map((s) => s.key),
     );
@@ -85,6 +86,7 @@ describe("market pack summary", () => {
     expect(inbound.modules.find((m) => m.key === "chain_free_inventory")?.enabled).toBe(false);
     expect(inbound.modules.find((m) => m.key === "document_vault")?.enabled).toBe(false);
     expect(inbound.modules.find((m) => m.key === "case_threads")?.enabled).toBe(false);
+    expect(inbound.modules.find((m) => m.key === "seller_milestone_views")?.enabled).toBe(false);
     expect(inbound.modules.find((m) => m.key === "hard_client_sla")?.enabled).toBe(false);
     expect(inbound.stages.map((s) => s.key)).not.toContain("chain_free_matching");
     expect(inbound.playbookStageKeys).toEqual(inbound.stages.map((s) => s.key));
