@@ -11,6 +11,7 @@ import { StageTimeline } from "@/components/StageTimeline";
 import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { ChainFreeCertificationPanel } from "@/components/ChainFreeCertificationPanel";
 import { ClientSlaPublishPanel } from "@/components/ClientSlaPublishPanel";
+import { SellerMilestonePanel } from "@/components/SellerMilestonePanel";
 import { ThreadPanel } from "@/components/ThreadPanel";
 import { VaultPanel } from "@/components/VaultPanel";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
@@ -32,6 +33,7 @@ import {
   assertCertificationVisible,
   assertClientSlaVisible,
   assertPlaybookVisible,
+  assertSellerMilestonesVisible,
 } from "@/server/cockpit-policy";
 import { canUseChainFree, loadCertification } from "@/server/chain-free";
 import { canUseClientSla, loadClientSla } from "@/server/client-sla";
@@ -46,6 +48,12 @@ import {
   threadViewerFor,
 } from "@/server/threads";
 import { canUseVault, listVaultDocuments } from "@/server/vault";
+import {
+  canUseSellerMilestones,
+  loadSellerMilestoneView,
+  sellerSharePath,
+  signSellerShare,
+} from "@/server/seller-milestones";
 import { isPartnerActorRole, PARTNER_ROLES } from "@/domain/types";
 
 type Props = {
@@ -137,6 +145,14 @@ export default async function CockpitCasePage({ params }: Props) {
   const clientSlaEnabled = canUseClientSla(caseState);
   const clientSla = clientSlaEnabled ? await loadClientSla(caseState) : null;
   const clientSlaView = clientSla ? advisorSlaView(clientSla.commitment) : null;
+
+  assertSellerMilestonesVisible("ADVISOR");
+  const sellerViewEnabled = canUseSellerMilestones(caseState);
+  const sellerView = sellerViewEnabled ? loadSellerMilestoneView(caseState) : null;
+  const sellerSharePathValue =
+    sellerView?.summary.shareStatus === "LIVE"
+      ? sellerSharePath(caseId, signSellerShare(caseId))
+      : null;
 
   const tickets = partnerTickets(caseState, now).map((ticket) => ({
     ...ticket,
@@ -256,6 +272,14 @@ export default async function CockpitCasePage({ params }: Props) {
 
       {clientSlaView && (
         <ClientSlaPublishPanel caseId={caseId} view={clientSlaView} />
+      )}
+
+      {sellerView && (
+        <SellerMilestonePanel
+          caseId={caseId}
+          view={sellerView}
+          sharePath={sellerSharePathValue}
+        />
       )}
 
       <CaseAdminControls
