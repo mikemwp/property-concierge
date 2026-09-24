@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { auStubPack } from "../../src/domain/market-packs/au-stub";
 import {
+  CORRIDOR_PACK_IDS,
   DEFAULT_MARKET_PACK_ID,
   findMarketPack,
   listMarketPacks,
@@ -28,6 +29,13 @@ describe("market pack registry", () => {
       ["uk_us", true],
       ["us_uk", true],
     ]);
+  });
+
+  it("exports the four corridor pack ids in sorted order", () => {
+    expect(CORRIDOR_PACK_IDS).toEqual(["au_uk", "uk_au", "uk_us", "us_uk"]);
+    for (const id of CORRIDOR_PACK_IDS) {
+      expect(resolveMarketPack(id).enabled).toBe(true);
+    }
   });
 
   it("fails closed on an unknown pack id", () => {

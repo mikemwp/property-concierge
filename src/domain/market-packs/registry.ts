@@ -9,6 +9,9 @@ import { MarketPackError, type MarketPack } from "./types";
 /** The only place in TypeScript that names the v1 market. */
 export const DEFAULT_MARKET_PACK_ID = "ew";
 
+/** Sorted ids of the enabled bidirectional corridor packs. The au stub is not in this list. */
+export const CORRIDOR_PACK_IDS = ["au_uk", "uk_au", "uk_us", "us_uk"] as const;
+
 const PACKS: readonly MarketPack[] = [
   ewMarketPack,
   auStubPack,

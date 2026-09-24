@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { auStubPack } from "../../src/domain/market-packs/au-stub";
+import { auUkMarketPack } from "../../src/domain/market-packs/au-uk";
 import { ewMarketPack } from "../../src/domain/market-packs/ew";
+import { ukAuMarketPack } from "../../src/domain/market-packs/uk-au";
 import { marketPackSummary } from "../../src/domain/market-packs/inspector";
 import { MARKET_MODULE_KEYS } from "../../src/domain/market-packs/types";
 
@@ -72,5 +74,21 @@ describe("market pack summary", () => {
     expect(stub.stages.map((s) => s.key)).toContain("finance_path");
     expect(stub.playbookStageKeys).toEqual([]);
     expect(stub.evidenceKinds).toEqual([]);
+  });
+
+  it("summarises a corridor pack without leaking playbook prose", () => {
+    const inbound = marketPackSummary(auUkMarketPack, "RETURNER_OVERSEAS");
+    expect(inbound.enabled).toBe(true);
+    expect(inbound.modules.find((m) => m.key === "corridor_inbound")?.enabled).toBe(true);
+    expect(inbound.modules.find((m) => m.key === "chain_free_inventory")?.enabled).toBe(false);
+    expect(inbound.stages.map((s) => s.key)).not.toContain("chain_free_matching");
+    expect(inbound.playbookStageKeys).toEqual(inbound.stages.map((s) => s.key));
+
+    const outbound = marketPackSummary(ukAuMarketPack, "UK_RESIDENT_SPEED");
+    expect(outbound.locale.currencyCode).toBe("AUD");
+    expect(outbound.stages.map((s) => s.key)).toContain("finance_path");
+    expect(JSON.stringify(outbound)).not.toContain(
+      ukAuMarketPack.buildPlaybooks("UK_RESIDENT_SPEED")[0]!.objective,
+    );
   });
 });
