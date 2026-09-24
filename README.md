@@ -157,7 +157,7 @@ country-agnostic; everything local lives in `src/domain/market-packs/`:
 | Interface + pure helpers | `types.ts` | `MarketPack`, `MarketLocale`, `MarketFlags`, `MarketCopy`, `PartnerRoleLabels`, `StagePlaybook`, `MarketPackError` |
 | Money formatting | `locale.ts` | `formatMoney(locale, amount)` — no currency literal anywhere else |
 | E&W config | `ew-config.ts` | locale (`en-GB` / `GBP`), module flags, jurisdiction copy, partner-role labels |
-| E&W legal spine | `ew-stages.ts` | the nine stage templates and their evidence kinds |
+| E&W legal spine | `ew-stages.ts` | the canonical stage templates plus optional `chain_free_matching` when `chain_free_inventory` is on |
 | E&W operating IP | `ew-playbook.ts` | entry-context playbooks (advisor-only) |
 | E&W consumer law | `ew-disclosure.ts` | referral disclosure wording |
 | Assembly | `ew.ts`, `au-stub.ts` | pack objects only |
@@ -169,11 +169,11 @@ country-agnostic; everything local lives in `src/domain/market-packs/`:
 disabled pack throws `MarketPackError` — it never falls back to `ew`.
 
 **Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
-`isModuleEnabled`. The `ew` pack runs `fx_deposit` and `partner_speed_rails`;
-`chain_free_inventory`, `hard_client_sla`, `corridor_inbound`, `corridor_outbound` and
-`document_vault` are **off** in every pack — the spec §9 dependency rule as data, not a
-promise in a doc. Speed rails being on means adapter plumbing exists, not that any date is
-guaranteed. Enforced by `tests/domain/market-pack-flags.test.ts`.
+`isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails` and
+`chain_free_inventory`; `hard_client_sla`, `corridor_inbound`, `corridor_outbound` and
+`document_vault` stay **off** in every pack. `chain_free_inventory` is a buyer-side
+certification overlay (see below), not seller listings and not a promised date.
+Enforced by `tests/domain/market-pack-flags.test.ts`.
 
 **`au` is a stub, not a product.** It is registered and `enabled: false`, with a different
 currency, address shape and stage keys (`finance_path`, `settlement_complete`), no
@@ -191,6 +191,25 @@ is metadata; packs localise it through `MarketCopy` and `buildPlaybooks(entry)`.
 copy in `src/content/marketing.ts` is brand copy and is intentionally not pack data.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-market-packs.md`](docs/superpowers/plans/demo-script-market-packs.md).
+
+## Chain-free overlay (buyer-side, post-proof)
+
+Spec §13 sub-project 6. After the stage engine and partner scorecards shipped, `ew`
+may turn `chain_free_inventory` on as **data**. That flag unlocks:
+
+- `ChainFreeCertification` on a case — `NOT_ASSESSED` / `IN_PROGRESS` / `CERTIFIED` /
+  `INELIGIBLE` — derived from paid tier, partner participation / scorecard signals, and
+  accepted `source_of_funds` + `dip_aip` + `buyer_ready`. Advisors may certify, mark
+  ineligible, or reset with a written reason; each write is a ledger event.
+- A `chain_free_matching` stage between search and offer (title **Chain-free position**).
+  Same engine for `UK_RESIDENT_SPEED`. Not a parallel track.
+- Cockpit checklist (operating IP). Portal copy only when `CERTIFIED` or `IN_PROGRESS`.
+- A homepage hook. Paid orchestration remains the product.
+
+**Not in this overlay:** seller inventory, private seller–buyer introductions, agent or
+developer lead fees, hard client SLAs, Rightmove/Zoopla, an open marketplace.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-chain-free.md`](docs/superpowers/plans/demo-script-chain-free.md).
 
 ## Advisor operating IP
 

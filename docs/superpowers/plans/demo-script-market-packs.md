@@ -14,8 +14,8 @@ closed instead of silently behaving like the UK.
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
 2. Two packs are listed: `ew · England & Wales` (**active**) and `au · Australia (configuration stub — not enabled)` (**disabled**).
 3. On `ew`, confirm jurisdiction `england_wales`, locale `en-GB · GBP`, address keys `line1, line2, town, county, postcode`.
-4. Modules: `fx_deposit` and `partner_speed_rails` are **on**. `chain_free_inventory`, `hard_client_sla`, `corridor_inbound`, `corridor_outbound` and `document_vault` are **off** — the spec §9 dependency rule as data, not a promise in a doc. Speed rails being on means adapter plumbing exists, not that any date is guaranteed.
-5. The stage table shows the nine E&W stages with owner labels from the pack (`conveyancer`, `mortgage adviser`, `removals partner`), SLA days and required evidence.
+4. Modules: `fx_deposit`, `partner_speed_rails` and `chain_free_inventory` are **on**. `hard_client_sla`, `corridor_inbound`, `corridor_outbound` and `document_vault` are **off**. `chain_free_inventory` is buyer-side overlay data, not seller stock; `hard_client_sla` staying off is the rest of the spec §9 rule.
+5. The stage table shows the E&W stages (canonical spine plus chain-free position when the module is on) with owner labels from the pack (`conveyancer`, `mortgage adviser`, `removals partner`), SLA days and required evidence.
 6. Jurisdiction copy shows `region_prompt`, `directory_intro`, `mortgage_posture` and `jurisdiction_scope` — the same strings the funnel and portal render.
 7. Note what is **not** here: no playbook prose. Playbook IP still renders only on a case page.
 
