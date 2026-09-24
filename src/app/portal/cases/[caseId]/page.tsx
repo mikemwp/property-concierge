@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { submitEvidenceAction } from "@/app/actions/portal";
+import { ChainFreeStatusCard } from "@/components/ChainFreeStatusCard";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
 import { PartnerDirectory } from "@/components/PartnerDirectory";
 import { ReferralDisclosure } from "@/components/ReferralDisclosure";
 import { StageTimeline } from "@/components/StageTimeline";
 import { UpgradeCallout } from "@/components/UpgradeCallout";
+import { clientCertificationCopy } from "@/domain/chain-free";
 import { canViewSlaPressure, clientStageView } from "@/domain/freemium";
 import { canViewDirectory, directoryEntries } from "@/domain/panel";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
@@ -14,6 +16,7 @@ import { getFocusStage } from "@/domain/stage-engine";
 import { stageSlaDays, casePack } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
+import { canUseChainFree, loadCertification } from "@/server/chain-free";
 import { listPanel } from "@/server/panel";
 import { canPortalSubmit } from "@/server/portal-policy";
 import { listReferralsForCase } from "@/server/referrals";
@@ -42,6 +45,10 @@ export default async function PortalCasePage({ params }: Props) {
   const now = new Date();
   const referrals = await listReferralsForCase(caseId);
   const pack = casePack(caseState);
+  const chainFreeCopy =
+    canUseChainFree(caseState)
+      ? clientCertificationCopy((await loadCertification(caseState, now)).certification)
+      : null;
   const directory = canViewDirectory(caseState)
     ? directoryEntries(
         await listPanel({ activeOnly: true, marketPackId: caseState.marketPackId }),
@@ -97,6 +104,13 @@ export default async function PortalCasePage({ params }: Props) {
       <p className="mt-1 text-sm text-slate-600">
         {caseState.tier === "FREE_DIY" ? "Free DIY" : "Paid Done-With-You"}
       </p>
+
+      {chainFreeCopy && (
+        <ChainFreeStatusCard
+          headline={chainFreeCopy.headline}
+          body={chainFreeCopy.body}
+        />
+      )}
 
       {showUpgrade && <UpgradeCallout limitedCount={limitedCount} />}
 
