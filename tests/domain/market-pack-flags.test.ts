@@ -85,6 +85,17 @@ describe("module flags are pack data", () => {
     expect(isModuleEnabled(EW_FLAGS, "seller_milestone_views")).toBe(true);
   });
 
+  it("keeps the open marketplace off in every registered pack", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "open_marketplace"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual([]);
+    expect(MARKET_MODULE_KEYS).toContain("open_marketplace");
+    for (const pack of listMarketPacks()) {
+      expect(isModuleEnabled(pack.flags, "open_marketplace")).toBe(false);
+    }
+  });
+
   it("turns corridor modules on only for the four corridor packs", () => {
     const inbound = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "corridor_inbound"))

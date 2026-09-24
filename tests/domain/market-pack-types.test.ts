@@ -54,6 +54,7 @@ describe("pack-parametric helpers", () => {
   it("keeps the module and copy key sets closed", () => {
     expect(MARKET_MODULE_KEYS).toContain("chain_free_inventory");
     expect(MARKET_MODULE_KEYS).toContain("hard_client_sla");
+    expect(MARKET_MODULE_KEYS).toContain("open_marketplace");
     expect(MARKET_COPY_KEYS).toEqual([
       "jurisdiction_scope",
       "mortgage_posture",
