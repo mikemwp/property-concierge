@@ -19,7 +19,8 @@ describe("market pack summary", () => {
   it("lists every module with its state and every stage in order", () => {
     expect(summary.modules).toHaveLength(MARKET_MODULE_KEYS.length);
     expect(summary.modules.find((m) => m.key === "fx_deposit")?.enabled).toBe(true);
-    expect(summary.modules.find((m) => m.key === "chain_free_inventory")?.enabled).toBe(false);
+    expect(summary.modules.find((m) => m.key === "chain_free_inventory")?.enabled).toBe(true);
+    expect(summary.modules.find((m) => m.key === "hard_client_sla")?.enabled).toBe(false);
     expect(summary.stages.map((s) => s.key)).toEqual(
       ewMarketPack.buildStages("RETURNER_OVERSEAS").map((s) => s.key),
     );

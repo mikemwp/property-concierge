@@ -8,9 +8,8 @@ import {
   packModules,
 } from "../../src/domain/market-packs/types";
 
-/** Spec §9: "Do not sell chain-free inventory or hard SLAs until the stage engine and partner scorecards are real." */
+/** Spec §9: hard SLAs stay unsold. Chain-free inventory is on for ew as buyer overlay data only. */
 const GATED_MODULES = [
-  "chain_free_inventory",
   "hard_client_sla",
   "corridor_inbound",
   "corridor_outbound",
@@ -38,6 +37,16 @@ describe("module flags are pack data", () => {
       .filter((pack) => isModuleEnabled(pack.flags, "partner_speed_rails"))
       .map((pack) => pack.id);
     expect(enabled).toEqual(["ew"]);
+  });
+
+  it("runs the chain-free overlay in England & Wales only", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "chain_free_inventory"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual(["ew"]);
+    expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "hard_client_sla")).toBe(
+      false,
+    );
   });
 
   it("lists every module key with its resolved state for a pack", () => {

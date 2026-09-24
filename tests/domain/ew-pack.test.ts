@@ -7,6 +7,7 @@ describe("ew market pack", () => {
     expect(ewMarketPack.flags).toEqual({
       fx_deposit: true,
       partner_speed_rails: true,
+      chain_free_inventory: true,
     });
   });
 

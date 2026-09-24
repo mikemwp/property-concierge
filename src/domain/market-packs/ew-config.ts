@@ -13,13 +13,15 @@ export const EW_LOCALE: MarketLocale = {
 };
 
 /**
- * Spec §3: FX for the deposit is in v1 scope. Spec §9 Phase 2: speed rails are deep
- * partner integrations — on here as adapter plumbing only. Chain-free inventory and
- * hard client SLAs stay off until the ledger proves speed.
+ * Spec §3: FX for the deposit is in v1 scope. Spec §9 Phase 2: speed rails are
+ * adapter plumbing. Spec §13 sub-project 6: chain_free_inventory is on as
+ * buyer-side certification/matching data — not seller listings and not a
+ * client SLA. hard_client_sla stays off.
  */
 export const EW_FLAGS: MarketFlags = {
   fx_deposit: true,
   partner_speed_rails: true,
+  chain_free_inventory: true,
 };
 
 export const EW_COPY: MarketCopy = {
