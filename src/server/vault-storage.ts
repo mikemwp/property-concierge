@@ -108,3 +108,16 @@ export function createVaultStorage(
   }
   throw new VaultStorageError("UNKNOWN_DRIVER", `Unknown vault storage driver: ${driver}`);
 }
+
+let current: VaultStorageBackend | null = null;
+
+export function getVaultStorage(): VaultStorageBackend {
+  if (!current) {
+    current = createVaultStorage();
+  }
+  return current;
+}
+
+export function setVaultStorageForTests(backend: VaultStorageBackend | null): void {
+  current = backend;
+}

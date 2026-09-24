@@ -5,9 +5,11 @@ import { afterEach, describe, expect, it } from "vitest";
 import { vaultStorageKey } from "../../src/domain/vault";
 import {
   createVaultStorage,
+  getVaultStorage,
   LocalVaultStorage,
   readS3VaultConfig,
   S3VaultStorage,
+  setVaultStorageForTests,
   VaultStorageError,
 } from "../../src/server/vault-storage";
 
@@ -128,5 +130,24 @@ describe("createVaultStorage", () => {
     } catch (err) {
       expect((err as VaultStorageError).code).toBe("UNKNOWN_DRIVER");
     }
+  });
+});
+
+describe("getVaultStorage", () => {
+  afterEach(() => {
+    setVaultStorageForTests(null);
+    delete process.env.VAULT_STORAGE;
+  });
+
+  it("lazy-inits from process.env and can be replaced in tests", () => {
+    setVaultStorageForTests(null);
+    const first = getVaultStorage();
+    expect(first.kind).toBe("local");
+    expect(getVaultStorage()).toBe(first);
+    const replacement = new S3VaultStorage(null);
+    setVaultStorageForTests(replacement);
+    expect(getVaultStorage()).toBe(replacement);
+    setVaultStorageForTests(null);
+    expect(getVaultStorage().kind).toBe("local");
   });
 });
