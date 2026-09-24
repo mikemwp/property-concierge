@@ -50,11 +50,17 @@ Founder validation script for spec §8: a case-scoped document vault with role A
 
 ## What is real and what is absent
 
-| Layer | Status |
+| Layer | Status after this plan |
 |-------|--------|
-| **Real** | `VaultDocument` metadata; files under `var/vault/`; one-time ACTIVE lock; advisor reset; role ACL; vault-required PAID_DWY submit on `ew`; `/api/vault/[documentId]` |
-| **Stubbed** | Partner adapters still simulate vendor turnaround; they do not generate files |
-| **Absent** | S3 / cloud storage, base64-in-SQLite, seller login, open marketplace browse, enabling the au stub |
+| **Real** | `VaultStorageBackend`; `LocalVaultStorage` under `var/vault/` or `VAULT_ROOT`; factory; Prisma metadata unchanged |
+| **Stubbed** | `S3VaultStorage` throws `S3_NOT_CONFIGURED` or `S3_NOT_IMPLEMENTED` |
+| **Absent** | `@aws-sdk/client-s3`, presigned URLs, production `VAULT_STORAGE=s3` |
+
+## 6. Storage backend (local default)
+
+1. Default upload still lands under `var/vault/` (or `VAULT_ROOT` in tests).
+2. Setting `VAULT_STORAGE=s3` without `VAULT_S3_BUCKET` / `VAULT_S3_REGION` makes the next write throw. Do not set this in CI.
+3. There is no AWS package in `package.json`.
 
 ## Automated verification
 

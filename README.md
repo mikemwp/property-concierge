@@ -250,7 +250,11 @@ Spec §8. Paid England & Wales and live corridor cases store evidence files in a
 - Download: authenticated `GET /api/vault/[documentId]`.
 
 Live corridor packs reuse the same vault stack. The disabled `au` stub does not.
-No S3 in this release — bytes still live under `var/vault/`.
+Bytes go through `VaultStorageBackend`. Default driver is `LocalVaultStorage`
+(`VAULT_ROOT`, otherwise `var/vault/`). `VAULT_STORAGE=s3` selects `S3VaultStorage`,
+a stub that throws unless `VAULT_S3_BUCKET` and `VAULT_S3_REGION` are set, and
+still throws `S3_NOT_IMPLEMENTED` when they are — no AWS SDK and no CI
+dependency on a real bucket.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-document-vault.md`](docs/superpowers/plans/demo-script-document-vault.md).
 
