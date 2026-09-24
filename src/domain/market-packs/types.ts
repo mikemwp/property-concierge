@@ -156,6 +156,12 @@ export function isModuleEnabled(flags: MarketFlags, key: MarketModuleKey): boole
   return flags[key] === true;
 }
 
+export type MarketplacePolicy = "curated_panel" | "open_marketplace";
+
+export function marketplacePolicy(flags: MarketFlags): MarketplacePolicy {
+  return isModuleEnabled(flags, "open_marketplace") ? "open_marketplace" : "curated_panel";
+}
+
 export type MarketModuleRow = { key: MarketModuleKey; enabled: boolean };
 
 /** Every module key with its resolved state — for the advisor pack inspector. */

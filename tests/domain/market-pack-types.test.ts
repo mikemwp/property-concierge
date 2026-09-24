@@ -5,6 +5,7 @@ import {
   isModuleEnabled,
   MARKET_COPY_KEYS,
   MARKET_MODULE_KEYS,
+  marketplacePolicy,
   packEvidenceKinds,
   partnerRoleLabel,
   stagePlaybook,
@@ -37,6 +38,12 @@ describe("pack-parametric helpers", () => {
     expect(isModuleEnabled(pack.flags, "corridor_inbound")).toBe(true);
     expect(isModuleEnabled(pack.flags, "chain_free_inventory")).toBe(false);
     expect(isModuleEnabled({}, "fx_deposit")).toBe(false);
+  });
+
+  it("treats an omitted open_marketplace flag as a curated panel", () => {
+    expect(marketplacePolicy({})).toBe("curated_panel");
+    expect(marketplacePolicy({ open_marketplace: false })).toBe("curated_panel");
+    expect(marketplacePolicy({ open_marketplace: true })).toBe("open_marketplace");
   });
 
   it("labels partner roles from the pack, not from a hardcoded map", () => {

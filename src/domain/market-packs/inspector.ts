@@ -2,6 +2,7 @@ import { PARTNER_ROLES, type ActorRole, type EntryContext } from "../types";
 import {
   getStageTemplate,
   MARKET_COPY_KEYS,
+  marketplacePolicy,
   milestonesForRole,
   packEvidenceKinds,
   packModules,
@@ -9,6 +10,7 @@ import {
   type MarketLocale,
   type MarketModuleRow,
   type MarketPack,
+  type MarketplacePolicy,
 } from "./types";
 
 export type MarketPackStageRow = {
@@ -31,6 +33,7 @@ export type MarketPackSummary = {
   jurisdiction: string;
   enabled: boolean;
   locale: MarketLocale;
+  marketplacePolicy: MarketplacePolicy;
   modules: MarketModuleRow[];
   copy: Array<{ key: MarketCopyKey; text: string }>;
   partnerRoleLabels: Array<{ role: ActorRole; label: string }>;
@@ -51,6 +54,7 @@ export function marketPackSummary(
     jurisdiction: pack.jurisdiction,
     enabled: pack.enabled,
     locale: pack.locale,
+    marketplacePolicy: marketplacePolicy(pack.flags),
     modules: packModules(pack),
     copy: MARKET_COPY_KEYS.map((key) => ({ key, text: pack.copy[key] })),
     partnerRoleLabels: Object.entries(pack.partnerRoleLabels).map(([role, label]) => ({

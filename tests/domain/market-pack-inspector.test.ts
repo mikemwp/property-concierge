@@ -16,6 +16,7 @@ describe("market pack summary", () => {
     expect(summary.enabled).toBe(true);
     expect(summary.entryContext).toBe("RETURNER_OVERSEAS");
     expect(summary.locale.currencyCode).toBe("GBP");
+    expect(summary.marketplacePolicy).toBe("curated_panel");
   });
 
   it("lists every module with its state and every stage in order", () => {
@@ -77,10 +78,12 @@ describe("market pack summary", () => {
     expect(stub.stages.map((s) => s.key)).toContain("finance_path");
     expect(stub.playbookStageKeys).toEqual([]);
     expect(stub.evidenceKinds).toEqual([]);
+    expect(stub.marketplacePolicy).toBe("curated_panel");
   });
 
   it("summarises a corridor pack without leaking playbook prose", () => {
     const inbound = marketPackSummary(auUkMarketPack, "RETURNER_OVERSEAS");
+    expect(inbound.marketplacePolicy).toBe("curated_panel");
     expect(inbound.enabled).toBe(true);
     expect(inbound.modules.find((m) => m.key === "corridor_inbound")?.enabled).toBe(true);
     expect(inbound.modules.find((m) => m.key === "chain_free_inventory")?.enabled).toBe(false);
