@@ -52,3 +52,11 @@ export function assertClientSlaVisible(viewerRole: ActorRole): void {
     );
   }
 }
+
+export function assertSellerMilestonesVisible(viewerRole: ActorRole): void {
+  if (viewerRole !== "ADVISOR") {
+    throw new CockpitPolicyError(
+      "Seller milestone share controls are advisor-only operating IP",
+    );
+  }
+}
