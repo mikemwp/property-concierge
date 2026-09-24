@@ -95,3 +95,16 @@ export class S3VaultStorage implements VaultStorageBackend {
     }
   }
 }
+
+export function createVaultStorage(
+  env: NodeJS.ProcessEnv = process.env,
+): VaultStorageBackend {
+  const driver = (env.VAULT_STORAGE ?? "local").trim() || "local";
+  if (driver === "local") {
+    return new LocalVaultStorage(env.VAULT_ROOT?.trim() || defaultVaultRoot());
+  }
+  if (driver === "s3") {
+    return new S3VaultStorage(readS3VaultConfig(env));
+  }
+  throw new VaultStorageError("UNKNOWN_DRIVER", `Unknown vault storage driver: ${driver}`);
+}

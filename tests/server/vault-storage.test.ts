@@ -4,6 +4,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { vaultStorageKey } from "../../src/domain/vault";
 import {
+  createVaultStorage,
   LocalVaultStorage,
   readS3VaultConfig,
   S3VaultStorage,
@@ -90,6 +91,42 @@ describe("S3VaultStorage stub", () => {
     } catch (err) {
       expect(err).toBeInstanceOf(VaultStorageError);
       expect((err as VaultStorageError).code).toBe("S3_NOT_IMPLEMENTED");
+    }
+  });
+});
+
+describe("createVaultStorage", () => {
+  it("defaults to local and honours VAULT_ROOT", () => {
+    root = mkdtempSync(path.join(tmpdir(), "vault-factory-"));
+    const backend = createVaultStorage({ VAULT_ROOT: root });
+    expect(backend.kind).toBe("local");
+    backend.write("caseB/docB", new Uint8Array([9]));
+    expect(Array.from(backend.read("caseB/docB"))).toEqual([9]);
+    expect(createVaultStorage({ VAULT_STORAGE: "local", VAULT_ROOT: root }).kind).toBe("local");
+    expect(createVaultStorage({}).kind).toBe("local");
+  });
+
+  it("returns the S3 stub when VAULT_STORAGE=s3 and does not require AWS", () => {
+    const unconfigured = createVaultStorage({ VAULT_STORAGE: "s3" });
+    expect(unconfigured.kind).toBe("s3");
+    expect(() => unconfigured.write("caseB/docB", new Uint8Array([1]))).toThrowError(
+      /VAULT_S3_BUCKET/,
+    );
+    const configured = createVaultStorage({
+      VAULT_STORAGE: "s3",
+      VAULT_S3_BUCKET: "docs",
+      VAULT_S3_REGION: "eu-west-2",
+    });
+    expect(configured.kind).toBe("s3");
+    expect(() => configured.read("caseB/docB")).toThrowError(/stub/i);
+  });
+
+  it("rejects an unknown driver", () => {
+    expect(() => createVaultStorage({ VAULT_STORAGE: "gcs" })).toThrow(VaultStorageError);
+    try {
+      createVaultStorage({ VAULT_STORAGE: "gcs" });
+    } catch (err) {
+      expect((err as VaultStorageError).code).toBe("UNKNOWN_DRIVER");
     }
   });
 });
