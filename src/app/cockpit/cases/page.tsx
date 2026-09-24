@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CreateAdvisorCaseForm } from "@/components/CreateAdvisorCaseForm";
 import { auth } from "@/lib/auth";
 import { listCasesForUser } from "@/server/cases";
 
@@ -18,6 +19,8 @@ export default async function CockpitCasesPage() {
         Advance stages, accept evidence, and request warm intros.
       </p>
 
+      <CreateAdvisorCaseForm />
+
       {cases.length === 0 ? (
         <p className="mt-6 text-slate-500">No cases assigned.</p>
       ) : (
@@ -34,6 +37,9 @@ export default async function CockpitCasesPage() {
                 </span>
                 <span className="ml-2 rounded bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700">
                   {c.leadSource.replace(/_/g, " ").toLowerCase()}
+                </span>
+                <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                  {c.marketPackId}
                 </span>
               </Link>
             </li>

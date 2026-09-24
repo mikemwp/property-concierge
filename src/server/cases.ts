@@ -231,7 +231,9 @@ export async function listFunnelRows(): Promise<FunnelCaseRow[]> {
 
 export async function listCasesForUser(
   userId: string,
-): Promise<Array<{ id: string; title: string; tier: string; leadSource: string }>> {
+): Promise<
+  Array<{ id: string; title: string; tier: string; leadSource: string; marketPackId: string }>
+> {
   const participants = await prisma.caseParticipant.findMany({
     where: { userId },
     include: { case: true },
@@ -243,6 +245,7 @@ export async function listCasesForUser(
     title: participant.case.title,
     tier: participant.case.tier,
     leadSource: participant.case.leadSource,
+    marketPackId: participant.case.marketPackId,
   }));
 }
 
