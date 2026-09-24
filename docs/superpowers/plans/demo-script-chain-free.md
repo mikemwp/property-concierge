@@ -6,13 +6,13 @@ Founder validation script for the **buyer-side certification overlay, not a sell
 
 ---
 
-## 1. The module is on for ew, and it is still not a hard SLA
+## 1. The module is on for ew; published dates are still targets
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
-2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails` and `chain_free_inventory` are **on**; `hard_client_sla` is **off**.
+2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails`, `chain_free_inventory` and `hard_client_sla` are **on**.
 3. The stage table now lists **Chain-free position** (`chain_free_matching`) between **Search readiness** and **Offer → instruct**, SLA 7 days, evidence `chain_free_position`.
 4. Select the **`au`** stub. Confirm `chain_free_inventory` and `hard_client_sla` are **off**. The stub still has no matching stage.
-5. `chain_free_inventory` being on means the buyer overlay exists as pack data. It does **not** mean we hold seller stock or that any date is guaranteed.
+5. `chain_free_inventory` being on means the buyer overlay exists as pack data. It does **not** mean we hold seller stock or that any date is guaranteed. Hard client SLA is Plan 9 — published targets with carve-outs, not a completion guarantee.
 
 ## 2. A new paid case carries the matching stage
 
@@ -58,7 +58,7 @@ Founder validation script for the **buyer-side certification overlay, not a sell
 |-------|--------|
 | **Real** | `ChainFreeCertification` derived from ledger + scorecard signals; advisor override events; `chain_free_matching` stage + playbook on `ew`; cockpit checklist; portal status copy; `chain_free_inventory: true` on `ew` |
 | **Stubbed** | Nothing new. Partner adapters and the inbound webhook stay Plan 5 stubs. |
-| **Absent** | Seller listings / inventory, private seller–buyer introductions, agent or developer lead fees, Rightmove/Zoopla, hard client SLAs, guaranteed completion dates, AU/US corridor content, document vault, open marketplace |
+| **Absent** | Seller listings / inventory, private seller–buyer introductions, agent or developer lead fees, Rightmove/Zoopla, marketing guarantees, AU/US corridor content, document vault, open marketplace |
 
 ---
 

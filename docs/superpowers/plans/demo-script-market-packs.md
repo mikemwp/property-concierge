@@ -14,7 +14,7 @@ closed instead of silently behaving like the UK.
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
 2. Six packs are listed, sorted by id: `au` (disabled), `au_uk` (active), `ew` (active), `uk_au` (active), `uk_us` (active), `us_uk` (active).
 3. On `ew`, confirm jurisdiction `england_wales`, locale `en-GB · GBP`, address keys `line1, line2, town, county, postcode`.
-4. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory` and `document_vault` are **on**. `corridor_inbound` and `corridor_outbound` are **on for corridor packs only**; they stay **off** on `ew` and `au`. `hard_client_sla` is **off** in every pack. `chain_free_inventory` is buyer-side overlay data, not seller stock; `document_vault` is the paid E&W file store; `hard_client_sla` staying off is the rest of the spec §9 rule.
+4. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault` and `hard_client_sla` are **on**. `corridor_inbound` and `corridor_outbound` are **on for corridor packs only**; they stay **off** on `ew` and `au`. `chain_free_inventory` is buyer-side overlay data, not seller stock; `document_vault` is the paid E&W file store; `hard_client_sla` is published target timelines with carve-outs, not a marketing guarantee.
 5. The stage table shows the E&W stages (canonical spine plus chain-free position when the module is on) with owner labels from the pack (`conveyancer`, `mortgage adviser`, `removals partner`), SLA days and required evidence.
 6. Jurisdiction copy shows `region_prompt`, `directory_intro`, `mortgage_posture` and `jurisdiction_scope` — the same strings the funnel and portal render.
 7. Note what is **not** here: no playbook prose. Playbook IP still renders only on a case page.
@@ -52,7 +52,6 @@ which asserts exactly this:
 
 1. `npm test -- tests/domain/engine-country-agnostic.test.ts` — the engine-global modules
    contain no `£`, `GBP`, `en-GB`, `england` or `wales`, and never import the `ew` pack.
-2. `npm test -- tests/domain/market-pack-flags.test.ts` — chain-free and hard-SLA modules
-   are off in every registered pack.
+2. `npm test -- tests/domain/market-pack-flags.test.ts` — `hard_client_sla` is on for `ew` only; corridor packs and the `au` stub stay off.
 3. `npm test -- tests/domain/market-pack-inspector.test.ts` — the inspector view model
    carries no playbook prose.

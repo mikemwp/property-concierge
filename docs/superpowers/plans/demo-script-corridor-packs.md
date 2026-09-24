@@ -10,7 +10,7 @@ Founder validation script for the **bidirectional corridor** thesis: the stage e
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
 2. Confirm the sorted list: `au` (disabled), `au_uk` (active), `ew` (active), `uk_au` (active), `uk_us` (active), `us_uk` (active).
-3. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault` **on**. `corridor_inbound`, `corridor_outbound`, `hard_client_sla` **off**. Stage table still includes **Chain-free position**.
+3. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla` **on**. `corridor_inbound`, `corridor_outbound` **off**. Stage table still includes **Chain-free position**.
 4. Select **`au`**. Still disabled. `finance_path` is present, playbooks are empty, every module is off. `resolveMarketPack("au")` still refuses to back a case.
 5. This stub is architecture proof. It is not the Australia product.
 

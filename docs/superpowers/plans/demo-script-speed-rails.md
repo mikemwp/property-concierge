@@ -9,8 +9,8 @@ Founder validation script for the **deep integrations behind a clean port, stubb
 ## 1. The rail is a flag, and it is off in markets we have not built
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
-2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails` and `chain_free_inventory` are **on**; `hard_client_sla` is **off**.
-3. Select the **`au`** stub pack. Confirm `partner_speed_rails`, `chain_free_inventory` and `hard_client_sla` are **off**.
+2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails`, `chain_free_inventory` and `hard_client_sla` are **on**.
+3. Select the **`au`** stub pack. Confirm `partner_speed_rails`, `chain_free_inventory` are **off** and `hard_client_sla` is **off**.
 4. Speed rails being on for `ew` means adapter plumbing exists — not that any date is guaranteed to a client.
 
 ## 2. A ticket opens
@@ -105,7 +105,7 @@ Expected response: `{"ok":true,"applied":"SUBMIT_EVIDENCE"}`. On the cockpit cas
 |-------|--------|
 | **Real** | The `PartnerPort` interface, ledger events (`PARTNER_CASE_ACKNOWLEDGED`, `PARTNER_STATUS_SYNCED`, `PARTNER_MILESTONE_REPORTED`, `PARTNER_UPDATE_REJECTED`), inbound status mapping, the `canUseSpeedRails` / `assertSpeedRails` gate, partner mini-view and advisor integration panel |
 | **Stubbed** | The three role-specific adapters' turnaround simulation (`stub-mortgage`, `stub-conveyancer`, `stub-move`) and the loopback webhook at `/api/partner-updates` |
-| **Absent** | Every live vendor API, OAuth, hard client SLAs, and any client-facing guaranteed date. Chain-free certification is Plan 6 — a buyer overlay, not a vendor rail. |
+| **Absent** | Every live vendor API, OAuth, marketing guarantees and Rightmove-style completion promises, and any client-facing guaranteed date. Chain-free certification is Plan 6 — a buyer overlay, not a vendor rail. |
 
 ---
 
