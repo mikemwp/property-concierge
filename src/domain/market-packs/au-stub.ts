@@ -2,11 +2,11 @@ import type { EntryContext } from "../types";
 import { MarketPackError, type MarketPack, type StageTemplate } from "./types";
 
 /**
- * Spec §3: "Second-country market packs (architecture ready only)". This pack exists
- * to prove the registry resolves more than one pack — it deliberately ships no AU
- * journeys, playbooks, evidence standards, partners or disclosure copy. It stays
- * `enabled: false`, so `resolveMarketPack("au")` refuses to back a case.
- * Corridor product work is Plan 7.
+ * Spec §3: "Second-country market packs (architecture ready only)". This pack
+ * exists to prove the registry resolves more than one pack — it deliberately
+ * ships no AU journeys, playbooks, evidence standards, partners or disclosure
+ * copy. It stays `enabled: false`, so `resolveMarketPack("au")` refuses to
+ * back a case. Live AU destination work is the `uk_au` corridor pack.
  */
 function auStageTemplates(_entry: EntryContext): StageTemplate[] {
   /** Spec §10 country-agnostic spine. SLA cadence is a placeholder; the pack cannot run. */
@@ -62,9 +62,9 @@ export const auStubPack: MarketPack = {
   },
   buildStages: auStageTemplates,
   buildPlaybooks: () => [],
-  /** AU partner process language is Plan 7. */
+  /** AU partner process language lives on uk_au, not on this stub. */
   partnerMilestones: () => [],
   disclosureText: () => {
-    throw new MarketPackError("Australia disclosure copy is not written yet");
+    throw new MarketPackError("Australia disclosure copy is not written on the stub; use uk_au");
   },
 };
