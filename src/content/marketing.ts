@@ -190,13 +190,13 @@ export const FORBIDDEN_INVENTORY_PATTERNS: RegExp[] = [
   /private seller/i,
   /listing feed/i,
   /onward chain inventory/i,
-  /(?<!\bnot )introduc(?:e|tion) .{0,40}seller/i,
+  /introduc(?:e|tion) .{0,40}seller/i,
 ];
 
 export const CHAIN_FREE_HOOK = {
   eyebrow: "Beachhead, not the product",
   headline: "Chain-free buyers use the same engine.",
-  body: "Paid orchestration certifies a household as chain-free from the stage ledger — not from star ratings, and not from a seller inventory. UK-resident speed-seekers enter the same way. We do not introduce buyers to sellers for a fee.",
+  body: "Paid orchestration certifies a household as chain-free from the stage ledger — not from star ratings, and not from a seller inventory. UK-resident speed-seekers enter the same way.",
 };
 
 export const OUT_OF_SCOPE_GEO_PATTERNS: RegExp[] = [
