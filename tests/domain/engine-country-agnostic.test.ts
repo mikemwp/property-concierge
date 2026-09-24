@@ -26,6 +26,8 @@ const ENGINE_GLOBAL_FILES = [
   "src/server/mappers.ts",
   "src/lib/case-pack.ts",
   "src/server/referrals.ts",
+  "src/server/vault.ts",
+  "src/server/vault-store.ts",
 ];
 
 const JURISDICTION_LITERAL = /£|\bGBP\b|en-GB|england|wales/i;
