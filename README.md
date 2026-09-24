@@ -156,10 +156,17 @@ country-agnostic; everything local lives in `src/domain/market-packs/`:
 |---|---|---|
 | Interface + pure helpers | `types.ts` | `MarketPack`, `MarketLocale`, `MarketFlags`, `MarketCopy`, `PartnerRoleLabels`, `StagePlaybook`, `MarketPackError` |
 | Money formatting | `locale.ts` | `formatMoney(locale, amount)` — no currency literal anywhere else |
+| Corridor helpers | `corridor.ts` | shared corridor copy and evidence kinds |
 | E&W config | `ew-config.ts` | locale (`en-GB` / `GBP`), module flags, jurisdiction copy, partner-role labels |
 | E&W legal spine | `ew-stages.ts` | the canonical stage templates plus optional `chain_free_matching` when `chain_free_inventory` is on |
 | E&W operating IP | `ew-playbook.ts` | entry-context playbooks (advisor-only) |
 | E&W consumer law | `ew-disclosure.ts` | referral disclosure wording |
+| AU→E&W corridor | `au-uk-config.ts`, `au-uk-stages.ts`, `au-uk-playbook.ts`, `au-uk.ts` | inbound Australia → England & Wales pack |
+| US→E&W corridor | `us-uk-config.ts`, `us-uk-stages.ts`, `us-uk-playbook.ts`, `us-uk.ts` | inbound United States → England & Wales pack |
+| UK→AU corridor | `uk-au-config.ts`, `uk-au-stages.ts`, `uk-au-playbook.ts`, `uk-au.ts` | outbound United Kingdom → Australia pack |
+| UK→US corridor | `uk-us-config.ts`, `uk-us-stages.ts`, `uk-us-playbook.ts`, `uk-us.ts` | outbound United Kingdom → United States pack |
+| AU consumer law | `au-disclosure.ts` | Australian referral disclosure wording |
+| US consumer law | `us-disclosure.ts` | United States referral disclosure wording |
 | Assembly | `ew.ts`, `au-stub.ts` | pack objects only |
 | Resolution | `registry.ts` | `DEFAULT_MARKET_PACK_ID`, `listMarketPacks`, `resolveMarketPack` |
 | Cockpit view model | `inspector.ts` | read-only `marketPackSummary` |
@@ -170,15 +177,22 @@ disabled pack throws `MarketPackError` — it never falls back to `ew`.
 
 **Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
 `isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails` and
-`chain_free_inventory`; `hard_client_sla`, `corridor_inbound`, `corridor_outbound` and
-`document_vault` stay **off** in every pack. `chain_free_inventory` is a buyer-side
-certification overlay (see below), not seller listings and not a promised date.
-Enforced by `tests/domain/market-pack-flags.test.ts`.
+`chain_free_inventory`. The four corridor packs (`au_uk`, `uk_au`, `us_uk`, `uk_us`)
+run `fx_deposit`, `corridor_inbound` and `corridor_outbound`. `hard_client_sla` and
+`document_vault` stay **off** in every pack. `chain_free_inventory` and
+`partner_speed_rails` stay **ew-only**. Enforced by `tests/domain/market-pack-flags.test.ts`.
 
-**`au` is a stub, not a product.** It is registered and `enabled: false`, with a different
-currency, address shape and stage keys (`finance_path`, `settlement_complete`), no
-playbooks, no evidence kinds and no partners. It exists to prove the registry resolves more
-than one pack. Corridor journeys (AU↔UK, US↔UK) are a later plan.
+**`au` is still a stub, not a product.** It stays registered and `enabled: false`.
+Live Australia destination work is the `uk_au` corridor pack. Domestic AU-only and
+US-only packs wait until these corridors are proven.
+
+**Corridor packs (Plan 7).** Destination jurisdiction owns the legal spine:
+`au_uk` / `us_uk` reuse England & Wales (`mortgage_path`, `exchange_complete`);
+`uk_au` uses `finance_path` + `settlement_complete`; `uk_us` uses `finance_path` +
+`closing_complete`. `/start` can open `ew`, `au_uk` and `us_uk`. Advisors open
+`uk_au` and `uk_us` from the cockpit. Packs are not reassigned on a live case.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-corridor-packs.md`](docs/superpowers/plans/demo-script-corridor-packs.md).
 
 **What stays engine-global:** the stage engine, pressure/escalation model, freemium
 discipline, partner scorecards and advisor cockpit. `tests/domain/engine-country-agnostic.test.ts`
