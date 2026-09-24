@@ -8,17 +8,7 @@ import {
   packModules,
 } from "../../src/domain/market-packs/types";
 
-const GATED_MODULES = ["hard_client_sla"] as const;
-
 describe("module flags are pack data", () => {
-  it("keeps every globally gated module off in every registered pack", () => {
-    for (const pack of listMarketPacks()) {
-      for (const key of GATED_MODULES) {
-        expect(isModuleEnabled(pack.flags, key), `${pack.id}.${key}`).toBe(false);
-      }
-    }
-  });
-
   it("enables FX on the beachhead pack and on every registered corridor pack", () => {
     const enabled = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "fx_deposit"))
@@ -38,9 +28,20 @@ describe("module flags are pack data", () => {
       .filter((pack) => isModuleEnabled(pack.flags, "chain_free_inventory"))
       .map((pack) => pack.id);
     expect(enabled).toEqual(["ew"]);
+  });
+
+  it("runs hard client SLA in England & Wales only", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "hard_client_sla"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual(["ew"]);
     expect(
       isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "hard_client_sla"),
     ).toBe(false);
+    expect(
+      isModuleEnabled(listMarketPacks().find((p) => p.id === "au_uk")!.flags, "hard_client_sla"),
+    ).toBe(false);
+    expect(isModuleEnabled(EW_FLAGS, "hard_client_sla")).toBe(true);
   });
 
   it("runs the document vault in England & Wales only", () => {
@@ -54,7 +55,6 @@ describe("module flags are pack data", () => {
     expect(
       isModuleEnabled(listMarketPacks().find((p) => p.id === "au_uk")!.flags, "document_vault"),
     ).toBe(false);
-    expect(isModuleEnabled(EW_FLAGS, "hard_client_sla")).toBe(false);
   });
 
   it("turns corridor modules on only for the four corridor packs", () => {
@@ -78,7 +78,7 @@ describe("module flags are pack data", () => {
     const rows = packModules(listMarketPacks().find((p) => p.id === "ew")!);
     expect(rows).toHaveLength(MARKET_MODULE_KEYS.length);
     expect(rows.find((r) => r.key === "fx_deposit")?.enabled).toBe(true);
-    expect(rows.find((r) => r.key === "hard_client_sla")?.enabled).toBe(false);
+    expect(rows.find((r) => r.key === "hard_client_sla")?.enabled).toBe(true);
   });
 });
 

@@ -15,14 +15,17 @@ export const EW_LOCALE: MarketLocale = {
 /**
  * Spec §3: FX for the deposit is in v1 scope. Spec §9 Phase 2: speed rails are
  * adapter plumbing. Spec §13 sub-project 6: chain_free_inventory is on as
- * buyer-side certification/matching data — not seller listings and not a
- * client SLA. Spec §8: document_vault is on for ew only. hard_client_sla stays off.
+ * buyer-side certification/matching data — not seller listings. Spec §8:
+ * document_vault is on for ew only. Spec §5/§9: hard_client_sla is on for ew
+ * only as published target timelines with legal carve-outs — not a marketing
+ * guarantee.
  */
 export const EW_FLAGS: MarketFlags = {
   fx_deposit: true,
   partner_speed_rails: true,
   chain_free_inventory: true,
   document_vault: true,
+  hard_client_sla: true,
 };
 
 export const EW_COPY: MarketCopy = {

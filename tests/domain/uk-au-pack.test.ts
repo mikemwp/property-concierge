@@ -29,6 +29,7 @@ describe("uk_au corridor pack", () => {
     expect(packEvidenceKinds(auStubPack)).toEqual([]);
     expect(isModuleEnabled(ukAuMarketPack.flags, "chain_free_inventory")).toBe(false);
     expect(isModuleEnabled(ukAuMarketPack.flags, "partner_speed_rails")).toBe(false);
+    expect(isModuleEnabled(ukAuMarketPack.flags, "hard_client_sla")).toBe(false);
   });
 
   it("uses the AU legal spine, not mortgage_path or exchange_complete", () => {

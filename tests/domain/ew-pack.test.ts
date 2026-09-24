@@ -9,6 +9,7 @@ describe("ew market pack", () => {
       partner_speed_rails: true,
       chain_free_inventory: true,
       document_vault: true,
+      hard_client_sla: true,
     });
   });
 
