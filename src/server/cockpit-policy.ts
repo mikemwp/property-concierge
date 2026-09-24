@@ -44,3 +44,11 @@ export function assertPackInspectorVisible(viewerRole: ActorRole): void {
     );
   }
 }
+
+export function assertClientSlaVisible(viewerRole: ActorRole): void {
+  if (viewerRole !== "ADVISOR") {
+    throw new CockpitPolicyError(
+      "Client SLA publish controls are advisor-only operating IP",
+    );
+  }
+}
