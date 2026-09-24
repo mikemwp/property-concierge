@@ -109,6 +109,14 @@ superseded, partner participant swapped). Free DIY cases get a names-only
 
 Walkthrough: [`docs/superpowers/plans/demo-script-partner-network.md`](docs/superpowers/plans/demo-script-partner-network.md).
 
+## Open marketplace (architecture stub)
+
+Spec §2 / §7. `open_marketplace` is a registered module key and stays **off** on
+every pack. The pack inspector reports `marketplacePolicy: curated_panel`.
+There is no browse UI and no partner self-signup.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-open-marketplace.md`](docs/superpowers/plans/demo-script-open-marketplace.md).
+
 ## Partner speed rails (deep integrations, stubbed)
 
 Paid England & Wales cases with the `partner_speed_rails` module on get a **clean integration port** behind which manual ops, stub adapters and future vendor clients are interchangeable implementations.

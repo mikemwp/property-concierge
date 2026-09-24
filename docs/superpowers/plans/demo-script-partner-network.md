@@ -12,6 +12,7 @@ Founder validation script for the **curated panel + ledger scorecards + disclose
 2. Confirm five rows: Priya Nair (mortgage), Ravi Patel (mortgage, **inactive**), Tom Ashby and Lena Okoro (conveyancers), Dan Whitfield (move).
 3. Every rating reads **no data** — the ledger has not yet attributed a partner-owned stage.
 4. Click **Demote** on Lena → she greys out; **Reinstate** restores her. There is no partner self-signup anywhere.
+5. The `open_marketplace` module key is registered on every pack but stays **off**; `/cockpit/market-packs` shows **Partner policy: curated panel**. There is no browse UI.
 
 ## 2. A warm intro names a partner and records a disclosure
 
