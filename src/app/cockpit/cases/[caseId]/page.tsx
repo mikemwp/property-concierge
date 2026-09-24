@@ -10,9 +10,11 @@ import { ReferralPanel } from "@/components/ReferralPanel";
 import { StageTimeline } from "@/components/StageTimeline";
 import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { ChainFreeCertificationPanel } from "@/components/ChainFreeCertificationPanel";
+import { ClientSlaPublishPanel } from "@/components/ClientSlaPublishPanel";
 import { VaultPanel } from "@/components/VaultPanel";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
 import { advisorCertificationView } from "@/domain/chain-free";
+import { advisorSlaView } from "@/domain/client-sla";
 import { advisorStageView, canUseWarmIntro } from "@/domain/freemium";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
 import {
@@ -25,8 +27,13 @@ import { advisorPlaybook } from "@/lib/cockpit-playbook";
 import { casePack, stageSlaDays } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
-import { assertCertificationVisible, assertPlaybookVisible } from "@/server/cockpit-policy";
+import {
+  assertCertificationVisible,
+  assertClientSlaVisible,
+  assertPlaybookVisible,
+} from "@/server/cockpit-policy";
 import { canUseChainFree, loadCertification } from "@/server/chain-free";
+import { canUseClientSla, loadClientSla } from "@/server/client-sla";
 import { listPanel } from "@/server/panel";
 import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
 import { displayTicketAdapterId } from "@/lib/partner-adapters/registry";
@@ -108,6 +115,11 @@ export default async function CockpitCasePage({ params }: Props) {
   const chainFreeView = chainFree
     ? advisorCertificationView(chainFree.certification)
     : null;
+
+  assertClientSlaVisible("ADVISOR");
+  const clientSlaEnabled = canUseClientSla(caseState);
+  const clientSla = clientSlaEnabled ? await loadClientSla(caseState) : null;
+  const clientSlaView = clientSla ? advisorSlaView(clientSla.commitment) : null;
 
   const tickets = partnerTickets(caseState, now).map((ticket) => ({
     ...ticket,
@@ -215,6 +227,10 @@ export default async function CockpitCasePage({ params }: Props) {
 
       {chainFreeView && (
         <ChainFreeCertificationPanel caseId={caseId} view={chainFreeView} />
+      )}
+
+      {clientSlaView && (
+        <ClientSlaPublishPanel caseId={caseId} view={clientSlaView} />
       )}
 
       <CaseAdminControls

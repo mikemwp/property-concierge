@@ -40,13 +40,25 @@ describe("SLA publish-panel visibility", () => {
 });
 
 describe("cockpit wiring contract", () => {
-  it("keeps the publish panel import off the portal page", () => {
+  it("renders the publish panel on the advisor case page and keeps checklist IP off the portal", () => {
+    const cockpit = readFileSync(
+      path.resolve(process.cwd(), "src/app/cockpit/cases/[caseId]/page.tsx"),
+      "utf8",
+    );
     const portal = readFileSync(
       path.resolve(process.cwd(), "src/app/portal/cases/[caseId]/page.tsx"),
       "utf8",
     );
+    const panel = readFileSync(
+      path.resolve(process.cwd(), "src/app/cockpit/panel/page.tsx"),
+      "utf8",
+    );
+    expect(cockpit).toContain("ClientSlaPublishPanel");
+    expect(cockpit).toContain("assertClientSlaVisible");
+    expect(cockpit).toContain("loadClientSla");
     expect(portal).not.toContain("ClientSlaPublishPanel");
     expect(portal).not.toContain("advisorSlaView");
-    expect(portal).not.toContain("assertClientSlaVisible");
+    expect(panel).toMatch(/published target/i);
+    expect(panel).not.toMatch(/guarante/i);
   });
 });
