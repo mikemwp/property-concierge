@@ -3,6 +3,7 @@ import { PartnerIntegrationError, applyPartnerUpdate, parseInboundUpdate } from 
 import { openTicketForRole, partnerTickets } from "../../src/domain/partner-activity";
 import { decodePartnerEventPayload, encodePartnerEventPayload } from "../../src/domain/partner-integration";
 import type { CaseStore } from "../../src/lib/case-store";
+import { allowAllVaultLookup } from "../../src/server/vault";
 import { atMortgagePath, makeMemoryCaseStore } from "../support/memory-case-store";
 
 const NOW = new Date("2026-09-12T09:00:00.000Z");
@@ -73,7 +74,7 @@ describe("applyPartnerUpdate", () => {
     const { store, ticketId } = await storeWithOpenTicket();
     const result = await applyPartnerUpdate(
       { caseId: "pp1", ticketId, role: "MORTGAGE_PARTNER", status: "EVIDENCE_READY" },
-      { now: NOW, store },
+      { now: NOW, store, vaultLookup: allowAllVaultLookup },
     );
 
     expect(result.applied).toBe("SUBMIT_EVIDENCE");

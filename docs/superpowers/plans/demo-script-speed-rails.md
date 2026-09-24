@@ -17,7 +17,7 @@ Founder validation script for the **deep integrations behind a clean port, stubb
 
 1. `/cockpit/cases` → **Bloggs return (paid)**.
 2. Drive the case to a partner-owned stage:
-   - As **`client@example.com`**: submit `profile_complete`.
+   - As **`client@example.com`**: upload a file and submit `profile_complete`.
    - As advisor: accept → **Advance stage**.
    - As client: submit `source_of_funds` and `fx_plan`.
    - As advisor: accept both → **Advance stage**.
@@ -32,7 +32,7 @@ Founder validation script for the **deep integrations behind a clean port, stubb
 ## 3. The partner works their own lane
 
 1. Sign in as **`mortgage@example.com`** → open the Bloggs case.
-2. Confirm the mini-view shows case context (pack name, stage title, SLA days), the **Required evidence** inbox (`dip_aip`), and **Integration actions**.
+2. Confirm the mini-view shows case context (pack name, stage title, SLA days), the **Required evidence** inbox (`dip_aip` — on `ew` paid cases this now requires a vault file before the port will record `EVIDENCE_SUBMITTED`; adapters still cannot accept or advance), and **Integration actions**.
 3. Click **Acknowledge case**.
 4. **Report milestone** → select **Decision in principle submitted** → submit.
 5. Sign in as advisor → **Bloggs return (paid)** → **Partner integration**:

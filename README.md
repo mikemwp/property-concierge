@@ -53,7 +53,7 @@ See the step-by-step click script: [`docs/superpowers/plans/demo-script-core-por
 
 **Paid (orchestrated) thesis in 2 minutes:**
 
-1. Client logs in → open paid case → submit profile evidence on the focus stage.
+1. Client logs in → open paid case → upload a file and submit profile evidence on the focus stage.
 2. Advisor logs in → accept evidence → advance to `money_readiness`.
 3. Advisor requests warm intro to a **named panel member** (event + disclosed referral logged on case).
 4. Advance case through money readiness to `mortgage_path` (advisor accepts + advances).
@@ -176,11 +176,12 @@ country-agnostic; everything local lives in `src/domain/market-packs/`:
 disabled pack throws `MarketPackError` — it never falls back to `ew`.
 
 **Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
-`isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails` and
-`chain_free_inventory`. The four corridor packs (`au_uk`, `uk_au`, `us_uk`, `uk_us`)
-run `fx_deposit`, `corridor_inbound` and `corridor_outbound`. `hard_client_sla` and
-`document_vault` stay **off** in every pack. `chain_free_inventory` and
-`partner_speed_rails` stay **ew-only**. Enforced by `tests/domain/market-pack-flags.test.ts`.
+`isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails`,
+`chain_free_inventory` and `document_vault`. The four corridor packs (`au_uk`, `uk_au`,
+`us_uk`, `uk_us`) run `fx_deposit`, `corridor_inbound` and `corridor_outbound`.
+`hard_client_sla` stays **off** in every pack. `chain_free_inventory`,
+`partner_speed_rails` and `document_vault` stay **ew-only**. Enforced by
+`tests/domain/market-pack-flags.test.ts`.
 
 **`au` is still a stub, not a product.** It stays registered and `enabled: false`.
 Live Australia destination work is the `uk_au` corridor pack. Domestic AU-only and
@@ -224,6 +225,23 @@ may turn `chain_free_inventory` on as **data**. That flag unlocks:
 developer lead fees, hard client SLAs, Rightmove/Zoopla, an open marketplace.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-chain-free.md`](docs/superpowers/plans/demo-script-chain-free.md).
+
+## Document vault (paid E&W, one-time upload)
+
+Spec §8. Paid England & Wales cases store evidence files in a case-scoped vault:
+
+- Metadata in Prisma (`VaultDocument`); bytes on disk under `var/vault/` (gitignored).
+- One `ACTIVE` file per evidence kind per stage. Replacement requires an advisor reset.
+- Role ACL: advisor sees all; the client sees their own uploads; a partner sees only
+  stages they own or were referred on. `FREE_DIY` stays note-only attestation.
+- When `document_vault` is on, PAID_DWY `submitEvidence` / partner submit require that
+  file. Adapters cannot skip the check (`tests/server/adapter-authority.test.ts`).
+- Download: authenticated `GET /api/vault/[documentId]`.
+
+Corridor packs keep the metadata-only submit path until the vault is proved on `ew`.
+No S3 in this release. `hard_client_sla` stays off.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-document-vault.md`](docs/superpowers/plans/demo-script-document-vault.md).
 
 ## Advisor operating IP
 

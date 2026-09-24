@@ -18,6 +18,7 @@ import {
   type PartnerPortContext,
 } from "@/lib/partner-port";
 import { assertSpeedRails } from "@/server/partner-policy";
+import { prismaVaultPresenceLookup, type VaultPresenceLookup } from "@/server/vault";
 
 export class PartnerIntegrationError extends Error {
   constructor(message: string) {
@@ -112,9 +113,10 @@ async function appendRejection(
 
 export async function applyPartnerUpdate(
   update: InboundPartnerUpdate,
-  options: { now?: Date; store?: CaseStore } = {},
+  options: { now?: Date; store?: CaseStore; vaultLookup?: VaultPresenceLookup } = {},
 ): Promise<InboundResult> {
   const store = options.store ?? prismaCaseStore;
+  const vaultLookup = options.vaultLookup ?? prismaVaultPresenceLookup;
   const now = options.now ?? new Date();
 
   const caseState = await store.load(update.caseId);
@@ -131,7 +133,7 @@ export async function applyPartnerUpdate(
     throw new PartnerIntegrationError(`Unknown milestone for ${update.role}: ${update.milestoneKey}`);
   }
 
-  const port = partnerPortForCase(caseState, update.role, store);
+  const port = partnerPortForCase(caseState, update.role, store, vaultLookup);
   const context: PartnerPortContext = {
     caseId: update.caseId,
     role: update.role,

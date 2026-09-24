@@ -18,7 +18,7 @@ Founder validation script for the **rigid stage ledger** thesis: one focus owner
 
 ## 2. Client submits; advisor accepts and advances
 
-1. Click **Submit** on `profile_complete`.
+1. On the **Bloggs** (`ew`) case the client must attach a file and use **Upload and submit**; the Smith DIY case is unchanged. Click **Upload and submit** on `profile_complete`.
 2. Sign out; sign in as **`advisor@example.com`** / `password`.
 3. Open `/cockpit/cases` → **Bloggs return (paid)**.
 4. Confirm playbook text appears (cockpit-only).
