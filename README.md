@@ -187,8 +187,11 @@ disabled pack throws `MarketPackError` — it never falls back to `ew`.
 `isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails`,
 `chain_free_inventory`, `document_vault`, `hard_client_sla` and `case_threads`. The four corridor packs
 (`au_uk`, `uk_au`, `us_uk`, `uk_us`) run `fx_deposit`, `corridor_inbound` and
-`corridor_outbound`. `chain_free_inventory`, `partner_speed_rails`, `document_vault`,
-`hard_client_sla` and `case_threads` stay **ew-only**. Enforced by
+`corridor_outbound`. `document_vault` is on for `ew` and the four live corridor packs (`au_uk`,
+`uk_au`, `us_uk`, `uk_us`). It stays **off** on the disabled `au` stub.
+`chain_free_inventory`, `partner_speed_rails`, `hard_client_sla`,
+`case_threads` and `seller_milestone_views` stay **ew-only**.
+`open_marketplace` stays off everywhere. Enforced by
 `tests/domain/market-pack-flags.test.ts`.
 
 **`au` is still a stub, not a product.** It stays registered and `enabled: false`.
@@ -234,9 +237,9 @@ introductions, agent or developer lead fees, Rightmove/Zoopla, an open marketpla
 
 Walkthrough: [`docs/superpowers/plans/demo-script-chain-free.md`](docs/superpowers/plans/demo-script-chain-free.md).
 
-## Document vault (paid E&W, one-time upload)
+## Document vault (paid E&W and corridors, one-time upload)
 
-Spec §8. Paid England & Wales cases store evidence files in a case-scoped vault:
+Spec §8. Paid England & Wales and live corridor cases store evidence files in a case-scoped vault:
 
 - Metadata in Prisma (`VaultDocument`); bytes on disk under `var/vault/` (gitignored).
 - One `ACTIVE` file per evidence kind per stage. Replacement requires an advisor reset.
@@ -246,8 +249,8 @@ Spec §8. Paid England & Wales cases store evidence files in a case-scoped vault
   file. Adapters cannot skip the check (`tests/server/adapter-authority.test.ts`).
 - Download: authenticated `GET /api/vault/[documentId]`.
 
-Corridor packs keep the metadata-only submit path until the vault is proved on `ew`.
-No S3 in this release.
+Live corridor packs reuse the same vault stack. The disabled `au` stub does not.
+No S3 in this release — bytes still live under `var/vault/`.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-document-vault.md`](docs/superpowers/plans/demo-script-document-vault.md).
 
