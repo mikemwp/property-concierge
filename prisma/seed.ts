@@ -3,6 +3,7 @@ import { prisma } from "../src/lib/db";
 import { createCaseRecord } from "../src/server/cases";
 
 async function main() {
+  await prisma.vaultDocument.deleteMany();
   await prisma.referral.deleteMany();
   await prisma.partnerPanel.deleteMany();
   await prisma.stageEvent.deleteMany();

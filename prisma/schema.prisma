@@ -33,6 +33,7 @@ model Case {
   participants  CaseParticipant[]
   events        StageEvent[]
   referrals     Referral[]
+  vaultDocuments VaultDocument[]
 }
 
 model CaseParticipant {
@@ -114,4 +115,23 @@ model Referral {
   createdAt      DateTime     @default(now())
   case           Case         @relation(fields: [caseId], references: [id], onDelete: Cascade)
   partner        PartnerPanel @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+}
+
+model VaultDocument {
+  id               String   @id @default(cuid())
+  caseId           String
+  stageKey         String
+  evidenceKind     String
+  uploadedByRole   String
+  uploadedByUserId String
+  originalFilename String
+  mimeType         String
+  byteSize         Int
+  storageKey       String
+  status           String   @default("ACTIVE")
+  createdAt        DateTime @default(now())
+  case             Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, status])
+  @@index([caseId, stageKey, evidenceKind, status])
 }
