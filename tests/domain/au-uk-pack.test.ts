@@ -18,6 +18,7 @@ describe("au_uk corridor pack", () => {
       fx_deposit: true,
       corridor_inbound: true,
       corridor_outbound: true,
+      document_vault: true,
     });
     expect(isModuleEnabled(auUkMarketPack.flags, "chain_free_inventory")).toBe(false);
     expect(isModuleEnabled(auUkMarketPack.flags, "partner_speed_rails")).toBe(false);

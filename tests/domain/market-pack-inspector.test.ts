@@ -87,7 +87,7 @@ describe("market pack summary", () => {
     expect(inbound.enabled).toBe(true);
     expect(inbound.modules.find((m) => m.key === "corridor_inbound")?.enabled).toBe(true);
     expect(inbound.modules.find((m) => m.key === "chain_free_inventory")?.enabled).toBe(false);
-    expect(inbound.modules.find((m) => m.key === "document_vault")?.enabled).toBe(false);
+    expect(inbound.modules.find((m) => m.key === "document_vault")?.enabled).toBe(true);
     expect(inbound.modules.find((m) => m.key === "case_threads")?.enabled).toBe(false);
     expect(inbound.modules.find((m) => m.key === "seller_milestone_views")?.enabled).toBe(false);
     expect(inbound.modules.find((m) => m.key === "hard_client_sla")?.enabled).toBe(false);

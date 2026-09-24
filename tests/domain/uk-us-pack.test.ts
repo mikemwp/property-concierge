@@ -22,6 +22,7 @@ describe("uk_us corridor pack", () => {
       fx_deposit: true,
       corridor_inbound: true,
       corridor_outbound: true,
+      document_vault: true,
     });
     expect(ukUsMarketPack.partnerRoleLabels.CONVEYANCER).toBe("closing attorney");
     expect(ukUsMarketPack.partnerRoleLabels.MOVE_PARTNER).toBe("movers");

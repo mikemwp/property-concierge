@@ -24,6 +24,7 @@ describe("uk_au corridor pack", () => {
       fx_deposit: true,
       corridor_inbound: true,
       corridor_outbound: true,
+      document_vault: true,
     });
     expect(auStubPack.enabled).toBe(false);
     expect(packEvidenceKinds(auStubPack)).toEqual([]);
@@ -31,7 +32,7 @@ describe("uk_au corridor pack", () => {
     expect(isModuleEnabled(ukAuMarketPack.flags, "partner_speed_rails")).toBe(false);
     expect(isModuleEnabled(ukAuMarketPack.flags, "hard_client_sla")).toBe(false);
     expect(isModuleEnabled(ukAuMarketPack.flags, "case_threads")).toBe(false);
-    expect(isModuleEnabled(ukAuMarketPack.flags, "document_vault")).toBe(false);
+    expect(isModuleEnabled(ukAuMarketPack.flags, "document_vault")).toBe(true);
     expect(isModuleEnabled(ukAuMarketPack.flags, "seller_milestone_views")).toBe(false);
   });
 
