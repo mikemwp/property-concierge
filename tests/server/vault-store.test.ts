@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -14,6 +14,7 @@ import {
   vaultRoot,
   writeVaultBytes,
 } from "../../src/server/vault-store";
+import { setVaultStorageForTests } from "../../src/server/vault-storage";
 import { vaultStorageKey } from "../../src/domain/vault";
 
 let caseId = "";
@@ -23,6 +24,7 @@ describe("vault store writes bytes to disk, not SQLite", () => {
   beforeAll(async () => {
     root = mkdtempSync(path.join(tmpdir(), "vault-store-"));
     process.env.VAULT_ROOT = root;
+    setVaultStorageForTests(null);
     const passwordHash = await bcrypt.hash("password", 10);
     await prisma.vaultDocument.deleteMany();
     await prisma.referral.deleteMany();
@@ -108,5 +110,15 @@ describe("vault store writes bytes to disk, not SQLite", () => {
     const listed = await listVaultDocuments(caseId);
     expect(listed).toHaveLength(1);
     expect(listed[0]?.status).toBe("RESET");
+  });
+
+  it("delegates byte I/O through getVaultStorage", async () => {
+    const storeSource = readFileSync(
+      path.resolve(process.cwd(), "src/server/vault-store.ts"),
+      "utf8",
+    );
+    expect(storeSource).toMatch(/getVaultStorage/);
+    expect(storeSource).toMatch(/\.write\(/);
+    expect(storeSource).toMatch(/\.read\(/);
   });
 });

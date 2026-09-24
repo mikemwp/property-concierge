@@ -1,16 +1,14 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import path from "node:path";
 import type { VaultDocument } from "@prisma/client";
 import type { ActorRole } from "../domain/types";
 import {
-  assertSafeStorageKey,
   isVaultDocumentStatus,
   type VaultDocumentRecord,
 } from "../domain/vault";
 import { prisma } from "../lib/db";
+import { defaultVaultRoot, getVaultStorage } from "./vault-storage";
 
 export function vaultRoot(): string {
-  return process.env.VAULT_ROOT ?? path.join(process.cwd(), "var", "vault");
+  return process.env.VAULT_ROOT ?? defaultVaultRoot();
 }
 
 export function toVaultDocumentRecord(row: VaultDocument): VaultDocumentRecord {
@@ -33,19 +31,12 @@ export function toVaultDocumentRecord(row: VaultDocument): VaultDocumentRecord {
   };
 }
 
-function absolutePath(storageKey: string): string {
-  assertSafeStorageKey(storageKey);
-  return path.join(vaultRoot(), ...storageKey.split("/"));
-}
-
 export function writeVaultBytes(storageKey: string, bytes: Uint8Array): void {
-  const full = absolutePath(storageKey);
-  mkdirSync(path.dirname(full), { recursive: true });
-  writeFileSync(full, bytes);
+  getVaultStorage().write(storageKey, bytes);
 }
 
 export function readVaultBytes(storageKey: string): Uint8Array {
-  return new Uint8Array(readFileSync(absolutePath(storageKey)));
+  return getVaultStorage().read(storageKey);
 }
 
 export async function findActiveVaultDocument(
