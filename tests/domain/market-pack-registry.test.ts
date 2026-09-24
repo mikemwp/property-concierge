@@ -25,6 +25,7 @@ describe("market pack registry", () => {
       ["au_uk", true],
       ["ew", true],
       ["uk_au", true],
+      ["uk_us", true],
       ["us_uk", true],
     ]);
   });

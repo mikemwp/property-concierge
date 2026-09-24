@@ -2,6 +2,7 @@ import { auStubPack } from "./au-stub";
 import { auUkMarketPack } from "./au-uk";
 import { ewMarketPack } from "./ew";
 import { ukAuMarketPack } from "./uk-au";
+import { ukUsMarketPack } from "./uk-us";
 import { usUkMarketPack } from "./us-uk";
 import { MarketPackError, type MarketPack } from "./types";
 
@@ -14,6 +15,7 @@ const PACKS: readonly MarketPack[] = [
   auUkMarketPack,
   usUkMarketPack,
   ukAuMarketPack,
+  ukUsMarketPack,
 ];
 
 export function listMarketPacks(): MarketPack[] {

@@ -24,7 +24,7 @@ describe("module flags are pack data", () => {
     const enabled = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "fx_deposit"))
       .map((pack) => pack.id);
-    expect(enabled).toEqual(["au_uk", "ew", "uk_au", "us_uk"]);
+    expect(enabled).toEqual(["au_uk", "ew", "uk_au", "uk_us", "us_uk"]);
   });
 
   it("turns corridor modules on only for registered corridor packs", () => {
@@ -34,8 +34,8 @@ describe("module flags are pack data", () => {
     const outbound = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "corridor_outbound"))
       .map((pack) => pack.id);
-    expect(inbound).toEqual(["au_uk", "uk_au", "us_uk"]);
-    expect(outbound).toEqual(["au_uk", "uk_au", "us_uk"]);
+    expect(inbound).toEqual(["au_uk", "uk_au", "uk_us", "us_uk"]);
+    expect(outbound).toEqual(["au_uk", "uk_au", "uk_us", "us_uk"]);
     expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "ew")!.flags, "corridor_inbound")).toBe(
       false,
     );
