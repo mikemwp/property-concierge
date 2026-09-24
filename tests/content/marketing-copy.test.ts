@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   CHAIN_FREE_HOOK,
+  CLIENT_SLA_HOOK,
   ENTRY_STORIES,
   FORBIDDEN_CLAIM_PATTERNS,
   FORBIDDEN_INVENTORY_PATTERNS,
@@ -106,5 +107,28 @@ describe("chain-free beachhead hook", () => {
         expect(pattern.test(text), `"${text}" matches ${pattern}`).toBe(false);
       }
     }
+  });
+});
+
+describe("client SLA hook is a target, not a promise", () => {
+  it("names published targets and carve-outs without guarantee or listings language", () => {
+    const blob = `${CLIENT_SLA_HOOK.eyebrow} ${CLIENT_SLA_HOOK.headline} ${CLIENT_SLA_HOOK.body}`;
+    expect(blob).toMatch(/target/i);
+    expect(blob).toMatch(/working toward/i);
+    expect(blob).toMatch(/carve-out/i);
+    expect(blob).not.toMatch(/guarante/i);
+    expect(blob).not.toMatch(/rightmove|zoopla/i);
+    expect(blob).not.toMatch(/complete in \d+/i);
+    for (const pattern of FORBIDDEN_CLAIM_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
+    }
+    for (const pattern of FORBIDDEN_INVENTORY_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
+    }
+  });
+
+  it("keeps the footer disclosure on planning targets", () => {
+    expect(REGULATORY_DISCLOSURES.some((line) => /planning targets/i.test(line))).toBe(true);
+    expect(REGULATORY_DISCLOSURES.some((line) => /carve-out/i.test(line))).toBe(true);
   });
 });

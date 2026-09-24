@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PlanCards } from "@/components/marketing/PlanCards";
-import { CHAIN_FREE_HOOK, ENTRY_STORIES, HERO } from "@/content/marketing";
+import { CHAIN_FREE_HOOK, CLIENT_SLA_HOOK, ENTRY_STORIES, HERO } from "@/content/marketing";
 import { attributionParamsFrom, startHref, withAttribution } from "@/lib/marketing-links";
 
 type Props = {
@@ -40,6 +40,16 @@ export default async function MarketingHomePage({ searchParams }: Props) {
           {CHAIN_FREE_HOOK.headline}
         </h2>
         <p className="mt-2 text-sm text-slate-600">{CHAIN_FREE_HOOK.body}</p>
+      </section>
+
+      <section className="mt-16 max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+          {CLIENT_SLA_HOOK.eyebrow}
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+          {CLIENT_SLA_HOOK.headline}
+        </h2>
+        <p className="mt-2 text-sm text-slate-600">{CLIENT_SLA_HOOK.body}</p>
       </section>
 
       <section className="mt-16">

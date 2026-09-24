@@ -158,7 +158,7 @@ export const REGULATORY_DISCLOSURES: string[] = [
   "Mortgages: we are an introducer only. We do not give mortgage advice — that comes from the FCA-authorised firm we introduce you to.",
   "We may receive a disclosed referral fee from partners you choose to use. It never changes what you pay them, and we tell you before the introduction.",
   "We act for buyers only, in England & Wales. We do not market property for sellers.",
-  "Any dates you see in the portal are planning targets from our own stage ledger, not a promise of a completion date.",
+  "Any dates you see in the portal are planning targets from our own stage ledger, subject to carve-outs, not a promise of a completion date.",
 ];
 
 /** Capabilities that must stay behind the paid tier in every free-facing list. */
@@ -199,6 +199,12 @@ export const CHAIN_FREE_HOOK = {
   body: "Paid orchestration certifies a household as chain-free from the stage ledger — not from star ratings, and not from a seller inventory. UK-resident speed-seekers enter the same way.",
 };
 
+export const CLIENT_SLA_HOOK = {
+  eyebrow: "Targets, not promises",
+  headline: "Published target timelines, subject to carve-outs.",
+  body: "When the ledger supports it, your advisor can publish a target completion date we are working toward. Dates stay subject to carve-outs. This is not a marketing promise of a completion date.",
+};
+
 export const OUT_OF_SCOPE_GEO_PATTERNS: RegExp[] = [
   /\bscotland\b/i,
   /northern ireland/i,
@@ -233,5 +239,8 @@ export function marketingClaimStrings(): string[] {
     CHAIN_FREE_HOOK.eyebrow,
     CHAIN_FREE_HOOK.headline,
     CHAIN_FREE_HOOK.body,
+    CLIENT_SLA_HOOK.eyebrow,
+    CLIENT_SLA_HOOK.headline,
+    CLIENT_SLA_HOOK.body,
   ];
 }
