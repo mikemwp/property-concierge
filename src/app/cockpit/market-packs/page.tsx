@@ -75,7 +75,7 @@ export default async function MarketPacksPage({ searchParams }: Props) {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
             label: "Jurisdiction",
@@ -93,6 +93,17 @@ export default async function MarketPacksPage({ searchParams }: Props) {
             label: "Evidence kinds",
             value: String(summary.evidenceKinds.length),
             note: summary.evidenceKinds.join(", ") || "none yet",
+          },
+          {
+            label: "Partner policy",
+            value:
+              summary.marketplacePolicy === "open_marketplace"
+                ? "open marketplace"
+                : "curated panel",
+            note:
+              summary.marketplacePolicy === "open_marketplace"
+                ? "third-party browse is still not shipped"
+                : "open marketplace off — architecture stub only",
           },
         ].map((card) => (
           <div
