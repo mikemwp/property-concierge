@@ -8,7 +8,9 @@ import { PlaybookPanel } from "@/components/PlaybookPanel";
 import { ReferralPanel } from "@/components/ReferralPanel";
 import { StageTimeline } from "@/components/StageTimeline";
 import { CaseAdminControls } from "@/components/CaseAdminControls";
+import { ChainFreeCertificationPanel } from "@/components/ChainFreeCertificationPanel";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
+import { advisorCertificationView } from "@/domain/chain-free";
 import { advisorStageView, canUseWarmIntro } from "@/domain/freemium";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
 import {
@@ -21,7 +23,8 @@ import { advisorPlaybook } from "@/lib/cockpit-playbook";
 import { casePack, stageSlaDays } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
-import { assertPlaybookVisible } from "@/server/cockpit-policy";
+import { assertCertificationVisible, assertPlaybookVisible } from "@/server/cockpit-policy";
+import { canUseChainFree, loadCertification } from "@/server/chain-free";
 import { listPanel } from "@/server/panel";
 import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
 import { displayTicketAdapterId } from "@/lib/partner-adapters/registry";
@@ -92,6 +95,14 @@ export default async function CockpitCasePage({ params }: Props) {
   const isBlocked = focusStage?.status === "BLOCKED";
 
   const pack = casePack(caseState);
+
+  assertCertificationVisible("ADVISOR");
+  const chainFreeEnabled = canUseChainFree(caseState);
+  const chainFree = chainFreeEnabled ? await loadCertification(caseState, now) : null;
+  const chainFreeView = chainFree
+    ? advisorCertificationView(chainFree.certification)
+    : null;
+
   const tickets = partnerTickets(caseState, now).map((ticket) => ({
     ...ticket,
     adapterId: displayTicketAdapterId(caseState, ticket),
@@ -193,6 +204,10 @@ export default async function CockpitCasePage({ params }: Props) {
       />
 
       <ReferralPanel caseId={caseId} referrals={referrals} panel={panel} />
+
+      {chainFreeView && (
+        <ChainFreeCertificationPanel caseId={caseId} view={chainFreeView} />
+      )}
 
       <CaseAdminControls
         caseId={caseId}

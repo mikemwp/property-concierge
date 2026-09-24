@@ -12,8 +12,8 @@ export default async function PanelPage() {
     <section>
       <h1 className="text-2xl font-semibold text-slate-900">Partner panel</h1>
       <p className="mt-1 text-sm text-slate-600">
-        Curated panel scored from the stage ledger. Speed credibility is earned
-        here before any chain-free or hard SLA promise.
+        Curated panel scored from the stage ledger. Scorecards unlock chain-free
+        certification on a case; hard client SLAs stay off.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">

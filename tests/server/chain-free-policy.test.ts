@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { describe, it, expect } from "vitest";
 import { createCase } from "../../src/domain/stage-engine";
 import {
@@ -37,5 +39,23 @@ describe("certification checklist visibility", () => {
     expect(() => assertCertificationVisible("ADVISOR")).not.toThrow();
     expect(() => assertCertificationVisible("CLIENT")).toThrow(CockpitPolicyError);
     expect(() => assertCertificationVisible("CONVEYANCER")).toThrow(/advisor-only/i);
+  });
+});
+
+describe("cockpit wiring", () => {
+  it("renders the certification panel on the advisor case page and keeps checklist IP off the portal", () => {
+    const cockpit = readFileSync(
+      path.resolve(process.cwd(), "src/app/cockpit/cases/[caseId]/page.tsx"),
+      "utf8",
+    );
+    const portal = readFileSync(
+      path.resolve(process.cwd(), "src/app/portal/cases/[caseId]/page.tsx"),
+      "utf8",
+    );
+    expect(cockpit).toContain("ChainFreeCertificationPanel");
+    expect(cockpit).toContain("assertCertificationVisible");
+    expect(cockpit).toContain("loadCertification");
+    expect(portal).not.toContain("ChainFreeCertificationPanel");
+    expect(portal).not.toContain("advisorCertificationView");
   });
 });
