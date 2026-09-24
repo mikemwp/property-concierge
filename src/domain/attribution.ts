@@ -1,6 +1,8 @@
 export type LeadSource =
   | "DIASPORA_AU_UK"
   | "DIASPORA_US_UK"
+  | "DIASPORA_UK_AU"
+  | "DIASPORA_UK_US"
   | "COMMUNITY_REFERRAL"
   | "PARTNER_REFERRAL"
   | "ORGANIC"
@@ -22,6 +24,8 @@ export type RawAttributionParams = {
 const LEAD_SOURCES: readonly LeadSource[] = [
   "DIASPORA_AU_UK",
   "DIASPORA_US_UK",
+  "DIASPORA_UK_AU",
+  "DIASPORA_UK_US",
   "COMMUNITY_REFERRAL",
   "PARTNER_REFERRAL",
   "ORGANIC",
@@ -44,6 +48,10 @@ const SOURCE_MAP: Record<string, LeadSource> = {
   "us-uk": "DIASPORA_US_UK",
   "brits-in-america": "DIASPORA_US_UK",
   "brits-in-usa": "DIASPORA_US_UK",
+  "uk-au": "DIASPORA_UK_AU",
+  "brits-to-australia": "DIASPORA_UK_AU",
+  "uk-us": "DIASPORA_UK_US",
+  "brits-to-america": "DIASPORA_UK_US",
   community: "COMMUNITY_REFERRAL",
   partner: "PARTNER_REFERRAL",
   google: "ORGANIC",
@@ -74,6 +82,8 @@ export function isDiasporaLead(source: LeadSource): boolean {
   return (
     source === "DIASPORA_AU_UK" ||
     source === "DIASPORA_US_UK" ||
+    source === "DIASPORA_UK_AU" ||
+    source === "DIASPORA_UK_US" ||
     source === "COMMUNITY_REFERRAL"
   );
 }

@@ -65,6 +65,8 @@ describe("parseAttribution", () => {
   it("flags diaspora leads for the community validation metric", () => {
     expect(isDiasporaLead("DIASPORA_AU_UK")).toBe(true);
     expect(isDiasporaLead("DIASPORA_US_UK")).toBe(true);
+    expect(isDiasporaLead("DIASPORA_UK_AU")).toBe(true);
+    expect(isDiasporaLead("DIASPORA_UK_US")).toBe(true);
     expect(isDiasporaLead("COMMUNITY_REFERRAL")).toBe(true);
     expect(isDiasporaLead("ORGANIC")).toBe(false);
     expect(isDiasporaLead("DIRECT")).toBe(false);

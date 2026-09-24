@@ -106,6 +106,102 @@ async function main() {
         userId: "seed_move_partner",
         marketPackId: "ew",
       },
+      {
+        id: "seed_panel_priya_au_uk",
+        roleType: "MORTGAGE_PARTNER",
+        name: "Priya Nair",
+        firm: "Northstar Mortgages",
+        slaDays: 3,
+        marketPackId: "au_uk",
+      },
+      {
+        id: "seed_panel_tom_au_uk",
+        roleType: "CONVEYANCER",
+        name: "Tom Ashby",
+        firm: "Harbour Law LLP",
+        slaDays: 5,
+        marketPackId: "au_uk",
+      },
+      {
+        id: "seed_panel_dan_au_uk",
+        roleType: "MOVE_PARTNER",
+        name: "Dan Whitfield",
+        firm: "Compass Removals",
+        slaDays: 4,
+        marketPackId: "au_uk",
+      },
+      {
+        id: "seed_panel_priya_us_uk",
+        roleType: "MORTGAGE_PARTNER",
+        name: "Priya Nair",
+        firm: "Northstar Mortgages",
+        slaDays: 3,
+        marketPackId: "us_uk",
+      },
+      {
+        id: "seed_panel_tom_us_uk",
+        roleType: "CONVEYANCER",
+        name: "Tom Ashby",
+        firm: "Harbour Law LLP",
+        slaDays: 5,
+        marketPackId: "us_uk",
+      },
+      {
+        id: "seed_panel_dan_us_uk",
+        roleType: "MOVE_PARTNER",
+        name: "Dan Whitfield",
+        firm: "Compass Removals",
+        slaDays: 4,
+        marketPackId: "us_uk",
+      },
+      {
+        id: "seed_panel_mia_uk_au",
+        roleType: "MORTGAGE_PARTNER",
+        name: "Mia Chen",
+        firm: "Harbour Brokers",
+        slaDays: 3,
+        marketPackId: "uk_au",
+      },
+      {
+        id: "seed_panel_owen_uk_au",
+        roleType: "CONVEYANCER",
+        name: "Owen Blake",
+        firm: "Southern Title",
+        slaDays: 5,
+        marketPackId: "uk_au",
+      },
+      {
+        id: "seed_panel_sam_uk_au",
+        roleType: "MOVE_PARTNER",
+        name: "Sam Reid",
+        firm: "Southern Cross Removalists",
+        slaDays: 4,
+        marketPackId: "uk_au",
+      },
+      {
+        id: "seed_panel_jordan_uk_us",
+        roleType: "MORTGAGE_PARTNER",
+        name: "Jordan Hale",
+        firm: "Liberty Lending",
+        slaDays: 3,
+        marketPackId: "uk_us",
+      },
+      {
+        id: "seed_panel_riley_uk_us",
+        roleType: "CONVEYANCER",
+        name: "Riley Cho",
+        firm: "Harbor Title",
+        slaDays: 5,
+        marketPackId: "uk_us",
+      },
+      {
+        id: "seed_panel_pat_uk_us",
+        roleType: "MOVE_PARTNER",
+        name: "Pat Nguyen",
+        firm: "Atlantic Movers",
+        slaDays: 4,
+        marketPackId: "uk_us",
+      },
     ],
   });
 
@@ -144,6 +240,62 @@ async function main() {
     attribution: {
       leadSource: "DIASPORA_US_UK",
       leadCampaign: "brits-in-america-sept",
+      leadReferrer: null,
+    },
+  });
+
+  await createCaseRecord({
+    title: "Chen AU→UK return (paid)",
+    entryContext: "RETURNER_OVERSEAS",
+    tier: "PAID_DWY",
+    clientUserId: client.id,
+    advisorUserId: advisor.id,
+    marketPackId: "au_uk",
+    attribution: {
+      leadSource: "DIASPORA_AU_UK",
+      leadCampaign: "poms-in-oz-sept",
+      leadReferrer: null,
+    },
+  });
+
+  await createCaseRecord({
+    title: "Morales US→UK return (paid)",
+    entryContext: "RETURNER_OVERSEAS",
+    tier: "PAID_DWY",
+    clientUserId: client.id,
+    advisorUserId: advisor.id,
+    marketPackId: "us_uk",
+    attribution: {
+      leadSource: "DIASPORA_US_UK",
+      leadCampaign: "brits-in-america-sept",
+      leadReferrer: null,
+    },
+  });
+
+  await createCaseRecord({
+    title: "Patel UK→AU purchase (paid)",
+    entryContext: "UK_RESIDENT_SPEED",
+    tier: "PAID_DWY",
+    clientUserId: client.id,
+    advisorUserId: advisor.id,
+    marketPackId: "uk_au",
+    attribution: {
+      leadSource: "DIASPORA_UK_AU",
+      leadCampaign: "brits-to-australia-sept",
+      leadReferrer: null,
+    },
+  });
+
+  await createCaseRecord({
+    title: "Hughes UK→US purchase (paid)",
+    entryContext: "RETURNER_OVERSEAS",
+    tier: "PAID_DWY",
+    clientUserId: client.id,
+    advisorUserId: advisor.id,
+    marketPackId: "uk_us",
+    attribution: {
+      leadSource: "DIASPORA_UK_US",
+      leadCampaign: "brits-to-america-sept",
       leadReferrer: null,
     },
   });

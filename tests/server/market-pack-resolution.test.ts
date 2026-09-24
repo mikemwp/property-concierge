@@ -55,6 +55,21 @@ describe("market pack resolution on persisted cases", () => {
     ).rejects.toThrow(/not enabled/i);
   });
 
+  it("creates a live case on an enabled corridor pack", async () => {
+    const created = await createCaseRecord({
+      title: "Corridor resolution case",
+      entryContext: "RETURNER_OVERSEAS",
+      tier: "PAID_DWY",
+      clientUserId: "mp_client",
+      advisorUserId: "mp_advisor",
+      marketPackId: "au_uk",
+    });
+    expect(created.marketPackId).toBe("au_uk");
+    const loaded = await loadCase(created.id);
+    expect(loaded.stages.some((s) => s.key === "mortgage_path")).toBe(true);
+    expect(loaded.stages.some((s) => s.key === "chain_free_matching")).toBe(false);
+  });
+
   it("fails closed when a stored pack id is unknown or disabled", async () => {
     const created = await newCase();
 
