@@ -34,6 +34,7 @@ model Case {
   events        StageEvent[]
   referrals     Referral[]
   vaultDocuments VaultDocument[]
+  messages       CaseMessage[]
 }
 
 model CaseParticipant {
@@ -134,4 +135,16 @@ model VaultDocument {
 
   @@index([caseId, status])
   @@index([caseId, stageKey, evidenceKind, status])
+}
+
+model CaseMessage {
+  id           String   @id @default(cuid())
+  caseId       String
+  authorUserId String
+  authorRole   String
+  body         String
+  createdAt    DateTime @default(now())
+  case         Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([caseId, createdAt])
 }

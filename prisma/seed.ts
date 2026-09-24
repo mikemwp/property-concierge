@@ -3,6 +3,7 @@ import { prisma } from "../src/lib/db";
 import { createCaseRecord } from "../src/server/cases";
 
 async function main() {
+  await prisma.caseMessage.deleteMany();
   await prisma.vaultDocument.deleteMany();
   await prisma.referral.deleteMany();
   await prisma.partnerPanel.deleteMany();
@@ -206,7 +207,7 @@ async function main() {
     ],
   });
 
-  await createCaseRecord({
+  const bloggs = await createCaseRecord({
     title: "Bloggs return (paid)",
     entryContext: "RETURNER_OVERSEAS",
     tier: "PAID_DWY",
@@ -216,6 +217,15 @@ async function main() {
       leadSource: "DIASPORA_AU_UK",
       leadCampaign: "poms-in-oz-sept",
       leadReferrer: null,
+    },
+  });
+
+  await prisma.caseMessage.create({
+    data: {
+      caseId: bloggs.id,
+      authorUserId: advisor.id,
+      authorRole: "ADVISOR",
+      body: "Welcome to the Bloggs case thread. I will stay in this conversation with every partner we introduce.",
     },
   });
 
