@@ -15,6 +15,7 @@ Founder validation script for the **rigid stage ledger** thesis: one focus owner
    - Timeline shows `purchase_profile` as **ACTIVE**, owned by **CLIENT**.
    - **Current owner** banner names the stage and owner.
    - **Submit evidence** form offers `profile_complete`.
+   - **Case thread** lists the seeded advisor welcome and a compose box. Smith DIY has no thread.
 
 ## 2. Client submits; advisor accepts and advances
 

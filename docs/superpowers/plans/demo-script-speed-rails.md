@@ -9,8 +9,8 @@ Founder validation script for the **deep integrations behind a clean port, stubb
 ## 1. The rail is a flag, and it is off in markets we have not built
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
-2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails`, `chain_free_inventory` and `hard_client_sla` are **on**.
-3. Select the **`au`** stub pack. Confirm `partner_speed_rails`, `chain_free_inventory` are **off** and `hard_client_sla` is **off**.
+2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla` and `case_threads` are **on**.
+3. Select the **`au`** stub pack. Confirm `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `case_threads` are **off** and `hard_client_sla` is **off**.
 4. Speed rails being on for `ew` means adapter plumbing exists — not that any date is guaranteed to a client.
 
 ## 2. A ticket opens

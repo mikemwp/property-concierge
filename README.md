@@ -177,10 +177,10 @@ disabled pack throws `MarketPackError` — it never falls back to `ew`.
 
 **Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
 `isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails`,
-`chain_free_inventory`, `document_vault` and `hard_client_sla`. The four corridor packs
+`chain_free_inventory`, `document_vault`, `hard_client_sla` and `case_threads`. The four corridor packs
 (`au_uk`, `uk_au`, `us_uk`, `uk_us`) run `fx_deposit`, `corridor_inbound` and
-`corridor_outbound`. `chain_free_inventory`, `partner_speed_rails`, `document_vault` and
-`hard_client_sla` stay **ew-only**. Enforced by
+`corridor_outbound`. `chain_free_inventory`, `partner_speed_rails`, `document_vault`,
+`hard_client_sla` and `case_threads` stay **ew-only**. Enforced by
 `tests/domain/market-pack-flags.test.ts`.
 
 **`au` is still a stub, not a product.** It stays registered and `enabled: false`.
@@ -260,10 +260,24 @@ Spec §5 / §9. After the stage engine and partner scorecards shipped, `ew` may 
   `guarantee`, Rightmove and Zoopla.
 
 **Not in this overlay:** a promised or guaranteed completion date, a Prisma SLA
-column, a new stage, seller views, threads, an open marketplace, corridor SLA,
+column, a new stage, seller views, an open marketplace, corridor SLA,
 S3, or FCA Appointed Representative status.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-client-sla.md`](docs/superpowers/plans/demo-script-client-sla.md).
+
+## Case thread (paid E&W, append-only)
+
+Spec §8. Paid England & Wales cases share one human thread:
+
+- Rows in Prisma (`CaseMessage`: `caseId`, `authorUserId`, `authorRole`, `body`, `createdAt`).
+- Append-only. No edit, no delete, no websocket. Post is a server action; refresh to see new messages.
+- Role ACL: advisor and the paid client read and post the whole thread; a partner reads and posts only when they are on the case (participant or active referral). `FREE_DIY` sees no panel.
+- Same `ThreadPanel` on `/portal`, `/cockpit`, and `/partner` (including the partner empty-stage view).
+
+Corridor packs stay threadless until the conversation is proved on `ew`.
+The stage ledger is unchanged — posts are not `StageEvent`s.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-case-threads.md`](docs/superpowers/plans/demo-script-case-threads.md).
 
 ## Advisor operating IP
 

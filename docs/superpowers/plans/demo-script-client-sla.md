@@ -9,7 +9,7 @@ Founder validation script for the **published target timelines, not a marketing 
 ## 1. The module is on for ew, and it is still not a guarantee
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
-2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault` and `hard_client_sla` are **on**. `corridor_inbound` and `corridor_outbound` stay **off**.
+2. Select **`ew · England & Wales`**. Under **Modules**, confirm `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla` and `case_threads` are **on**. `corridor_inbound` and `corridor_outbound` stay **off**.
 3. Select the **`au`** stub. Confirm `hard_client_sla` is **off**. Repeat for `au_uk`, `uk_au`, `us_uk` and `uk_us`.
 4. `hard_client_sla` being on means the publish overlay exists as pack data. It does **not** mean any date is guaranteed.
 
@@ -56,7 +56,7 @@ Founder validation script for the **published target timelines, not a marketing 
 |-------|--------|
 | **Real** | `ClientSlaCommitment` derived from ledger events + scorecard signals; advisor publish / amend / withdraw; cockpit checklist; portal target card + carve-outs; `hard_client_sla: true` on `ew` |
 | **Stubbed** | Nothing new. Partner adapters and the inbound webhook stay Plan 5 stubs. |
-| **Absent** | Marketing guarantees, Rightmove-style completion promises, Prisma SLA columns, a new stage, seller views, threads, marketplace, corridor SLA, S3, FCA AR, enabling the `au` stub |
+| **Absent** | Marketing guarantees, Rightmove-style completion promises, Prisma SLA columns, a new stage, seller views, marketplace, corridor SLA, S3, FCA AR, enabling the `au` stub |
 
 ## Automated verification
 

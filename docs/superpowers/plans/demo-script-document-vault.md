@@ -9,7 +9,7 @@ Founder validation script for spec §8: a case-scoped document vault with role A
 ## 1. The flag is ew-only, and free stays file-free
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
-2. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla` **on**. `corridor_inbound`, `corridor_outbound` **off**.
+2. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla`, `case_threads` **on**. `corridor_inbound`, `corridor_outbound` **off**.
 3. Select **`au_uk`**. `document_vault` is **off**. Repeat for `uk_au`, `us_uk`, `uk_us`, and the disabled `au` stub.
 4. Sign out. Sign in as **`client@example.com`** → open **Smith DIY journey**. There is no file input and no Document vault panel. Free attestation is still the Submit button.
 
@@ -53,7 +53,7 @@ Founder validation script for spec §8: a case-scoped document vault with role A
 |-------|--------|
 | **Real** | `VaultDocument` metadata; files under `var/vault/`; one-time ACTIVE lock; advisor reset; role ACL; vault-required PAID_DWY submit on `ew`; `/api/vault/[documentId]` |
 | **Stubbed** | Partner adapters still simulate vendor turnaround; they do not generate files |
-| **Absent** | S3 / cloud storage, base64-in-SQLite, corridor vault, threads, seller views |
+| **Absent** | S3 / cloud storage, base64-in-SQLite, corridor vault, seller views, websocket chat |
 
 ## Automated verification
 

@@ -10,14 +10,14 @@ Founder validation script for the **bidirectional corridor** thesis: the stage e
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
 2. Confirm the sorted list: `au` (disabled), `au_uk` (active), `ew` (active), `uk_au` (active), `uk_us` (active), `us_uk` (active).
-3. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla` **on**. `corridor_inbound`, `corridor_outbound` **off**. Stage table still includes **Chain-free position**.
+3. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla`, `case_threads` **on**. `corridor_inbound`, `corridor_outbound` **off**. Stage table still includes **Chain-free position**.
 4. Select **`au`**. Still disabled. `finance_path` is present, playbooks are empty, every module is off. `resolveMarketPack("au")` still refuses to back a case.
 5. This stub is architecture proof. It is not the Australia product.
 
 ## 2. Inbound-to-E&W corridors reuse the E&W spine without chain-free
 
 1. Select **`au_uk`**. Jurisdiction `england_wales`, locale `en-GB · GBP`.
-2. Modules: `fx_deposit`, `corridor_inbound`, `corridor_outbound` **on**. `chain_free_inventory`, `partner_speed_rails`, `hard_client_sla`, `document_vault` **off**.
+2. Modules: `fx_deposit`, `corridor_inbound`, `corridor_outbound` **on**. `chain_free_inventory`, `partner_speed_rails`, `hard_client_sla`, `document_vault`, `case_threads` **off**.
 3. Stages are the nine E&W legal keys (`mortgage_path`, `exchange_complete`). There is **no** `chain_free_matching`.
 4. Click **returner overseas**. `purchase_profile` requires `profile_complete, corridor_intent`. `money_readiness` requires `source_of_funds, fx_plan`. `move_logistics` requires `move_quote, departure_plan, vehicle_path, visa_status`.
 5. Select **`us_uk`**. Same E&W spine and the same three corridor flags. Copy names the United States as origin.
