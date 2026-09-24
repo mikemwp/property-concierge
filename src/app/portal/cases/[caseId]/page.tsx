@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { submitEvidenceAction } from "@/app/actions/portal";
 import { uploadAndSubmitEvidenceAction } from "@/app/actions/vault";
 import { ChainFreeStatusCard } from "@/components/ChainFreeStatusCard";
+import { ClientSlaTargetCard } from "@/components/ClientSlaTargetCard";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
 import { VaultPanel } from "@/components/VaultPanel";
@@ -12,6 +13,7 @@ import { ReferralDisclosure } from "@/components/ReferralDisclosure";
 import { StageTimeline } from "@/components/StageTimeline";
 import { UpgradeCallout } from "@/components/UpgradeCallout";
 import { clientCertificationCopy } from "@/domain/chain-free";
+import { clientSlaTargetCopy } from "@/domain/client-sla";
 import { canViewSlaPressure, clientStageView } from "@/domain/freemium";
 import { canViewDirectory, directoryEntries } from "@/domain/panel";
 import { daysInStage, escalationLevel } from "@/domain/escalation";
@@ -20,6 +22,7 @@ import { stageSlaDays, casePack } from "@/lib/case-pack";
 import { auth } from "@/lib/auth";
 import { CaseAccessError, loadCaseForUser } from "@/server/cases";
 import { canUseChainFree, loadCertification } from "@/server/chain-free";
+import { canUseClientSla, loadClientSla } from "@/server/client-sla";
 import { listPanel } from "@/server/panel";
 import { canPortalSubmit } from "@/server/portal-policy";
 import { listReferralsForCase } from "@/server/referrals";
@@ -56,6 +59,10 @@ export default async function PortalCasePage({ params }: Props) {
   const chainFreeCopy =
     canUseChainFree(caseState)
       ? clientCertificationCopy((await loadCertification(caseState, now)).certification)
+      : null;
+  const clientSlaCopy =
+    canUseClientSla(caseState)
+      ? clientSlaTargetCopy((await loadClientSla(caseState)).commitment)
       : null;
   const directory = canViewDirectory(caseState)
     ? directoryEntries(
@@ -139,6 +146,15 @@ export default async function PortalCasePage({ params }: Props) {
         <ChainFreeStatusCard
           headline={chainFreeCopy.headline}
           body={chainFreeCopy.body}
+        />
+      )}
+
+      {clientSlaCopy && (
+        <ClientSlaTargetCard
+          headline={clientSlaCopy.headline}
+          body={clientSlaCopy.body}
+          targetDate={clientSlaCopy.targetDate}
+          carveOuts={clientSlaCopy.carveOuts}
         />
       )}
 
