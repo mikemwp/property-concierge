@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   CASE_THREAD_HOOK,
+  SELLER_VIEW_HOOK,
   CHAIN_FREE_HOOK,
   CLIENT_SLA_HOOK,
   ENTRY_STORIES,
@@ -156,6 +157,24 @@ describe("case thread hook is an audit trail, not live chat", () => {
     expect(FREE_PLAN.limits.some((line) => /case thread/i.test(line))).toBe(true);
     for (const feature of FREE_PLAN.features) {
       expect(/case thread/i.test(feature), feature).toBe(false);
+    }
+  });
+});
+
+describe("seller milestone hook is a buyer ledger snapshot", () => {
+  it("names advisor-shared buyer progress without inventory or introductions", () => {
+    const blob = `${SELLER_VIEW_HOOK.eyebrow} ${SELLER_VIEW_HOOK.headline} ${SELLER_VIEW_HOOK.body}`;
+    expect(blob).toMatch(/buyer/i);
+    expect(blob).toMatch(/ledger|progress/i);
+    expect(blob).toMatch(/advisor/i);
+    expect(blob.replace(/not a seller login/gi, "")).not.toMatch(/seller login/i);
+    expect(blob.replace(/not a listing/gi, "")).not.toMatch(/inventory|listing feed/i);
+    expect(blob.replace(/not an introduction/gi, "")).not.toMatch(/introduc/i);
+    for (const pattern of FORBIDDEN_CLAIM_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
+    }
+    for (const pattern of FORBIDDEN_INVENTORY_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
     }
   });
 });

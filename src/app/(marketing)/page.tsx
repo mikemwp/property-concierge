@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PlanCards } from "@/components/marketing/PlanCards";
 import {
   CASE_THREAD_HOOK,
+  SELLER_VIEW_HOOK,
   CHAIN_FREE_HOOK,
   CLIENT_SLA_HOOK,
   ENTRY_STORIES,
@@ -66,6 +67,16 @@ export default async function MarketingHomePage({ searchParams }: Props) {
           {CASE_THREAD_HOOK.headline}
         </h2>
         <p className="mt-2 text-sm text-slate-600">{CASE_THREAD_HOOK.body}</p>
+      </section>
+
+      <section className="mt-16 max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+          {SELLER_VIEW_HOOK.eyebrow}
+        </p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">
+          {SELLER_VIEW_HOOK.headline}
+        </h2>
+        <p className="mt-2 text-sm text-slate-600">{SELLER_VIEW_HOOK.body}</p>
       </section>
 
       <section className="mt-16">

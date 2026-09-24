@@ -213,6 +213,12 @@ export const CASE_THREAD_HOOK = {
   body: "On Done-With-You your advisor stays in one append-only thread with you and the partners on the case. Every post is dated and attributed. Refresh the portal to see new messages — this is not a live chat.",
 };
 
+export const SELLER_VIEW_HOOK = {
+  eyebrow: "Buyer progress, shared by the advisor",
+  headline: "A milestone snapshot from the purchase ledger.",
+  body: "When it helps a sale, your advisor can share a read-only view of buyer-side progress. We act for the buyer only. This is not a seller login, not a listing, and not an introduction.",
+};
+
 export const OUT_OF_SCOPE_GEO_PATTERNS: RegExp[] = [
   /\bscotland\b/i,
   /northern ireland/i,
@@ -253,5 +259,8 @@ export function marketingClaimStrings(): string[] {
     CASE_THREAD_HOOK.eyebrow,
     CASE_THREAD_HOOK.headline,
     CASE_THREAD_HOOK.body,
+    SELLER_VIEW_HOOK.eyebrow,
+    SELLER_VIEW_HOOK.headline,
+    SELLER_VIEW_HOOK.body,
   ];
 }
