@@ -16,7 +16,11 @@ import {
   assertPortalSubmit,
   PortalPolicyError,
 } from "@/server/portal-policy";
-import { assertVaultSubmitAllowed } from "@/server/vault";
+import {
+  assertVaultSubmitAllowed,
+  canUseVault,
+  prismaVaultPresenceLookup,
+} from "@/server/vault";
 import { revalidatePath } from "next/cache";
 
 export type SubmitEvidenceResult =
@@ -43,11 +47,15 @@ export async function submitEvidenceAction(
 
     if (caseState.tier === "PAID_DWY") {
       await assertVaultSubmitAllowed(caseState, stageKey, kind);
+      const vaultEnabled = canUseVault(caseState);
+      const hasActiveDocument = vaultEnabled
+        ? await prismaVaultPresenceLookup.hasActiveDocument(caseId, stageKey, kind)
+        : false;
       caseState = submitEvidence(caseState, {
         stageKey,
         kind,
         actorRole: "CLIENT",
-        vault: undefined,
+        vault: vaultEnabled ? { enabled: true, hasActiveDocument } : undefined,
       });
     } else {
       caseState = attestEvidence(caseState, {

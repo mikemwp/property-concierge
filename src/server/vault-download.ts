@@ -17,7 +17,7 @@ export function authorizeVaultDownload(input: {
     throw new VaultError("NOT_FOUND", "Vault document not found");
   }
   if (input.actor.role !== "ADVISOR" && !canUseVault(input.caseState)) {
-    throw new VaultError("FORBIDDEN", "Document vault is not available");
+    throw new VaultError("FORBIDDEN", "Document vault is not allowed for this case");
   }
   const allowed = documentVisibleTo(input.document, {
     role: input.actor.role,

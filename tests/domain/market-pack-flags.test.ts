@@ -8,7 +8,7 @@ import {
   packModules,
 } from "../../src/domain/market-packs/types";
 
-const GATED_MODULES = ["hard_client_sla", "document_vault"] as const;
+const GATED_MODULES = ["hard_client_sla"] as const;
 
 describe("module flags are pack data", () => {
   it("keeps every globally gated module off in every registered pack", () => {
@@ -41,6 +41,20 @@ describe("module flags are pack data", () => {
     expect(
       isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "hard_client_sla"),
     ).toBe(false);
+  });
+
+  it("runs the document vault in England & Wales only", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "document_vault"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual(["ew"]);
+    expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "document_vault")).toBe(
+      false,
+    );
+    expect(
+      isModuleEnabled(listMarketPacks().find((p) => p.id === "au_uk")!.flags, "document_vault"),
+    ).toBe(false);
+    expect(isModuleEnabled(EW_FLAGS, "hard_client_sla")).toBe(false);
   });
 
   it("turns corridor modules on only for the four corridor packs", () => {

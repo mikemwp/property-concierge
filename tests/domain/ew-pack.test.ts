@@ -8,6 +8,7 @@ describe("ew market pack", () => {
       fx_deposit: true,
       partner_speed_rails: true,
       chain_free_inventory: true,
+      document_vault: true,
     });
   });
 

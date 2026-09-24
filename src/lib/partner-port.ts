@@ -15,6 +15,7 @@ import { casePack } from "@/lib/case-pack";
 import { type CaseStore, prismaCaseStore } from "@/lib/case-store";
 import {
   assertVaultSubmitAllowed,
+  canUseVault,
   prismaVaultPresenceLookup,
   type VaultPresenceLookup,
 } from "@/server/vault";
@@ -261,11 +262,17 @@ export class ManualPartnerPort implements PartnerPort {
       (input.now ?? new Date()).toISOString(),
     );
 
+    const vaultEnabled = canUseVault(caseState);
+    const hasActiveDocument = vaultEnabled
+      ? await this.vaultLookup.hasActiveDocument(input.caseId, input.stageKey, input.kind)
+      : false;
+
     caseState = applyPartnerEvidence(caseState, {
       stageKey: input.stageKey,
       kind: input.kind,
       actorRole: input.role,
       now: input.now,
+      vault: vaultEnabled ? { enabled: true, hasActiveDocument } : undefined,
     });
 
     await this.store.save(caseState);

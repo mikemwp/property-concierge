@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { decodePartnerEventPayload } from "../../src/domain/partner-integration";
 import { ManualPartnerPort, PartnerPortError } from "../../src/lib/partner-port";
+import { allowAllVaultLookup } from "../../src/server/vault";
 import { atMortgagePath, makeMemoryCaseStore } from "../support/memory-case-store";
 
 const NOW = new Date("2026-09-10T09:00:00.000Z");
@@ -43,7 +44,7 @@ describe("ManualPartnerPort implements the whole integration surface", () => {
 
   it("submits partner evidence through the engine with the frozen bare-kind payload", async () => {
     const store = makeMemoryCaseStore(atMortgagePath());
-    const port = new ManualPartnerPort(store);
+    const port = new ManualPartnerPort(store, allowAllVaultLookup);
 
     await port.submitPartnerEvidence({ ...context(), stageKey: "mortgage_path", kind: "dip_aip" });
 
@@ -63,7 +64,8 @@ describe("ManualPartnerPort implements the whole integration surface", () => {
     expect(before.status).toBe("RECEIVED");
 
     await port.acknowledgeCase(context());
-    await port.submitPartnerEvidence({ ...context(), stageKey: "mortgage_path", kind: "dip_aip" });
+    const submitPort = new ManualPartnerPort(store, allowAllVaultLookup);
+    await submitPort.submitPartnerEvidence({ ...context(), stageKey: "mortgage_path", kind: "dip_aip" });
     const after = await port.syncStatus(context());
     expect(after.status).toBe("EVIDENCE_READY");
     expect(store.current().events.at(-1)!.type).toBe("PARTNER_STATUS_SYNCED");
