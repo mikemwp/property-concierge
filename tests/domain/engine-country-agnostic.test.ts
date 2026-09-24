@@ -33,6 +33,7 @@ const ENGINE_GLOBAL_FILES = [
   "src/server/threads.ts",
   "src/server/thread-store.ts",
   "src/server/vault-store.ts",
+  "src/server/vault-storage.ts",
   "src/server/seller-milestones.ts",
 ];
 

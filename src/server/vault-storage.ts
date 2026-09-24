@@ -1,0 +1,54 @@
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { assertSafeStorageKey } from "../domain/vault";
+
+export type VaultStorageKind = "local" | "s3";
+
+export type VaultStorageBackend = {
+  readonly kind: VaultStorageKind;
+  write(storageKey: string, bytes: Uint8Array): void;
+  read(storageKey: string): Uint8Array;
+};
+
+export type VaultStorageErrorCode = "S3_NOT_CONFIGURED" | "S3_NOT_IMPLEMENTED" | "UNKNOWN_DRIVER";
+
+export class VaultStorageError extends Error {
+  constructor(
+    public code: VaultStorageErrorCode,
+    message: string,
+  ) {
+    super(message);
+    this.name = "VaultStorageError";
+  }
+}
+
+export type S3VaultConfig = {
+  bucket: string;
+  region: string;
+  prefix: string;
+};
+
+export function defaultVaultRoot(cwd: string = process.cwd()): string {
+  return path.join(cwd, "var", "vault");
+}
+
+export class LocalVaultStorage implements VaultStorageBackend {
+  readonly kind = "local" as const;
+
+  constructor(private readonly root: string) {}
+
+  write(storageKey: string, bytes: Uint8Array): void {
+    const full = this.absolutePath(storageKey);
+    mkdirSync(path.dirname(full), { recursive: true });
+    writeFileSync(full, bytes);
+  }
+
+  read(storageKey: string): Uint8Array {
+    return new Uint8Array(readFileSync(this.absolutePath(storageKey)));
+  }
+
+  private absolutePath(storageKey: string): string {
+    assertSafeStorageKey(storageKey);
+    return path.join(this.root, ...storageKey.split("/"));
+  }
+}
