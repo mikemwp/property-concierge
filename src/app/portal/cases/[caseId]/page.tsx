@@ -6,6 +6,7 @@ import { ChainFreeStatusCard } from "@/components/ChainFreeStatusCard";
 import { ClientSlaTargetCard } from "@/components/ClientSlaTargetCard";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
+import { ThreadPanel } from "@/components/ThreadPanel";
 import { VaultPanel } from "@/components/VaultPanel";
 import { VaultUploadForm } from "@/components/VaultUploadForm";
 import { PartnerDirectory } from "@/components/PartnerDirectory";
@@ -26,6 +27,12 @@ import { canUseClientSla, loadClientSla } from "@/server/client-sla";
 import { listPanel } from "@/server/panel";
 import { canPortalSubmit } from "@/server/portal-policy";
 import { listReferralsForCase } from "@/server/referrals";
+import { canPostThread } from "@/domain/threads";
+import {
+  canUseThreads,
+  loadVisibleCaseMessages,
+  threadViewerFor,
+} from "@/server/threads";
 import {
   canUseVault,
   listVaultDocuments,
@@ -113,6 +120,16 @@ export default async function PortalCasePage({ params }: Props) {
         readStageKeys: [],
       })
     : [];
+  const threadsOn = canUseThreads(caseState);
+  const threadViewer = threadViewerFor(
+    caseState,
+    { role: "CLIENT", userId: session.user.id },
+    { assigned: true, hasActiveReferral: false },
+  );
+  const threadMessages = threadsOn
+    ? await loadVisibleCaseMessages(caseState, threadViewer)
+    : [];
+  const threadCanPost = threadsOn && canPostThread(threadViewer);
   const activeByKind = new Map(
     vaultDocuments
       .filter((doc) => doc.status === "ACTIVE" && doc.stageKey === focus?.key)
@@ -203,6 +220,14 @@ export default async function PortalCasePage({ params }: Props) {
       )}
 
       {vaultOn && <VaultPanel caseId={caseId} documents={vaultDocuments} canReset={false} />}
+
+      {threadsOn && (
+        <ThreadPanel
+          caseId={caseId}
+          messages={threadMessages}
+          canPost={threadCanPost}
+        />
+      )}
 
       <ReferralDisclosure referrals={referrals} />
 
