@@ -1,7 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
+  CHAIN_FREE_HOOK,
   ENTRY_STORIES,
   FORBIDDEN_CLAIM_PATTERNS,
+  FORBIDDEN_INVENTORY_PATTERNS,
   FREE_PLAN,
   OUT_OF_SCOPE_GEO_PATTERNS,
   PAID_ONLY_CAPABILITY_PATTERNS,
@@ -84,5 +86,25 @@ describe("entry stories", () => {
       "RETURNER_OVERSEAS",
     );
     expect(storyBySlug("not-a-story")).toBeNull();
+  });
+});
+
+describe("chain-free beachhead hook", () => {
+  it("names chain-free as positioning and paid orchestration as the product", () => {
+    const blob = `${CHAIN_FREE_HOOK.eyebrow} ${CHAIN_FREE_HOOK.headline} ${CHAIN_FREE_HOOK.body}`;
+    expect(blob).toMatch(/chain-free/i);
+    expect(blob).toMatch(/orchestrat/i);
+    expect(blob).not.toMatch(/guarantee/i);
+    for (const pattern of FORBIDDEN_INVENTORY_PATTERNS) {
+      expect(pattern.test(blob), `${pattern} matched hook`).toBe(false);
+    }
+  });
+
+  it("keeps inventory, private seller intros and listing-feed claims out of every sales string", () => {
+    for (const text of marketingClaimStrings()) {
+      for (const pattern of FORBIDDEN_INVENTORY_PATTERNS) {
+        expect(pattern.test(text), `"${text}" matches ${pattern}`).toBe(false);
+      }
+    }
   });
 });

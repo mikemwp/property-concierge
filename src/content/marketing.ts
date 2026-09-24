@@ -56,7 +56,7 @@ export const FREE_PLAN: PlanCopy = {
   primary: false,
   price: "£0",
   features: [
-    "The full nine-stage purchase map for England & Wales",
+    "The full purchase stage map for England & Wales",
     "A plain-English explainer of what each stage is for",
     "Tick off the starter stages yourself as you go",
     "A directory of the partner categories you will need to find",
@@ -137,7 +137,7 @@ export const ENTRY_STORIES: EntryStory[] = [
     subhead:
       "You live here and you want the purchase run properly: one owner per stage, evidence checked once, and somebody chasing the party who is late.",
     proofPoints: [
-      "The same nine-stage ledger, without the currency and shipping steps",
+      "The same stage ledger, without the currency and shipping steps",
       "One owner at a time, with the day counter visible",
       "Conveyancer and survey stages actively chased, not tracked",
       "Everything in one portal with an audit trail",
@@ -181,10 +181,23 @@ export const FORBIDDEN_CLAIM_PATTERNS: RegExp[] = [
   /guaranteed/i,
   /mortgage advice/i,
   /we advise/i,
-  /chain[- ]free/i,
   /rightmove/i,
   /zoopla/i,
 ];
+
+export const FORBIDDEN_INVENTORY_PATTERNS: RegExp[] = [
+  /seller[- ]side/i,
+  /private seller/i,
+  /listing feed/i,
+  /onward chain inventory/i,
+  /(?<!\bnot )introduc(?:e|tion) .{0,40}seller/i,
+];
+
+export const CHAIN_FREE_HOOK = {
+  eyebrow: "Beachhead, not the product",
+  headline: "Chain-free buyers use the same engine.",
+  body: "Paid orchestration certifies a household as chain-free from the stage ledger — not from star ratings, and not from a seller inventory. UK-resident speed-seekers enter the same way. We do not introduce buyers to sellers for a fee.",
+};
 
 export const OUT_OF_SCOPE_GEO_PATTERNS: RegExp[] = [
   /\bscotland\b/i,
@@ -217,5 +230,8 @@ export function marketingClaimStrings(): string[] {
     HERO.secondaryCta,
     ...planStrings,
     ...storyStrings,
+    CHAIN_FREE_HOOK.eyebrow,
+    CHAIN_FREE_HOOK.headline,
+    CHAIN_FREE_HOOK.body,
   ];
 }
