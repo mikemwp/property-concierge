@@ -18,7 +18,8 @@ export const EW_LOCALE: MarketLocale = {
  * buyer-side certification/matching data — not seller listings. Spec §8:
  * document_vault is on for ew only. Spec §5/§9: hard_client_sla is on for ew
  * only as published target timelines with legal carve-outs — not a marketing
- * guarantee.
+ * guarantee. Spec §8: case_threads is on for ew only as the append-only
+ * multi-party case thread.
  */
 export const EW_FLAGS: MarketFlags = {
   fx_deposit: true,
@@ -26,6 +27,7 @@ export const EW_FLAGS: MarketFlags = {
   chain_free_inventory: true,
   document_vault: true,
   hard_client_sla: true,
+  case_threads: true,
 };
 
 export const EW_COPY: MarketCopy = {

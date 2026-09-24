@@ -37,7 +37,8 @@ export type MarketModuleKey =
   | "chain_free_inventory"
   | "hard_client_sla"
   | "document_vault"
-  | "partner_speed_rails";
+  | "partner_speed_rails"
+  | "case_threads";
 
 export const MARKET_MODULE_KEYS: readonly MarketModuleKey[] = [
   "fx_deposit",
@@ -47,6 +48,7 @@ export const MARKET_MODULE_KEYS: readonly MarketModuleKey[] = [
   "hard_client_sla",
   "document_vault",
   "partner_speed_rails",
+  "case_threads",
 ];
 
 /** Partial on purpose: a module is off unless a pack explicitly turns it on. */

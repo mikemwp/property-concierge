@@ -57,6 +57,20 @@ describe("module flags are pack data", () => {
     ).toBe(false);
   });
 
+  it("runs the case thread in England & Wales only", () => {
+    const enabled = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "case_threads"))
+      .map((pack) => pack.id);
+    expect(enabled).toEqual(["ew"]);
+    expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "case_threads")).toBe(
+      false,
+    );
+    expect(
+      isModuleEnabled(listMarketPacks().find((p) => p.id === "au_uk")!.flags, "case_threads"),
+    ).toBe(false);
+    expect(isModuleEnabled(EW_FLAGS, "case_threads")).toBe(true);
+  });
+
   it("turns corridor modules on only for the four corridor packs", () => {
     const inbound = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "corridor_inbound"))

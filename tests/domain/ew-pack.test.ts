@@ -10,6 +10,7 @@ describe("ew market pack", () => {
       chain_free_inventory: true,
       document_vault: true,
       hard_client_sla: true,
+      case_threads: true,
     });
   });
 
