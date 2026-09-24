@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { resetVaultDocumentAction } from "@/app/actions/vault";
 import { AdvisorStageControls } from "@/components/AdvisorStageControls";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { PartnerIntegrationPanel } from "@/components/PartnerIntegrationPanel";
@@ -9,6 +10,7 @@ import { ReferralPanel } from "@/components/ReferralPanel";
 import { StageTimeline } from "@/components/StageTimeline";
 import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { ChainFreeCertificationPanel } from "@/components/ChainFreeCertificationPanel";
+import { VaultPanel } from "@/components/VaultPanel";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
 import { advisorCertificationView } from "@/domain/chain-free";
 import { advisorStageView, canUseWarmIntro } from "@/domain/freemium";
@@ -29,6 +31,7 @@ import { listPanel } from "@/server/panel";
 import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
 import { displayTicketAdapterId } from "@/lib/partner-adapters/registry";
 import { canUseSpeedRails } from "@/server/partner-policy";
+import { canUseVault, listVaultDocuments } from "@/server/vault";
 import { isPartnerActorRole, PARTNER_ROLES } from "@/domain/types";
 
 type Props = {
@@ -95,6 +98,9 @@ export default async function CockpitCasePage({ params }: Props) {
   const isBlocked = focusStage?.status === "BLOCKED";
 
   const pack = casePack(caseState);
+
+  const vaultOn = canUseVault(caseState);
+  const vaultDocuments = vaultOn ? await listVaultDocuments(caseId) : [];
 
   assertCertificationVisible("ADVISOR");
   const chainFreeEnabled = canUseChainFree(caseState);
@@ -181,6 +187,8 @@ export default async function CockpitCasePage({ params }: Props) {
           />
         </div>
       )}
+
+      {vaultOn && <VaultPanel caseId={caseId} documents={vaultDocuments} canReset />}
 
       <div className="mt-8">
         <WarmIntroButton

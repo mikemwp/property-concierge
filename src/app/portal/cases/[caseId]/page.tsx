@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { submitEvidenceAction } from "@/app/actions/portal";
+import { uploadAndSubmitEvidenceAction } from "@/app/actions/vault";
 import { ChainFreeStatusCard } from "@/components/ChainFreeStatusCard";
 import { CurrentOwnerBanner } from "@/components/CurrentOwnerBanner";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
+import { VaultPanel } from "@/components/VaultPanel";
+import { VaultUploadForm } from "@/components/VaultUploadForm";
 import { PartnerDirectory } from "@/components/PartnerDirectory";
 import { ReferralDisclosure } from "@/components/ReferralDisclosure";
 import { StageTimeline } from "@/components/StageTimeline";
@@ -20,6 +23,11 @@ import { canUseChainFree, loadCertification } from "@/server/chain-free";
 import { listPanel } from "@/server/panel";
 import { canPortalSubmit } from "@/server/portal-policy";
 import { listReferralsForCase } from "@/server/referrals";
+import {
+  canUseVault,
+  listVaultDocuments,
+  visibleVaultDocuments,
+} from "@/server/vault";
 
 type Props = {
   params: Promise<{ caseId: string }>;
@@ -89,6 +97,28 @@ export default async function PortalCasePage({ params }: Props) {
     onSubmit: async () => submitEvidenceAction(caseId, focus!.key, kind),
   }));
 
+  const vaultOn = canUseVault(caseState);
+  const vaultDocuments = vaultOn
+    ? visibleVaultDocuments(await listVaultDocuments(caseId), {
+        role: "CLIENT",
+        userId: session.user.id,
+        tier: caseState.tier,
+        readStageKeys: [],
+      })
+    : [];
+  const activeByKind = new Map(
+    vaultDocuments
+      .filter((doc) => doc.status === "ACTIVE" && doc.stageKey === focus?.key)
+      .map((doc) => [doc.evidenceKind, doc]),
+  );
+  const vaultRows = pendingSubmitKinds.map((kind) => ({
+    kind,
+    hasActiveDocument: activeByKind.has(kind),
+    onUploadAndSubmit: async (formData: FormData) =>
+      uploadAndSubmitEvidenceAction(caseId, focus!.key, kind, formData),
+    onSubmitOnly: async () => submitEvidenceAction(caseId, focus!.key, kind),
+  }));
+
   return (
     <section>
       <Link
@@ -146,11 +176,17 @@ export default async function PortalCasePage({ params }: Props) {
       {canSubmit && (pendingSubmitKinds.length > 0 || awaitingKinds.length > 0) && (
         <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">
           <h2 className="mb-3 text-lg font-medium text-slate-900">
-            Submit evidence
+            {vaultOn ? "Tasks and documents" : "Submit evidence"}
           </h2>
-          <EvidenceSubmitForm rows={evidenceRows} awaitingKinds={awaitingKinds} />
+          {vaultOn ? (
+            <VaultUploadForm rows={vaultRows} awaitingKinds={awaitingKinds} />
+          ) : (
+            <EvidenceSubmitForm rows={evidenceRows} awaitingKinds={awaitingKinds} />
+          )}
         </div>
       )}
+
+      {vaultOn && <VaultPanel caseId={caseId} documents={vaultDocuments} canReset={false} />}
 
       <ReferralDisclosure referrals={referrals} />
 

@@ -5,7 +5,10 @@ import {
   reportMilestoneAction,
 } from "@/app/actions/partner-integration";
 import { submitPartnerEvidenceAction } from "@/app/actions/partner";
+import { uploadAndSubmitPartnerEvidenceAction } from "@/app/actions/vault";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
+import { VaultPanel } from "@/components/VaultPanel";
+import { VaultUploadForm } from "@/components/VaultUploadForm";
 import { PartnerCaseContext } from "@/components/PartnerCaseContext";
 import { PartnerIntegrationControls } from "@/components/PartnerIntegrationControls";
 import { StageTimeline } from "@/components/StageTimeline";
@@ -30,6 +33,13 @@ import {
   canUseSpeedRails,
   isPartnerRole,
 } from "@/server/partner-policy";
+import { activeReferralForRole } from "@/server/referrals";
+import {
+  canUseVault,
+  listVaultDocuments,
+  partnerScopeForCase,
+  visibleVaultDocuments,
+} from "@/server/vault";
 import type { ActorRole } from "@/domain/types";
 
 type Props = {
@@ -96,6 +106,33 @@ export default async function PartnerCasePage({ params }: Props) {
       submitPartnerEvidenceAction(caseId, focus.key, kind),
   }));
 
+  const vaultOn = canUseVault(caseState);
+  const referral = await activeReferralForRole(caseId, role);
+  const readStageKeys = partnerScopeForCase(caseState, role, {
+    assigned: true,
+    hasActiveReferral: referral !== null,
+  });
+  const vaultDocuments = vaultOn
+    ? visibleVaultDocuments(await listVaultDocuments(caseId), {
+        role,
+        userId: session.user.id,
+        tier: caseState.tier,
+        readStageKeys,
+      })
+    : [];
+  const activeByKind = new Map(
+    vaultDocuments
+      .filter((doc) => doc.status === "ACTIVE" && doc.stageKey === focus.key)
+      .map((doc) => [doc.evidenceKind, doc]),
+  );
+  const vaultRows = inbox.toSubmit.map((kind) => ({
+    kind,
+    hasActiveDocument: activeByKind.has(kind),
+    onUploadAndSubmit: async (formData: FormData) =>
+      uploadAndSubmitPartnerEvidenceAction(caseId, focus.key, kind, formData),
+    onSubmitOnly: async () => submitPartnerEvidenceAction(caseId, focus.key, kind),
+  }));
+
   const openTicket = openTicketForRole(caseState, role);
   const railsEnabled = canUseSpeedRails(caseState);
   const ticket = openTicket
@@ -140,10 +177,17 @@ export default async function PartnerCasePage({ params }: Props) {
           <h2 className="mb-3 text-lg font-medium text-slate-900">
             Required evidence
           </h2>
-          <EvidenceSubmitForm
-            rows={evidenceRows}
-            awaitingKinds={inbox.awaitingAcceptance}
-          />
+          {vaultOn ? (
+            <VaultUploadForm
+              rows={vaultRows}
+              awaitingKinds={inbox.awaitingAcceptance}
+            />
+          ) : (
+            <EvidenceSubmitForm
+              rows={evidenceRows}
+              awaitingKinds={inbox.awaitingAcceptance}
+            />
+          )}
           {inbox.accepted.length > 0 && (
             <ul className="mt-4 space-y-2">
               {inbox.accepted.map((kind) => (
@@ -158,6 +202,8 @@ export default async function PartnerCasePage({ params }: Props) {
           )}
         </div>
       )}
+
+      {vaultOn && <VaultPanel caseId={caseId} documents={vaultDocuments} canReset={false} />}
 
       {canSubmit && inbox.complete && (
         <p className="mt-8 text-sm text-emerald-700">
