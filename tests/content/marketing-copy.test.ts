@@ -7,6 +7,7 @@ import {
   ENTRY_STORIES,
   FORBIDDEN_CLAIM_PATTERNS,
   FORBIDDEN_INVENTORY_PATTERNS,
+  FORBIDDEN_MARKETPLACE_PATTERNS,
   FREE_PLAN,
   OUT_OF_SCOPE_GEO_PATTERNS,
   PAID_ONLY_CAPABILITY_PATTERNS,
@@ -17,6 +18,16 @@ import {
   storyBySlug,
 } from "../../src/content/marketing";
 import type { EntryContext } from "../../src/domain/types";
+
+describe("open marketplace stays a non-goal in sales copy", () => {
+  it("never advertises browse, self-signup, or an open marketplace", () => {
+    for (const text of marketingClaimStrings()) {
+      for (const pattern of FORBIDDEN_MARKETPLACE_PATTERNS) {
+        expect(pattern.test(text), `"${text}" matches ${pattern}`).toBe(false);
+      }
+    }
+  });
+});
 
 describe("freemium discipline in marketing copy", () => {
   it("makes paid the primary plan and shows it first", () => {

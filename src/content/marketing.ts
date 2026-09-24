@@ -195,6 +195,13 @@ export const FORBIDDEN_INVENTORY_PATTERNS: RegExp[] = [
   /introduc(?:e|tion) .{0,40}seller/i,
 ];
 
+export const FORBIDDEN_MARKETPLACE_PATTERNS: RegExp[] = [
+  /open marketplace/i,
+  /browse (all )?partners/i,
+  /partner self-?signup/i,
+  /third[- ]party (stock|browse)/i,
+];
+
 export const CHAIN_FREE_HOOK = {
   eyebrow: "Beachhead, not the product",
   headline: "Chain-free buyers use the same engine.",
