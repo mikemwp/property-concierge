@@ -22,6 +22,7 @@ describe("market pack registry", () => {
   it("lists every registered pack, enabled or not, sorted by id", () => {
     expect(listMarketPacks().map((p) => [p.id, p.enabled])).toEqual([
       ["au", false],
+      ["au_uk", true],
       ["ew", true],
     ]);
   });

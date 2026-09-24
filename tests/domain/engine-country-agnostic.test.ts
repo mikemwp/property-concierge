@@ -20,6 +20,7 @@ const ENGINE_GLOBAL_FILES = [
   "src/domain/partner-activity.ts",
   "src/domain/referral.ts",
   "src/domain/chain-free.ts",
+  "src/domain/market-packs/corridor.ts",
   "src/domain/intake.ts",
   "src/server/mappers.ts",
   "src/lib/case-pack.ts",

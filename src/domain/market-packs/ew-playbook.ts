@@ -1,5 +1,5 @@
 import type { ActorRole, EntryContext } from "../types";
-import { isModuleEnabled, type PlaybookAction, type StagePlaybook } from "./types";
+import { isModuleEnabled, type MarketFlags, type PlaybookAction, type StagePlaybook } from "./types";
 import { EW_LOCALE, EW_FLAGS } from "./ew-config";
 import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew-stages";
 import { formatMoney } from "./locale";
@@ -8,8 +8,8 @@ function isOverseas(entry: EntryContext): boolean {
   return entry === "RETURNER_OVERSEAS";
 }
 
-function needsCurrencyWork(entry: EntryContext): boolean {
-  return moneyEvidenceKinds(entry, EW_FLAGS).includes("fx_plan");
+function needsCurrencyWork(entry: EntryContext, flags: MarketFlags): boolean {
+  return moneyEvidenceKinds(entry, flags).includes("fx_plan");
 }
 
 const MONEY_EVIDENCE: Record<string, string> = {
@@ -70,8 +70,11 @@ export function chainFreeMatchingPlaybook(): StagePlaybook {
   };
 }
 
-export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
-  const playbooks: StagePlaybook[] = [
+export function ewLegalPlaybooks(
+  entry: EntryContext,
+  flags: MarketFlags = EW_FLAGS,
+): StagePlaybook[] {
+  return [
     {
       stageKey: "purchase_profile",
       objective:
@@ -120,7 +123,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
           action:
             "Issue the source-of-funds list: statements covering six months, evidence of any gift, and the account the deposit will settle from.",
         },
-        ...(needsCurrencyWork(entry)
+        ...(needsCurrencyWork(entry, flags)
           ? [
               {
                 day: 2,
@@ -147,7 +150,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
             "Review the pack against the standard below and reject anything a lender or conveyancer would bounce — once, properly, not twice.",
         },
       ],
-      evidenceStandard: linesFor(moneyEvidenceKinds(entry, EW_FLAGS), MONEY_EVIDENCE),
+      evidenceStandard: linesFor(moneyEvidenceKinds(entry, flags), MONEY_EVIDENCE),
       escalation: [
         "Day 7 (SLA): pack incomplete — advisor calls the client and names the single missing document.",
         "Day 11: still incomplete — block the stage; do not let search readiness start on an unproven deposit.",
@@ -341,7 +344,7 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
           action:
             "Work backwards from the target completion date to the date cleared funds must sit in the conveyancer's client account.",
         },
-        ...(needsCurrencyWork(entry)
+        ...(needsCurrencyWork(entry, flags)
           ? [
               {
                 day: 1,
@@ -401,7 +404,10 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
       partnerScript: null,
     },
   ];
+}
 
+export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
+  const playbooks = ewLegalPlaybooks(entry, EW_FLAGS);
   if (!isModuleEnabled(EW_FLAGS, "chain_free_inventory")) {
     return playbooks;
   }

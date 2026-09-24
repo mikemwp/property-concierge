@@ -34,9 +34,12 @@ export function chainFreeMatchingTemplate(): StageTemplate {
   };
 }
 
-/** England & Wales legal spine. Spec §4 canonical stage groups. */
-export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
-  const stages: StageTemplate[] = [
+/** Nine-stage England & Wales legal spine. No chain-free overlay. */
+export function ewLegalSpine(
+  entry: EntryContext,
+  flags: MarketFlags = EW_FLAGS,
+): StageTemplate[] {
+  return [
     {
       key: "purchase_profile",
       title: "Purchase profile",
@@ -51,7 +54,7 @@ export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
       title: "Money readiness",
       defaultOwnerRole: "CLIENT",
       slaDays: 7,
-      requiredEvidenceKinds: moneyEvidenceKinds(entry, EW_FLAGS),
+      requiredEvidenceKinds: moneyEvidenceKinds(entry, flags),
       freeVisible: true,
       freeCanSelfAdvance: false,
     },
@@ -119,7 +122,11 @@ export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
       freeCanSelfAdvance: true,
     },
   ];
+}
 
+/** England & Wales legal spine. Spec §4 canonical stage groups. */
+export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
+  const stages = ewLegalSpine(entry, EW_FLAGS);
   if (!isModuleEnabled(EW_FLAGS, "chain_free_inventory")) {
     return stages;
   }

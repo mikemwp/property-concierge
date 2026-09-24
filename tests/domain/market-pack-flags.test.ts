@@ -8,13 +8,8 @@ import {
   packModules,
 } from "../../src/domain/market-packs/types";
 
-/** Spec §9: hard SLAs stay unsold. Chain-free inventory is on for ew as buyer overlay data only. */
-const GATED_MODULES = [
-  "hard_client_sla",
-  "corridor_inbound",
-  "corridor_outbound",
-  "document_vault",
-] as const;
+/** Spec §9: hard SLAs and the vault stay unsold. Corridor flags are on for corridor packs only. */
+const GATED_MODULES = ["hard_client_sla", "document_vault"] as const;
 
 describe("module flags are pack data", () => {
   it("keeps every gated module off in every registered pack", () => {
@@ -25,11 +20,28 @@ describe("module flags are pack data", () => {
     }
   });
 
-  it("enables FX for the deposit in England & Wales only", () => {
+  it("enables FX on the beachhead pack and on every registered corridor pack", () => {
     const enabled = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "fx_deposit"))
       .map((pack) => pack.id);
-    expect(enabled).toEqual(["ew"]);
+    expect(enabled).toEqual(["au_uk", "ew"]);
+  });
+
+  it("turns corridor modules on only for registered corridor packs", () => {
+    const inbound = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "corridor_inbound"))
+      .map((pack) => pack.id);
+    const outbound = listMarketPacks()
+      .filter((pack) => isModuleEnabled(pack.flags, "corridor_outbound"))
+      .map((pack) => pack.id);
+    expect(inbound).toEqual(["au_uk"]);
+    expect(outbound).toEqual(["au_uk"]);
+    expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "ew")!.flags, "corridor_inbound")).toBe(
+      false,
+    );
+    expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "corridor_outbound")).toBe(
+      false,
+    );
   });
 
   it("runs partner speed rails in England & Wales only", () => {
