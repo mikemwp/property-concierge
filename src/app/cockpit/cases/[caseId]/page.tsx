@@ -11,6 +11,7 @@ import { StageTimeline } from "@/components/StageTimeline";
 import { CaseAdminControls } from "@/components/CaseAdminControls";
 import { ChainFreeCertificationPanel } from "@/components/ChainFreeCertificationPanel";
 import { ClientSlaPublishPanel } from "@/components/ClientSlaPublishPanel";
+import { ThreadPanel } from "@/components/ThreadPanel";
 import { VaultPanel } from "@/components/VaultPanel";
 import { WarmIntroButton } from "@/components/WarmIntroButton";
 import { advisorCertificationView } from "@/domain/chain-free";
@@ -38,6 +39,12 @@ import { listPanel } from "@/server/panel";
 import { activeReferralForRole, listReferralsForCase } from "@/server/referrals";
 import { displayTicketAdapterId } from "@/lib/partner-adapters/registry";
 import { canUseSpeedRails } from "@/server/partner-policy";
+import { canPostThread } from "@/domain/threads";
+import {
+  canUseThreads,
+  loadVisibleCaseMessages,
+  threadViewerFor,
+} from "@/server/threads";
 import { canUseVault, listVaultDocuments } from "@/server/vault";
 import { isPartnerActorRole, PARTNER_ROLES } from "@/domain/types";
 
@@ -108,6 +115,16 @@ export default async function CockpitCasePage({ params }: Props) {
 
   const vaultOn = canUseVault(caseState);
   const vaultDocuments = vaultOn ? await listVaultDocuments(caseId) : [];
+  const threadsOn = canUseThreads(caseState);
+  const threadViewer = threadViewerFor(
+    caseState,
+    { role: "ADVISOR", userId: session.user.id },
+    { assigned: true, hasActiveReferral: false },
+  );
+  const threadMessages = threadsOn
+    ? await loadVisibleCaseMessages(caseState, threadViewer)
+    : [];
+  const threadCanPost = threadsOn && canPostThread(threadViewer);
 
   assertCertificationVisible("ADVISOR");
   const chainFreeEnabled = canUseChainFree(caseState);
@@ -201,6 +218,14 @@ export default async function CockpitCasePage({ params }: Props) {
       )}
 
       {vaultOn && <VaultPanel caseId={caseId} documents={vaultDocuments} canReset />}
+
+      {threadsOn && (
+        <ThreadPanel
+          caseId={caseId}
+          messages={threadMessages}
+          canPost={threadCanPost}
+        />
+      )}
 
       <div className="mt-8">
         <WarmIntroButton

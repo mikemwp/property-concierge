@@ -23,4 +23,24 @@ describe("thread surfaces", () => {
     expect(panel).toMatch(/Refresh to see new posts|not a live chat/i);
     expect(panel).toContain('name="body"');
   });
+
+  it("mounts the same panel on cockpit and on both partner branches", () => {
+    const cockpit = read("src/app/cockpit/cases/[caseId]/page.tsx");
+    const partner = read("src/app/partner/cases/[caseId]/page.tsx");
+
+    expect(cockpit).toContain("canUseThreads");
+    expect(cockpit).toContain("ThreadPanel");
+    expect(cockpit).toContain("loadVisibleCaseMessages");
+    expect(cockpit).toContain("VaultPanel");
+    expect(cockpit).not.toContain("WebSocket");
+
+    expect(partner).toContain("canUseThreads");
+    expect(partner).toContain("ThreadPanel");
+    expect(partner).toContain("No assigned stage");
+    expect(partner).toContain("partnerThreadFlags");
+    const earlyReturnIndex = partner.indexOf("No assigned stage");
+    const lastPanelIndex = partner.lastIndexOf("ThreadPanel");
+    expect(earlyReturnIndex).toBeGreaterThan(-1);
+    expect(lastPanelIndex).toBeGreaterThan(earlyReturnIndex);
+  });
 });

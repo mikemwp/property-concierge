@@ -7,6 +7,7 @@ import {
 import { submitPartnerEvidenceAction } from "@/app/actions/partner";
 import { uploadAndSubmitPartnerEvidenceAction } from "@/app/actions/vault";
 import { EvidenceSubmitForm } from "@/components/EvidenceSubmitForm";
+import { ThreadPanel } from "@/components/ThreadPanel";
 import { VaultPanel } from "@/components/VaultPanel";
 import { VaultUploadForm } from "@/components/VaultUploadForm";
 import { PartnerCaseContext } from "@/components/PartnerCaseContext";
@@ -34,6 +35,13 @@ import {
   isPartnerRole,
 } from "@/server/partner-policy";
 import { activeReferralForRole } from "@/server/referrals";
+import { canPostThread } from "@/domain/threads";
+import {
+  canUseThreads,
+  loadVisibleCaseMessages,
+  partnerThreadFlags,
+  threadViewerFor,
+} from "@/server/threads";
 import {
   canUseVault,
   listVaultDocuments,
@@ -72,6 +80,18 @@ export default async function PartnerCasePage({ params }: Props) {
   const views = advisorStageView(caseState, now);
   const focus = getFocusStage(caseState);
 
+  const threadsOn = canUseThreads(caseState);
+  const threadFlags = await partnerThreadFlags(caseId, role);
+  const threadViewer = threadViewerFor(
+    caseState,
+    { role, userId: session.user.id },
+    threadFlags,
+  );
+  const threadMessages = threadsOn
+    ? await loadVisibleCaseMessages(caseState, threadViewer)
+    : [];
+  const threadCanPost = threadsOn && canPostThread(threadViewer);
+
   if (!focus || focus.ownerRole !== role) {
     return (
       <section>
@@ -88,6 +108,13 @@ export default async function PartnerCasePage({ params }: Props) {
           This case is not currently waiting on your role ({role.replace(/_/g, " ")}
           ).
         </p>
+        {threadsOn && (
+          <ThreadPanel
+            caseId={caseId}
+            messages={threadMessages}
+            canPost={threadCanPost}
+          />
+        )}
       </section>
     );
   }
@@ -204,6 +231,14 @@ export default async function PartnerCasePage({ params }: Props) {
       )}
 
       {vaultOn && <VaultPanel caseId={caseId} documents={vaultDocuments} canReset={false} />}
+
+      {threadsOn && (
+        <ThreadPanel
+          caseId={caseId}
+          messages={threadMessages}
+          canPost={threadCanPost}
+        />
+      )}
 
       {canSubmit && inbox.complete && (
         <p className="mt-8 text-sm text-emerald-700">
