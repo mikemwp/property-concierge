@@ -44,17 +44,20 @@ describe("module flags are pack data", () => {
     expect(isModuleEnabled(EW_FLAGS, "hard_client_sla")).toBe(true);
   });
 
-  it("runs the document vault in England & Wales only", () => {
+  it("runs the document vault on England & Wales and every live corridor pack", () => {
     const enabled = listMarketPacks()
       .filter((pack) => isModuleEnabled(pack.flags, "document_vault"))
       .map((pack) => pack.id);
-    expect(enabled).toEqual(["ew"]);
+    expect(enabled).toEqual(["au_uk", "ew", "uk_au", "uk_us", "us_uk"]);
     expect(isModuleEnabled(listMarketPacks().find((p) => p.id === "au")!.flags, "document_vault")).toBe(
       false,
     );
-    expect(
-      isModuleEnabled(listMarketPacks().find((p) => p.id === "au_uk")!.flags, "document_vault"),
-    ).toBe(false);
+    expect(isModuleEnabled(EW_FLAGS, "document_vault")).toBe(true);
+    for (const id of CORRIDOR_PACK_IDS) {
+      expect(isModuleEnabled(listMarketPacks().find((p) => p.id === id)!.flags, "document_vault")).toBe(
+        true,
+      );
+    }
   });
 
   it("runs the case thread in England & Wales only", () => {
