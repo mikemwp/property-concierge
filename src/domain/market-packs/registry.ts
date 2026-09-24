@@ -1,12 +1,13 @@
 import { auStubPack } from "./au-stub";
 import { auUkMarketPack } from "./au-uk";
 import { ewMarketPack } from "./ew";
+import { usUkMarketPack } from "./us-uk";
 import { MarketPackError, type MarketPack } from "./types";
 
 /** The only place in TypeScript that names the v1 market. */
 export const DEFAULT_MARKET_PACK_ID = "ew";
 
-const PACKS: readonly MarketPack[] = [ewMarketPack, auStubPack, auUkMarketPack];
+const PACKS: readonly MarketPack[] = [ewMarketPack, auStubPack, auUkMarketPack, usUkMarketPack];
 
 export function listMarketPacks(): MarketPack[] {
   return [...PACKS].sort((left, right) => left.id.localeCompare(right.id));
