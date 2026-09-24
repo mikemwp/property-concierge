@@ -29,6 +29,8 @@ const ENGINE_GLOBAL_FILES = [
   "src/lib/case-pack.ts",
   "src/server/referrals.ts",
   "src/server/vault.ts",
+  "src/server/threads.ts",
+  "src/server/thread-store.ts",
   "src/server/vault-store.ts",
 ];
 
