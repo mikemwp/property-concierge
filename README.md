@@ -279,6 +279,17 @@ The stage ledger is unchanged — posts are not `StageEvent`s.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-case-threads.md`](docs/superpowers/plans/demo-script-case-threads.md).
 
+## Seller milestone views (buyer-side, post-proof)
+
+Spec §9 Phase 4. After the stage ledger exists, `ew` may turn `seller_milestone_views`
+on as **data**. That flag unlocks a read-only milestone snapshot projected from the
+buyer case stages, advisor export copy, and an optional HMAC share link.
+
+**Not in this overlay:** a seller login, inventory, listing feed, private
+seller–buyer introduction, corridor enablement, or a Prisma share table.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-seller-milestones.md`](docs/superpowers/plans/demo-script-seller-milestones.md).
+
 ## Advisor operating IP
 
 Stage playbooks live in `src/domain/market-packs/ew-playbook.ts`, resolve through

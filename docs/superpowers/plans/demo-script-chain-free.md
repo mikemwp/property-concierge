@@ -58,7 +58,7 @@ Founder validation script for the **buyer-side certification overlay, not a sell
 |-------|--------|
 | **Real** | `ChainFreeCertification` derived from ledger + scorecard signals; advisor override events; `chain_free_matching` stage + playbook on `ew`; cockpit checklist; portal status copy; `chain_free_inventory: true` on `ew` |
 | **Stubbed** | Nothing new. Partner adapters and the inbound webhook stay Plan 5 stubs. |
-| **Absent** | Seller listings / inventory, private seller–buyer introductions, agent or developer lead fees, Rightmove/Zoopla, marketing guarantees, AU/US corridor content, document vault, open marketplace |
+| **Absent** | Seller listings / inventory, private seller–buyer introductions, agent or developer lead fees, Rightmove/Zoopla, marketing guarantees, AU/US corridor content, document vault, open marketplace, seller login / inventory product |
 
 ---
 
