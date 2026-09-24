@@ -8,10 +8,12 @@ export const UK_AU_LOCALE: MarketLocale = {
   regionNoun: "state",
 };
 
+/** Plan 13: reuse the paid document vault. Not a domestic AU/US product. */
 export const UK_AU_FLAGS: MarketFlags = {
   fx_deposit: true,
   corridor_inbound: true,
   corridor_outbound: true,
+  document_vault: true,
 };
 
 export const UK_AU_COPY: MarketCopy = {

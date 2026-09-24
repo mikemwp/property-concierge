@@ -4,10 +4,12 @@ import { EW_COPY, EW_LOCALE, EW_PARTNER_ROLE_LABELS } from "./ew-config";
 
 export { EW_LOCALE as AU_UK_LOCALE, EW_PARTNER_ROLE_LABELS as AU_UK_PARTNER_ROLE_LABELS };
 
+/** Plan 13: reuse the paid document vault. Not a domestic AU/US product. */
 export const AU_UK_FLAGS: MarketFlags = {
   fx_deposit: true,
   corridor_inbound: true,
   corridor_outbound: true,
+  document_vault: true,
 };
 
 export const AU_UK_COPY: MarketCopy = {
