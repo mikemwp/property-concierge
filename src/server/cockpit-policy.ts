@@ -29,6 +29,14 @@ export function assertPlaybookVisible(viewerRole: ActorRole): void {
   }
 }
 
+export function assertCertificationVisible(viewerRole: ActorRole): void {
+  if (viewerRole !== "ADVISOR") {
+    throw new CockpitPolicyError(
+      "Chain-free certification criteria are advisor-only operating IP",
+    );
+  }
+}
+
 export function assertPackInspectorVisible(viewerRole: ActorRole): void {
   if (viewerRole !== "ADVISOR") {
     throw new CockpitPolicyError(
