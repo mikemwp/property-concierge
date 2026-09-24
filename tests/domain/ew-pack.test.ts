@@ -30,7 +30,7 @@ describe("ew market pack", () => {
     expect(ewMarketPack.partnerRoleLabels.MORTGAGE_PARTNER).toBe("mortgage adviser");
   });
 
-  it("returns nine canonical stage keys in order", () => {
+  it("returns the canonical stage keys plus chain-free matching when the module is on", () => {
     const stages = getStageTemplate(ewMarketPack, "RETURNER_OVERSEAS");
     expect(stages.map((s) => s.key)).toEqual([
       "purchase_profile",
@@ -38,11 +38,28 @@ describe("ew market pack", () => {
       "mortgage_path",
       "move_logistics",
       "search_readiness",
+      "chain_free_matching",
       "offer_instruct",
       "diligence",
       "exchange_complete",
       "settle_light",
     ]);
+  });
+
+  it("gives UK-resident speed-seekers the same matching stage, without international-only evidence", () => {
+    const stages = getStageTemplate(ewMarketPack, "UK_RESIDENT_SPEED");
+    const matching = stages.find((s) => s.key === "chain_free_matching");
+    expect(matching).toMatchObject({
+      title: "Chain-free position",
+      defaultOwnerRole: "CLIENT",
+      slaDays: 7,
+      requiredEvidenceKinds: ["chain_free_position"],
+      freeVisible: true,
+      freeCanSelfAdvance: false,
+    });
+    expect(matching?.requiredEvidenceKinds.some((k) => /fx|vehicle|container/i.test(k))).toBe(
+      false,
+    );
   });
 
   it("does not use international-only stage titles", () => {
@@ -73,6 +90,5 @@ describe("ew market pack", () => {
         expect(stagePlaybook(ewMarketPack, key, entry)?.stageKey).toBe(key);
       }
     }
-    expect(stagePlaybook(ewMarketPack, "chain_free_matching", "RETURNER_IN_UK")).toBeNull();
   });
 });

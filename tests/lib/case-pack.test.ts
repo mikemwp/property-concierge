@@ -13,9 +13,10 @@ describe("case pack resolution", () => {
     expect(stageSlaDays(caseState, "offer_instruct")).toBe(5);
   });
 
-  it("falls back to a one-week cadence for a stage key the pack does not define", () => {
+  it("uses the pack SLA for chain_free_matching and falls back for unknown keys", () => {
     const caseState = createCase({ ...base });
     expect(stageSlaDays(caseState, "chain_free_matching")).toBe(7);
+    expect(stageSlaDays(caseState, "unknown_overlay_stage")).toBe(7);
   });
 
   it("fails closed when the stored pack id is not resolvable", () => {

@@ -20,7 +20,7 @@ describe("createCase", () => {
       tier: "PAID_DWY",
       now: new Date("2026-09-04T10:00:00.000Z"),
     });
-    expect(c.stages).toHaveLength(9);
+    expect(c.stages).toHaveLength(10);
     const active = c.stages.filter((s) => s.status === "ACTIVE");
     expect(active).toHaveLength(1);
     expect(active[0].key).toBe("purchase_profile");

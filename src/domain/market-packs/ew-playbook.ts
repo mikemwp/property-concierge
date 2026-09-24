@@ -1,5 +1,5 @@
 import type { ActorRole, EntryContext } from "../types";
-import type { PlaybookAction, StagePlaybook } from "./types";
+import { isModuleEnabled, type PlaybookAction, type StagePlaybook } from "./types";
 import { EW_LOCALE, EW_FLAGS } from "./ew-config";
 import { moneyEvidenceKinds, moveEvidenceKinds } from "./ew-stages";
 import { formatMoney } from "./locale";
@@ -35,8 +35,43 @@ function linesFor(kinds: string[], copy: Record<string, string>): string[] {
   });
 }
 
+export function chainFreeMatchingPlaybook(): StagePlaybook {
+  return {
+    stageKey: "chain_free_matching",
+    objective:
+      "Record the household's chain-free position from ledger evidence so they can show agents a certified buyer-readiness status — not a private seller introduction.",
+    actions: [
+      {
+        day: 0,
+        owner: "ADVISOR",
+        action:
+          "Confirm the household has no property to sell, or that any sale has completed, and write that into the case thread.",
+      },
+      {
+        day: 2,
+        owner: "CLIENT",
+        action:
+          "Submit chain_free_position: a written statement of the onward-chain position signed by the decision-makers.",
+      },
+      {
+        day: 4,
+        owner: "ADVISOR",
+        action:
+          "Check the certification criteria on the case. Certify only when every ledger gate is green. Do not broker this household to a seller for a fee.",
+      },
+    ],
+    evidenceStandard: [
+      "chain_free_position: written statement that the household has no property to sell, or that any related sale has completed, signed by every decision-maker.",
+    ],
+    escalation: [
+      "Day 7 (SLA): position still unsigned — advisor calls, does not email, and names the missing decision-maker.",
+    ],
+    partnerScript: null,
+  };
+}
+
 export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
-  return [
+  const playbooks: StagePlaybook[] = [
     {
       stageKey: "purchase_profile",
       objective:
@@ -365,6 +400,16 @@ export function ewPlaybooks(entry: EntryContext): StagePlaybook[] {
       ],
       partnerScript: null,
     },
+  ];
+
+  if (!isModuleEnabled(EW_FLAGS, "chain_free_inventory")) {
+    return playbooks;
+  }
+  const insertAt = playbooks.findIndex((playbook) => playbook.stageKey === "offer_instruct");
+  return [
+    ...playbooks.slice(0, insertAt),
+    chainFreeMatchingPlaybook(),
+    ...playbooks.slice(insertAt),
   ];
 }
 

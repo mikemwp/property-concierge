@@ -22,9 +22,21 @@ export function moveEvidenceKinds(entry: EntryContext): string[] {
   return kinds;
 }
 
+export function chainFreeMatchingTemplate(): StageTemplate {
+  return {
+    key: "chain_free_matching",
+    title: "Chain-free position",
+    defaultOwnerRole: "CLIENT",
+    slaDays: 7,
+    requiredEvidenceKinds: ["chain_free_position"],
+    freeVisible: true,
+    freeCanSelfAdvance: false,
+  };
+}
+
 /** England & Wales legal spine. Spec §4 canonical stage groups. */
 export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
-  return [
+  const stages: StageTemplate[] = [
     {
       key: "purchase_profile",
       title: "Purchase profile",
@@ -106,5 +118,15 @@ export function ewStageTemplates(entry: EntryContext): StageTemplate[] {
       freeVisible: true,
       freeCanSelfAdvance: true,
     },
+  ];
+
+  if (!isModuleEnabled(EW_FLAGS, "chain_free_inventory")) {
+    return stages;
+  }
+  const insertAt = stages.findIndex((stage) => stage.key === "offer_instruct");
+  return [
+    ...stages.slice(0, insertAt),
+    chainFreeMatchingTemplate(),
+    ...stages.slice(insertAt),
   ];
 }

@@ -113,7 +113,7 @@ describe("cases persistence", () => {
       advisorUserId: "user_advisor",
     });
     const loaded = await loadCase(created.id);
-    expect(loaded.stages).toHaveLength(9);
+    expect(loaded.stages).toHaveLength(10);
     expect(loaded.stages.filter((s) => s.status === "ACTIVE")).toHaveLength(1);
   });
 

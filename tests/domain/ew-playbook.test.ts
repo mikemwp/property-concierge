@@ -46,7 +46,19 @@ describe("ew stage playbooks", () => {
   });
 
   it("returns null for unknown stage keys", () => {
-    expect(ewStagePlaybook("chain_free_matching", "RETURNER_IN_UK")).toBeNull();
+    expect(ewStagePlaybook("not_a_real_stage", "RETURNER_IN_UK")).toBeNull();
+  });
+
+  it("covers chain_free_matching as buyer-position work, not a seller introduction", () => {
+    const playbook = ewStagePlaybook("chain_free_matching", "UK_RESIDENT_SPEED");
+    expect(playbook?.stageKey).toBe("chain_free_matching");
+    expect(playbook?.objective.length).toBeGreaterThan(20);
+    expect(playbook?.actions.length).toBeGreaterThanOrEqual(2);
+    const blob = JSON.stringify(playbook);
+    expect(blob).not.toMatch(/introduc(?:e|tion).{0,60}seller/i);
+    expect(blob).not.toMatch(/private listing/i);
+    expect(blob).not.toMatch(/inventory feed/i);
+    expect(blob).toMatch(/chain_free_position/);
   });
 
   it("keeps money and move evidenceStandard aligned with pack kinds", () => {
