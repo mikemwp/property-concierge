@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { vaultStorageKey } from "../../src/domain/vault";
 import {
   LocalVaultStorage,
+  readS3VaultConfig,
+  S3VaultStorage,
   VaultStorageError,
 } from "../../src/server/vault-storage";
 
@@ -41,5 +43,53 @@ describe("VaultStorageError", () => {
     expect(err).toBeInstanceOf(Error);
     expect(err.name).toBe("VaultStorageError");
     expect(err.code).toBe("S3_NOT_CONFIGURED");
+  });
+});
+
+describe("S3VaultStorage stub", () => {
+  it("reads config only when bucket and region are both set", () => {
+    expect(readS3VaultConfig({})).toBeNull();
+    expect(readS3VaultConfig({ VAULT_S3_BUCKET: "docs" })).toBeNull();
+    expect(readS3VaultConfig({ VAULT_S3_REGION: "eu-west-2" })).toBeNull();
+    expect(readS3VaultConfig({ VAULT_S3_BUCKET: "docs", VAULT_S3_REGION: "eu-west-2" })).toEqual({
+      bucket: "docs",
+      region: "eu-west-2",
+      prefix: "vault",
+    });
+    expect(
+      readS3VaultConfig({
+        VAULT_S3_BUCKET: "docs",
+        VAULT_S3_REGION: "eu-west-2",
+        VAULT_S3_PREFIX: "prod",
+      }),
+    ).toEqual({ bucket: "docs", region: "eu-west-2", prefix: "prod" });
+  });
+
+  it("throws S3_NOT_CONFIGURED when env is missing", () => {
+    const backend = new S3VaultStorage(null);
+    expect(backend.kind).toBe("s3");
+    try {
+      backend.write("caseA/docA", new Uint8Array([1]));
+      throw new Error("expected throw");
+    } catch (err) {
+      expect(err).toBeInstanceOf(VaultStorageError);
+      expect((err as VaultStorageError).code).toBe("S3_NOT_CONFIGURED");
+    }
+    expect(() => backend.read("caseA/docA")).toThrow(VaultStorageError);
+  });
+
+  it("throws S3_NOT_IMPLEMENTED when env is configured — no AWS client", () => {
+    const backend = new S3VaultStorage({
+      bucket: "docs",
+      region: "eu-west-2",
+      prefix: "vault",
+    });
+    try {
+      backend.read("caseA/docA");
+      throw new Error("expected throw");
+    } catch (err) {
+      expect(err).toBeInstanceOf(VaultStorageError);
+      expect((err as VaultStorageError).code).toBe("S3_NOT_IMPLEMENTED");
+    }
   });
 });

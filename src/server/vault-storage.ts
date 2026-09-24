@@ -52,3 +52,46 @@ export class LocalVaultStorage implements VaultStorageBackend {
     return path.join(this.root, ...storageKey.split("/"));
   }
 }
+
+export function readS3VaultConfig(
+  env: NodeJS.ProcessEnv = process.env,
+): S3VaultConfig | null {
+  const bucket = env.VAULT_S3_BUCKET?.trim();
+  const region = env.VAULT_S3_REGION?.trim();
+  if (!bucket || !region) {
+    return null;
+  }
+  const prefix = env.VAULT_S3_PREFIX?.trim() || "vault";
+  return { bucket, region, prefix };
+}
+
+export class S3VaultStorage implements VaultStorageBackend {
+  readonly kind = "s3" as const;
+
+  constructor(private readonly config: S3VaultConfig | null) {}
+
+  write(_storageKey: string, _bytes: Uint8Array): void {
+    this.assertReady();
+    throw new VaultStorageError(
+      "S3_NOT_IMPLEMENTED",
+      "S3 vault storage is a stub; use local storage in this environment",
+    );
+  }
+
+  read(_storageKey: string): Uint8Array {
+    this.assertReady();
+    throw new VaultStorageError(
+      "S3_NOT_IMPLEMENTED",
+      "S3 vault storage is a stub; use local storage in this environment",
+    );
+  }
+
+  private assertReady(): void {
+    if (!this.config) {
+      throw new VaultStorageError(
+        "S3_NOT_CONFIGURED",
+        "VAULT_S3_BUCKET and VAULT_S3_REGION are required for S3 vault storage",
+      );
+    }
+  }
+}
