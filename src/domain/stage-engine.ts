@@ -1,4 +1,5 @@
 import type { ActorRole, EntryContext, StageStatus, Tier } from "./types";
+import { assertVaultAttachedForSubmit } from "./vault";
 import { DEFAULT_ATTRIBUTION, type LeadAttribution } from "./attribution";
 import { DEFAULT_MARKET_PACK_ID, resolveMarketPack } from "./market-packs/registry";
 import { getStageTemplate, type StageTemplate } from "./market-packs/types";
@@ -216,6 +217,7 @@ export function submitEvidence(
     kind: string;
     actorRole: ActorRole;
     now?: Date;
+    vault?: { enabled: boolean; hasActiveDocument: boolean };
   },
 ): CaseState {
   const stage = requireFocusStage(caseState, input.stageKey);
@@ -234,6 +236,14 @@ export function submitEvidence(
   }
   if (stage.acceptedEvidenceKinds.includes(input.kind)) {
     throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already accepted: ${input.kind}`);
+  }
+
+  if (input.vault) {
+    assertVaultAttachedForSubmit({
+      vaultEnabled: input.vault.enabled,
+      hasActiveDocument: input.vault.hasActiveDocument,
+      kind: input.kind,
+    });
   }
 
   const at = nowIso(input.now);
@@ -269,6 +279,7 @@ export function submitPartnerEvidence(
     kind: string;
     actorRole: ActorRole;
     now?: Date;
+    vault?: { enabled: boolean; hasActiveDocument: boolean };
   },
 ): CaseState {
   const stage = requireFocusStage(caseState, input.stageKey);
@@ -298,6 +309,14 @@ export function submitPartnerEvidence(
   }
   if (stage.acceptedEvidenceKinds.includes(input.kind)) {
     throw new StageEngineError("ALREADY_ACCEPTED", `Evidence already accepted: ${input.kind}`);
+  }
+
+  if (input.vault) {
+    assertVaultAttachedForSubmit({
+      vaultEnabled: input.vault.enabled,
+      hasActiveDocument: input.vault.hasActiveDocument,
+      kind: input.kind,
+    });
   }
 
   const at = nowIso(input.now);

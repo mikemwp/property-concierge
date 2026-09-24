@@ -20,6 +20,14 @@ const ADVISOR_ONLY_POWERS = [
   "createReferral",
 ];
 
+const VAULT_WRITE_POWERS = [
+  "performVaultReset",
+  "writeVaultBytes",
+  "insertVaultDocument",
+  "markVaultDocumentReset",
+  "resetVaultDocument",
+];
+
 const LIVE_VENDOR_CALL = /\bfetch\s*\(|\baxios\b|https?:\/\/(?!localhost)/;
 
 function read(relative: string): string {
@@ -48,5 +56,23 @@ describe("adapters never take advisor powers", () => {
     for (const entry of readdirSync(path.resolve(process.cwd(), dir))) {
       expect(LIVE_VENDOR_CALL.test(read(`${dir}/${entry}`)), `${dir}/${entry} calls out`).toBe(false);
     }
+  });
+
+  it("never writes or resets vault files from an adapter", () => {
+    for (const file of ADAPTER_FILES) {
+      const source = read(file);
+      for (const power of VAULT_WRITE_POWERS) {
+        expect(source.includes(power), `${file} references ${power}`).toBe(false);
+      }
+      expect(source.includes("var/vault"), `${file} hard-codes the vault path`).toBe(false);
+    }
+  });
+
+  it("keeps the vault presence check on the port, not on a stub", () => {
+    const port = read("src/lib/partner-port.ts");
+    expect(port).toMatch(/vaultLookup/);
+    expect(port).toMatch(/assertVaultSubmitAllowed/);
+    const stub = read("src/lib/partner-adapters/stub-adapter.ts");
+    expect(stub.includes("assertVaultSubmitAllowed")).toBe(false);
   });
 });

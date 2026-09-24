@@ -13,6 +13,11 @@ import {
 import type { ActorRole } from "@/domain/types";
 import { casePack } from "@/lib/case-pack";
 import { type CaseStore, prismaCaseStore } from "@/lib/case-store";
+import {
+  assertVaultSubmitAllowed,
+  prismaVaultPresenceLookup,
+  type VaultPresenceLookup,
+} from "@/server/vault";
 
 export type WarmIntroRequest = {
   caseId: string;
@@ -157,7 +162,10 @@ export function buildPartnerEventPayload(
 export class ManualPartnerPort implements PartnerPort {
   readonly adapterId: string = "manual";
 
-  constructor(protected readonly store: CaseStore = prismaCaseStore) {}
+  constructor(
+    protected readonly store: CaseStore = prismaCaseStore,
+    protected readonly vaultLookup: VaultPresenceLookup = prismaVaultPresenceLookup,
+  ) {}
 
   async requestWarmIntro(input: WarmIntroRequest): Promise<{ ticketId: string }> {
     const caseState = await this.store.load(input.caseId);
@@ -245,6 +253,7 @@ export class ManualPartnerPort implements PartnerPort {
     if (stage.key !== input.stageKey) {
       throw new PartnerPortError("Evidence submit only on current focus stage");
     }
+    await assertVaultSubmitAllowed(caseState, input.stageKey, input.kind, this.vaultLookup);
     const ticketId = resolveTicketId(
       caseState,
       input.role,

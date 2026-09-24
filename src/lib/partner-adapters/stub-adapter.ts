@@ -5,6 +5,7 @@ import {
   type PartnerStatus,
 } from "@/domain/partner-integration";
 import type { CaseStore } from "@/lib/case-store";
+import type { VaultPresenceLookup } from "@/server/vault";
 import {
   ManualPartnerPort,
   appendIntegrationEvent,
@@ -22,8 +23,9 @@ export class StubPartnerAdapter extends ManualPartnerPort {
   constructor(
     private readonly profile: AdapterProfile,
     store: CaseStore,
+    vaultLookup?: VaultPresenceLookup,
   ) {
-    super(store);
+    super(store, vaultLookup);
     this.adapterId = profile.adapterId;
   }
 

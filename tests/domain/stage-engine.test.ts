@@ -310,3 +310,97 @@ describe("case attribution", () => {
     expect(c.attribution.leadCampaign).toBe("spring-return");
   });
 });
+
+describe("submitEvidence optional vault argument", () => {
+  it("keeps today's behaviour when vault is omitted or disabled", () => {
+    let c = createCase({
+      id: "vault_off",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    c = submitEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+    });
+    expect(c.stages[0].submittedEvidenceKinds).toEqual(["profile_complete"]);
+
+    let d = createCase({
+      id: "vault_disabled_arg",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    d = submitEvidence(d, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+      vault: { enabled: false, hasActiveDocument: false },
+    });
+    expect(d.stages[0].submittedEvidenceKinds).toEqual(["profile_complete"]);
+  });
+
+  it("refuses PAID_DWY submit when vault is enabled and no file is attached", () => {
+    const c = createCase({
+      id: "vault_on_missing",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    expect(() =>
+      submitEvidence(c, {
+        stageKey: "purchase_profile",
+        kind: "profile_complete",
+        actorRole: "CLIENT",
+        vault: { enabled: true, hasActiveDocument: false },
+      }),
+    ).toThrow(/Vault document required/);
+  });
+
+  it("refuses partner submit the same way, and allows it when a file is attached", () => {
+    let c = createCase({
+      id: "vault_partner",
+      entryContext: "UK_RESIDENT_SPEED",
+      tier: "PAID_DWY",
+    });
+    c = submitEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "CLIENT",
+    });
+    c = acceptEvidence(c, {
+      stageKey: "purchase_profile",
+      kind: "profile_complete",
+      actorRole: "ADVISOR",
+    });
+    c = advanceStage(c, { actorRole: "ADVISOR" });
+    c = submitEvidence(c, {
+      stageKey: "money_readiness",
+      kind: "source_of_funds",
+      actorRole: "CLIENT",
+    });
+    c = acceptEvidence(c, {
+      stageKey: "money_readiness",
+      kind: "source_of_funds",
+      actorRole: "ADVISOR",
+    });
+    c = advanceStage(c, { actorRole: "ADVISOR" });
+
+    expect(() =>
+      submitPartnerEvidence(c, {
+        stageKey: "mortgage_path",
+        kind: "dip_aip",
+        actorRole: "MORTGAGE_PARTNER",
+        vault: { enabled: true, hasActiveDocument: false },
+      }),
+    ).toThrow(/Vault document required/);
+
+    const next = submitPartnerEvidence(c, {
+      stageKey: "mortgage_path",
+      kind: "dip_aip",
+      actorRole: "MORTGAGE_PARTNER",
+      vault: { enabled: true, hasActiveDocument: true },
+    });
+    expect(
+      next.stages.find((s) => s.key === "mortgage_path")?.submittedEvidenceKinds,
+    ).toEqual(["dip_aip"]);
+  });
+});

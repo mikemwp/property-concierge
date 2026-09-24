@@ -4,6 +4,7 @@ import type { ActorRole } from "@/domain/types";
 import { type CaseStore, prismaCaseStore } from "@/lib/case-store";
 import { casePack } from "@/lib/case-pack";
 import { ManualPartnerPort, type PartnerPort } from "@/lib/partner-port";
+import { prismaVaultPresenceLookup, type VaultPresenceLookup } from "@/server/vault";
 import { profileForRole } from "./profiles";
 import { StubPartnerAdapter } from "./stub-adapter";
 
@@ -19,9 +20,15 @@ function railsEnabled(caseState: CaseState): boolean {
   }
 }
 
-export function partnerPortForRole(role: ActorRole, store: CaseStore = prismaCaseStore): PartnerPort {
+export function partnerPortForRole(
+  role: ActorRole,
+  store: CaseStore = prismaCaseStore,
+  vaultLookup: VaultPresenceLookup = prismaVaultPresenceLookup,
+): PartnerPort {
   const profile = profileForRole(role);
-  return profile ? new StubPartnerAdapter(profile, store) : new ManualPartnerPort(store);
+  return profile
+    ? new StubPartnerAdapter(profile, store, vaultLookup)
+    : new ManualPartnerPort(store, vaultLookup);
 }
 
 /**
@@ -32,8 +39,11 @@ export function partnerPortForCase(
   caseState: CaseState,
   role: ActorRole,
   store: CaseStore = prismaCaseStore,
+  vaultLookup: VaultPresenceLookup = prismaVaultPresenceLookup,
 ): PartnerPort {
-  return railsEnabled(caseState) ? partnerPortForRole(role, store) : new ManualPartnerPort(store);
+  return railsEnabled(caseState)
+    ? partnerPortForRole(role, store, vaultLookup)
+    : new ManualPartnerPort(store, vaultLookup);
 }
 
 /** UI overlay: warm-intro tickets omit adapterId in the ledger until the first stub event. */

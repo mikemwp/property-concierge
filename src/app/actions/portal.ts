@@ -6,6 +6,7 @@ import {
   submitEvidence,
   StageEngineError,
 } from "@/domain/stage-engine";
+import { VaultError } from "@/domain/vault";
 import {
   CaseAccessError,
   loadCaseForUser,
@@ -15,6 +16,7 @@ import {
   assertPortalSubmit,
   PortalPolicyError,
 } from "@/server/portal-policy";
+import { assertVaultSubmitAllowed } from "@/server/vault";
 import { revalidatePath } from "next/cache";
 
 export type SubmitEvidenceResult =
@@ -40,10 +42,12 @@ export async function submitEvidenceAction(
     assertPortalSubmit(caseState, stageKey);
 
     if (caseState.tier === "PAID_DWY") {
+      await assertVaultSubmitAllowed(caseState, stageKey, kind);
       caseState = submitEvidence(caseState, {
         stageKey,
         kind,
         actorRole: "CLIENT",
+        vault: undefined,
       });
     } else {
       caseState = attestEvidence(caseState, {
@@ -62,7 +66,8 @@ export async function submitEvidenceAction(
     const message =
       err instanceof PortalPolicyError ||
       err instanceof StageEngineError ||
-      err instanceof CaseAccessError
+      err instanceof CaseAccessError ||
+      err instanceof VaultError
         ? err.message
         : err instanceof Error
           ? err.message
