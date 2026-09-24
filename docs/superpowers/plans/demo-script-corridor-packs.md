@@ -17,7 +17,7 @@ Founder validation script for the **bidirectional corridor** thesis: the stage e
 ## 2. Inbound-to-E&W corridors reuse the E&W spine without chain-free
 
 1. Select **`au_uk`**. Jurisdiction `england_wales`, locale `en-GB · GBP`.
-2. Modules: `fx_deposit`, `corridor_inbound`, `corridor_outbound` **on**. `chain_free_inventory`, `partner_speed_rails`, `hard_client_sla`, `document_vault`, `case_threads` **off**.
+2. Modules: `fx_deposit`, `corridor_inbound`, `corridor_outbound`, `document_vault` **on**. `chain_free_inventory`, `partner_speed_rails`, `hard_client_sla`, `case_threads` **off**. The disabled `au` stub keeps every module off, including `document_vault`.
 3. Stages are the nine E&W legal keys (`mortgage_path`, `exchange_complete`). There is **no** `chain_free_matching`.
 4. Click **returner overseas**. `purchase_profile` requires `profile_complete, corridor_intent`. `money_readiness` requires `source_of_funds, fx_plan`. `move_logistics` requires `move_quote, departure_plan, vehicle_path, visa_status`.
 5. Select **`us_uk`**. Same E&W spine and the same three corridor flags. Copy names the United States as origin.
@@ -55,7 +55,7 @@ Founder validation script for the **bidirectional corridor** thesis: the stage e
 |-------|--------|
 | **Real** | Four enabled corridor packs; destination-driven spines; corridor flags; local disclosure; self-serve `au_uk`/`us_uk`; advisor-created `uk_au`/`uk_us`; pack-scoped panel rows; inspector + seed |
 | **Stubbed** | Partner adapters and inbound webhooks stay Plan 5 stubs. Hard client SLAs stay off. |
-| **Absent** | Domestic AU-only / US-only products, enabling the `au` stub, seller inventory, private seller–buyer introductions, chain-free on corridor packs, speed rails on corridor packs, Prisma schema changes, EntryContext rename |
+| **Absent** | Domestic AU-only / US-only products, enabling the `au` stub, seller inventory, private seller–buyer introductions, chain-free on corridor packs, speed rails on corridor packs, S3 / cloud vault storage, Prisma schema changes, EntryContext rename |
 
 ---
 

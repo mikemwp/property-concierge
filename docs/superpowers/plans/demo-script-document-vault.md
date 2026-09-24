@@ -1,16 +1,16 @@
 # Document vault demo script
 
-Founder validation script for spec §8: a case-scoped document vault with role ACL and a one-time upload principle. Binaries live on disk under `var/vault/`; metadata lives in Prisma. The module is on for paid England & Wales only.
+Founder validation script for spec §8: a case-scoped document vault with role ACL and a one-time upload principle. Binaries live on disk under `var/vault/`; metadata lives in Prisma. The module is on for paid England & Wales and the four live corridor packs.
 
 **Prerequisites:** `npm run db:push`, `npm run db:seed`, `npm run dev`. All logins use password `password`. Use any small PDF or PNG (under 10 MB).
 
 ---
 
-## 1. The flag is ew-only, and free stays file-free
+## 1. Vault on ew and live corridors; free stays file-free
 
 1. Sign in as **`advisor@example.com`** → `/cockpit/market-packs`.
 2. Select **`ew`**. Modules: `fx_deposit`, `partner_speed_rails`, `chain_free_inventory`, `document_vault`, `hard_client_sla`, `case_threads` **on**. `corridor_inbound`, `corridor_outbound` **off**.
-3. Select **`au_uk`**. `document_vault` is **off**. Repeat for `uk_au`, `us_uk`, `uk_us`, and the disabled `au` stub.
+3. Select **`au_uk`** and confirm `document_vault` is **on**. Repeat for `uk_au`, `us_uk`, `uk_us`. The disabled `au` stub stays **off**.
 4. Sign out. Sign in as **`client@example.com`** → open **Smith DIY journey**. There is no file input and no Document vault panel. Free attestation is still the Submit button.
 
 ## 2. Paid client: upload once, cannot replace
@@ -39,11 +39,12 @@ Founder validation script for spec §8: a case-scoped document vault with role A
 5. Advisor accepts `dip_aip`. The stage does **not** advance until the advisor advances it — same adapter-authority rule as Plan 5.
 6. Cross-reference `tests/server/adapter-authority.test.ts` and `tests/server/vault-submit.test.ts`: a stub adapter that calls `submitPartnerEvidence` with an empty vault lookup is rejected.
 
-## 5. Corridor cases stay on the old submit-without-file path
+## 5. Corridor paid cases use the same vault
 
 1. Advisor opens **Chen AU→UK return (paid)** (`au_uk`).
-2. There is no Document vault panel. Client submit on that case is still the metadata-only **Submit** button.
-3. That is fail-closed: corridor packs have not proved the vault.
+2. **Document vault** is present. Client submit on that case is **Upload and submit**, not metadata-only.
+3. Attach a PDF for `profile_complete` and submit. Download works for the client who uploaded it.
+4. The disabled `au` stub still cannot back a case, so it never receives a vault.
 
 ---
 
@@ -53,7 +54,7 @@ Founder validation script for spec §8: a case-scoped document vault with role A
 |-------|--------|
 | **Real** | `VaultDocument` metadata; files under `var/vault/`; one-time ACTIVE lock; advisor reset; role ACL; vault-required PAID_DWY submit on `ew`; `/api/vault/[documentId]` |
 | **Stubbed** | Partner adapters still simulate vendor turnaround; they do not generate files |
-| **Absent** | S3 / cloud storage, base64-in-SQLite, corridor vault, seller views, websocket chat |
+| **Absent** | S3 / cloud storage, base64-in-SQLite, seller login, open marketplace browse, enabling the au stub |
 
 ## Automated verification
 
