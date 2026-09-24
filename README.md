@@ -177,10 +177,10 @@ disabled pack throws `MarketPackError` — it never falls back to `ew`.
 
 **Module toggles are data, not scattered ifs.** `MarketFlags` on the pack are read through
 `isModuleEnabled`. The `ew` pack runs `fx_deposit`, `partner_speed_rails`,
-`chain_free_inventory` and `document_vault`. The four corridor packs (`au_uk`, `uk_au`,
-`us_uk`, `uk_us`) run `fx_deposit`, `corridor_inbound` and `corridor_outbound`.
-`hard_client_sla` stays **off** in every pack. `chain_free_inventory`,
-`partner_speed_rails` and `document_vault` stay **ew-only**. Enforced by
+`chain_free_inventory`, `document_vault` and `hard_client_sla`. The four corridor packs
+(`au_uk`, `uk_au`, `us_uk`, `uk_us`) run `fx_deposit`, `corridor_inbound` and
+`corridor_outbound`. `chain_free_inventory`, `partner_speed_rails`, `document_vault` and
+`hard_client_sla` stay **ew-only**. Enforced by
 `tests/domain/market-pack-flags.test.ts`.
 
 **`au` is still a stub, not a product.** It stays registered and `enabled: false`.
@@ -221,8 +221,8 @@ may turn `chain_free_inventory` on as **data**. That flag unlocks:
 - Cockpit checklist (operating IP). Portal copy only when `CERTIFIED` or `IN_PROGRESS`.
 - A homepage hook. Paid orchestration remains the product.
 
-**Not in this overlay:** seller inventory, private seller–buyer introductions, agent or
-developer lead fees, hard client SLAs, Rightmove/Zoopla, an open marketplace.
+**Not in this overlay:** seller inventory and marketplace matching, private seller–buyer
+introductions, agent or developer lead fees, Rightmove/Zoopla, an open marketplace.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-chain-free.md`](docs/superpowers/plans/demo-script-chain-free.md).
 
@@ -239,9 +239,31 @@ Spec §8. Paid England & Wales cases store evidence files in a case-scoped vault
 - Download: authenticated `GET /api/vault/[documentId]`.
 
 Corridor packs keep the metadata-only submit path until the vault is proved on `ew`.
-No S3 in this release. `hard_client_sla` stays off.
+No S3 in this release.
 
 Walkthrough: [`docs/superpowers/plans/demo-script-document-vault.md`](docs/superpowers/plans/demo-script-document-vault.md).
+
+## Client SLA overlay (published targets, post-proof)
+
+Spec §5 / §9. After the stage engine and partner scorecards shipped, `ew` may turn
+`hard_client_sla` on as **data**. That flag unlocks:
+
+- `ClientSlaCommitment` on a case — `UNPUBLISHED` / `PUBLISHED` / `AMENDED` /
+  `WITHDRAWN` — reconstructed from `CLIENT_SLA_*` ledger events. Publishing requires
+  paid tier, a partner scorecard signal, and at least one accepted evidence kind.
+- Advisor publish / amend / withdraw with a written reason and a calendar target date.
+  Every live commitment carries the standard carve-out list (lender delay, survey
+  defects, title/tenure packs, client inaction, events outside the pipeline).
+- Cockpit publish panel (operating IP). Portal target card only when `PUBLISHED` or
+  `AMENDED`. Copy says target / working toward / subject to carve-outs.
+- A homepage hook. Paid orchestration remains the product. Marketing still forbids
+  `guarantee`, Rightmove and Zoopla.
+
+**Not in this overlay:** a promised or guaranteed completion date, a Prisma SLA
+column, a new stage, seller views, threads, an open marketplace, corridor SLA,
+S3, or FCA Appointed Representative status.
+
+Walkthrough: [`docs/superpowers/plans/demo-script-client-sla.md`](docs/superpowers/plans/demo-script-client-sla.md).
 
 ## Advisor operating IP
 
